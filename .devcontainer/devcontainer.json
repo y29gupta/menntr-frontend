@@ -1,0 +1,24 @@
+{
+  "name": "frontend:dev",
+  "dockerComposeFile": ["../docker-compose.dev.yml"],
+  "service": "frontend",
+  "runServices": ["frontend"],
+  "workspaceFolder": "/usr/src/app",
+  "shutdownAction": "stopCompose",
+  "forwardPorts": [3000],
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "esbenp.prettier-vscode",
+        "dbaeumer.vscode-eslint",
+        "ms-azuretools.vscode-docker"
+      ],
+      "settings": {
+        "git.enabled": true,
+        "git.path": "/usr/bin/git"
+      }
+    }
+  },
+  "postCreateCommand": "echo 'Devcontainer ready.'",
+  "remoteUser": "root"
+}
