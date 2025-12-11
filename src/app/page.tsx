@@ -1,11 +1,11 @@
-import { Button } from 'antd';
+// import { Button } from 'antd';
 import React from 'react';
 
 const page = () => {
   return (
-    <div>
-      <Button type="primary">hey</Button>
-    </div>
+    <>
+      <button className="bg-green-400 px-3">submit</button>
+    </>
   );
 };
 
