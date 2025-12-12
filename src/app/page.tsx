@@ -70,7 +70,7 @@ export default function page() {
                   bg-[linear-gradient(90deg,#F8FBFF_0%,#EEEBFF_100%)]
                 shadow-sm "
                 >
-                  Exactly. Let’s begin
+                  Exactly. Let's begin
                 </span>
               </div>
             </div>
