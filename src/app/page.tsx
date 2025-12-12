@@ -1,10 +1,14 @@
-// import { Button } from 'antd';
-import React from 'react';
+import Image from 'next/image';
+import Buttons from './ui/Button';
+import LoginForm from './auth/Login-form';
+import Loginform from './ui/Loginform';
+import LoginLayout from './pages/Login-layout';
+// import { button } from './ui/Button';
 
 const page = () => {
   return (
     <>
-      <button className="bg-green-400 px-3">submit</button>
+      <LoginLayout />
     </>
   );
 };
