@@ -1,4 +1,4 @@
-const HelpSupportIcon = (props) => (
+const HelpSupportIcon = (props: any) => (
   <svg
     width={20}
     height={20}
