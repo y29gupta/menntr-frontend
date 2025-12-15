@@ -19,7 +19,7 @@ export default function Page() {
         bg-white
         px-4
         sm:px-6
-        md:px-8
+        md:px-
         lg:px-20
         flex
         flex-col
@@ -27,7 +27,7 @@ export default function Page() {
       "
     >
       {/* CONTENT CONTAINER */}
-      <div className=" relative w-full max-w-[1206px] mx-auto flex flex-col gap-6">
+      <div className=" relative w-full max-w-[1206px]  flex flex-col gap-6">
         <Topbar />
 
         {/* FLOATING ROBOT (LEFT) */}
