@@ -38,11 +38,11 @@ const Loginform = ({ role }: { role: string }) => {
           </div>
         </div>
 
-        <div className="flex w-full  px-10 bg-white items-center justify-between">
+        <div className="flex w-full border px-10 bg-white items-center justify-between">
           <div className=" flex gap-5   bg-white min-h-auto  ">
             <div className="w-4px max-h-[100vh] bg-[#3B82F6] text-[#3B82F6]">|</div>
-            <div>
-              <div className="flex items-center gap-7 bg-white max-w-xs mb-8 border-0 rounded-4xl px-5 shadow-[0px_0px_24px_0px_#0F172A40]">
+            <div className="border">
+              <div className="flex  items-center gap-7 bg-white max-w-xs mb-8 border-0 rounded-4xl px-5 shadow-[0px_0px_24px_0px_#0F172A40]">
                 <img src={'vector.svg'} alt="loading" />
                 <p className="text-[#0F172A] text-[20px] font-semibold pt-4">
                   {role === 'student'
@@ -53,7 +53,7 @@ const Loginform = ({ role }: { role: string }) => {
                 </p>
               </div>
 
-              <div className="space-y-6 bg-white p-8 rounded-2xl w-full min-w-lg mx-auto transition-all duration-300 shadow-[0px_0px_16px_0px_#0F172A26] hover:shadow-[0px_0px_24px_0px_#0F172A40] hover:-translate-y-1">
+              <div className="space-y-6 border bg-white p-8 rounded-2xl w-full min-w-lg mx-auto transition-all duration-300 shadow-[0px_0px_16px_0px_#0F172A26] hover:shadow-[0px_0px_24px_0px_#0F172A40] hover:-translate-y-1">
                 <p className="text-[#1A2C50] text-[16px] font-semibold text-center">
                   {role === 'student'
                     ? 'Enter your student login details'
@@ -81,7 +81,7 @@ const Loginform = ({ role }: { role: string }) => {
               </div>
             </div>
           </div>
-          <div className=" ">
+          <div className=" border min-w-[300px] min-h-[300px]">
             <img src={imageSrc} alt="Loading" />
           </div>
         </div>

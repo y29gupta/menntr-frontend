@@ -1,6 +1,6 @@
 'use client';
 
-import { Card, Button, Divider } from 'antd';
+import { Button } from 'antd';
 import Image from 'next/image';
 import ArrowUpRightIcon from '../icons/ArrowUpRightIcon';
 
@@ -8,10 +8,10 @@ export interface RoleCardProps {
   label: string;
   title: string;
   description: string;
-  image: string; // image URL
+  image: string;
   buttonText: string;
-  gradient?: string; // optional (because sometimes you may not send)
-  onClick?: () => void; // optional handler
+  gradient?: string;
+  onClick?: () => void;
 }
 
 export default function CampusUserCard({
@@ -24,58 +24,52 @@ export default function CampusUserCard({
   onClick,
 }: RoleCardProps) {
   return (
-    <div className="w-[320px]    flex flex-col items-center mt-10 md:mt-1">
-      {/* Top Label Outside Card */}
-      <div
-        style={{
-          padding: '12px 16px',
-          borderRadius: '20px',
-          background: 'rgba(255, 255, 255, 0.1)',
-          boxShadow: '0px 4px 20px rgba(15, 23, 42, 0.12)',
-          marginBottom: '20px',
-          fontSize: '16px',
-          fontWeight: 500,
-          color: 'rgba(15, 23, 42, 1)',
-        }}
-      >
+    <div className="w-[320px] flex flex-col items-center">
+      {/* LABEL */}
+      <div className="mb-5 px-4 py-2 rounded-full bg-white/80 shadow-md text-[16px] font-medium text-[#0F172A]">
         {label}
       </div>
 
-      {/* Card */}
-      <Card
-        style={{
-          width: 320,
-          height: 'auto',
-          borderRadius: 20,
-          boxShadow: '0 6px 25px rgba(0,0,0,0.12)',
-          textAlign: 'center',
-          paddingTop: '10px',
-        }}
-      >
-        {/* Icon */}
-        <Image src={image} alt={title} width={90} height={90} style={{ margin: '0 auto' }} />
+      {/* CARD */}
+      <div className="w-full rounded-2xl bg-white shadow-lg px-6 pt-6 pb-5 flex flex-col items-center text-center">
+        {/* ICON */}
+        <div className="w-[90px] h-[90px] flex items-center justify-center">
+          <Image src={image} alt={title} width={90} height={90} priority />
+        </div>
 
-        {/* Title */}
-        <h2 className="mt-3 mb-2 text-[20px] font-semibold">{title}</h2>
+        <h2 className="mt-4 mb-2 text-[20px] font-semibold leading-[28px]">{title}</h2>
 
-        {/* Description */}
-        <p className="text-[14px] text-gray-600 px-4 leading-5">{description}</p>
+        <p className="text-[14px] text-gray-600 leading-5 min-h-[40px]">{description}</p>
 
-        <Divider />
+        {/* STATIC DIVIDER (NO ANT-D) */}
+        <div className="w-full h-px bg-gray-200 my-4" />
 
-        {/* Button */}
+        {/* BUTTON */}
         <Button
           onClick={onClick}
           type="text"
-          className="flex items-center gap-2 text-blue-600 font-medium text-[15px]"
+          className="
+            !p-0
+            !h-[44px]
+            !leading-[44px]
+            flex
+            items-center
+            gap-2
+            text-[#3B82F6]
+            font-medium
+            text-[15px]
+          "
         >
-          {buttonText}
+          <span className="whitespace-nowrap">{buttonText}</span>
 
-          <span className={`inline-flex items-center justify-center p-2 rounded-md ${gradient}`}>
+          {/* ICON BOX (fixed size = no shift) */}
+          <span
+            className={`w-[32px] h-[32px] flex items-center justify-center rounded-md ${gradient}`}
+          >
             <ArrowUpRightIcon className="w-3 h-3 text-white" />
           </span>
         </Button>
-      </Card>
+      </div>
     </div>
   );
 }
