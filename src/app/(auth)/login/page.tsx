@@ -1,9 +1,12 @@
-import React from 'react'
+import LoginLayout from '@/app/pages/Login-layout';
+import React from 'react';
 
 const page = () => {
   return (
-    <div>page</div>
-  )
-}
+    <div>
+      <LoginLayout />
+    </div>
+  );
+};
 
-export default page
+export default page;

@@ -8,7 +8,7 @@ const Loginform = () => {
       <div className=" flex gap-5  bg-white min-h-auto  ">
         <div className="w-4px max-h-[100vh] bg-[#3B82F6] text-[#3B82F6]">|</div>
         <div>
-          <div className="flex items-center gap-7 bg-white max-w-xs mb-8 border rounded-4xl px-5 shadow-[0px_0px_8px_0px_#465D951F_inset,-1px_-1px_0px_0px_#465D951F_inset,0px_0px_8px_0px_#0F172A1F]">
+          <div className="flex items-center gap-7 bg-white max-w-xs mb-8 border-0 rounded-4xl px-5 shadow-[0px_0px_24px_0px_#0F172A40]">
             <img src={'Vector.svg'} alt="loading" />
             <p className="text-[#0F172A] text-[20px] font-semibold pt-4">Super Admin Portal</p>
           </div>

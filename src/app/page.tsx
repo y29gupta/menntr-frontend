@@ -13,7 +13,7 @@ export default function page() {
         <div className=" w-full  flex flex-col   relative  ">
           {/* <div className='border '> */}
           <Image
-            src="/roboIcon.jpg"
+            src="/assets/roboIcon.jpg"
             width={150}
             height={150}
             className="absolute top-15 left-5 -z-50 "
