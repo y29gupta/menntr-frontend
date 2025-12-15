@@ -2,7 +2,7 @@ import React from 'react';
 import { Button } from 'antd';
 import { ArrowUpOutlined } from '@ant-design/icons';
 
-const Buttons = () => {
+const Buttons = ({ role }: { role: string }) => {
   return (
     <Button
       className="
@@ -18,7 +18,7 @@ const Buttons = () => {
     flex items-center gap-2
   "
     >
-      Log in to Super Admin Portal
+      {role == 'student' ? 'Login to Student Portal' : 'Login to Admin Portal'}
       <ArrowUpOutlined
         size={20}
         className="rotate-45 transition-transform duration-300 hover:rotate-90"

@@ -1,6 +1,6 @@
-import * as React from "react";
+import * as React from 'react';
 
-const ArrowUpRightIcon = (props) => (
+const ArrowUpRightIcon = (props: any) => (
   <svg
     width={35}
     height={35}

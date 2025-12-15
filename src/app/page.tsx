@@ -2,8 +2,11 @@
 import Topbar from './components/layout/Topbar';
 import CampusUserCard from './components/layout/CampusUserCard';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+// import { useRouter } from 'next/router';
 
 export default function page() {
+  const router = useRouter();
   return (
     <>
       <div className="max-w-full   px-12">
@@ -44,7 +47,7 @@ export default function page() {
                 image="/assets/studentIcon.png"
                 buttonText="Continue as Student"
                 gradient="bg-[linear-gradient(90deg,#904BFF_0%,#BD47BF_100%)]"
-                onClick={() => console.log('Student clicked')}
+                onClick={() => router.push('/login?role=student')}
               />
               <CampusUserCard
                 label="For Admin Roles"
@@ -53,7 +56,7 @@ export default function page() {
                 image="/assets/institutionIcon.png"
                 buttonText="Continue as Institution Admin"
                 gradient="bg-[linear-gradient(90deg,#904BFF_0%,#BD47BF_100%)]"
-                onClick={() => console.log('Student clicked')}
+                onClick={() => router.push('/login?role=admin')}
               />
             </div>
             <div className="w-full  flex justify-end ">
@@ -70,7 +73,7 @@ export default function page() {
                   bg-[linear-gradient(90deg,#F8FBFF_0%,#EEEBFF_100%)]
                 shadow-sm "
                 >
-                  Exactly. Let’s begin
+                  Exactly. Let's begin
                 </span>
               </div>
             </div>
