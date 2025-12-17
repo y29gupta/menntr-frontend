@@ -1,9 +1,8 @@
 import { notFound } from 'next/navigation';
 import { superAdminSections } from '@/app/constants/superAdminSections';
-import Dashboard from '../components/Dashboard';
 
 const pageMap: Record<string, React.FC> = {
-  dashboard: Dashboard,
+  //   dashboard: Dashboard,
   // Add more components as you build them:
   // 'manage-institutions': ManageInstitutions,
   // 'upcoming-features': UpcomingFeatures,
