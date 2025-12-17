@@ -3,6 +3,7 @@
 /* Load Tailwind v4 */
 @import 'tailwindcss';
 
+
 /* Now everything else */
 :root {
   --background: #ffffff;

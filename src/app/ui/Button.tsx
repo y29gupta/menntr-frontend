@@ -4,9 +4,10 @@ import { ArrowUpOutlined } from '@ant-design/icons';
 
 interface ButtonsProps {
   role?: string | null;
+  status?: boolean;
 }
 
-const Buttons = ({ role }: ButtonsProps) => {
+const Buttons = ({ role, status }: ButtonsProps) => {
   if (!role) {
     return <div className="h-[48px] w-[260px]" />;
   }
@@ -21,7 +22,7 @@ const Buttons = ({ role }: ButtonsProps) => {
   return (
     <Button
       htmlType="submit" // ✅ THIS IS THE FIX
-      loading={false}
+      loading={status}
       className="
         !rounded-full
         !h-[48px]

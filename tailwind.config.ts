@@ -23,6 +23,10 @@ export default {
         primary: "#4F46E5",
         secondary: "#EC4899",
       },
+      backgroundImage: {
+        "primary-gradient":
+          "linear-gradient(90deg, #904BFF 0%, #C053C2 100%)",
+      },
     },
   },
 } satisfies Config;

@@ -165,10 +165,8 @@ const Loginform = ({ role }: { role: string }) => {
                 </div>
 
                 <div className="flex justify-center">
-                  <Buttons role={role} />
+                  <Buttons role={role} status={isSubmitting} />
                 </div>
-
-                {isSubmitting && <p className="text-center text-sm text-gray-500">Logging in...</p>}
               </form>
             </div>
           </div>
