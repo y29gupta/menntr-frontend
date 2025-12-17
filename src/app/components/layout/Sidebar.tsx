@@ -6,6 +6,9 @@ import clsx from 'clsx';
 import { SIDEBAR_CONFIG } from '@/app/lib/sidebar.config';
 import { Role } from '@/app/lib/roles';
 import { MenuFoldOutlined, MenuUnfoldOutlined } from '@ant-design/icons';
+
+import CollapseIcon from '../icons/CollapseIcon';
+import ExpandMenuIcon from '../icons/ExpandMenuIcon';
 type SidebarRole = keyof typeof SIDEBAR_CONFIG;
 type SidebarItem = {
   label: string;
@@ -40,8 +43,8 @@ export default function Sidebar({ role, collapsed, onToggle }: Props) {
           </div>
         )}
 
-        <button onClick={onToggle} className="text-gray-600">
-          {collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
+        <button onClick={onToggle} className="text-gray-600 ">
+          {collapsed ? <ExpandMenuIcon /> : <CollapseIcon />}
         </button>
       </div>
 
