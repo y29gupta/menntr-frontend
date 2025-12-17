@@ -24,7 +24,6 @@ const Dashboard = () => {
         overflow-x-hidden
       "
     >
-      {/* ================= Header (ALWAYS HORIZONTAL) ================= */}
       <div className="flex items-center justify-between gap-4">
         <h1
           className="

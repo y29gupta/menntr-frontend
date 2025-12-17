@@ -18,22 +18,22 @@ export const SIDEBAR_CONFIG = {
   'super-admin': [
     {
       label: 'Dashboard',
-      path: '/dashboard/super-admin',
+      path: '/super-admin',
       icon: <LayoutDashboard size={20} />,
     },
     {
       label: 'Manage Institutions',
-      path: '/dashboard/super-admin/institutions',
+      path: '/super-admin/institutions',
       icon: <Building2 size={20} />,
     },
     {
       label: 'License Management',
-      path: '/dashboard/super-admin/licenses',
+      path: '/super-admin/licenses',
       icon: <Settings size={20} />,
     },
     {
       label: 'System Health',
-      path: '/dashboard/super-admin/system-health',
+      path: '/super-admin/system-health',
       icon: <Activity size={20} />,
     },
   ],
@@ -41,7 +41,7 @@ export const SIDEBAR_CONFIG = {
   admin: [
     {
       label: 'Dashboard',
-      path: '/dashboard/admin',
+      path: '/admin',
       icon: <LayoutDashboard size={20} />,
     },
     {
@@ -51,7 +51,7 @@ export const SIDEBAR_CONFIG = {
     },
     {
       label: 'Reports',
-      path: '/dashboard/admin/reports',
+      path: '/admin/reports',
       icon: <BarChart3 size={20} />,
     },
   ],
@@ -59,12 +59,12 @@ export const SIDEBAR_CONFIG = {
   student: [
     {
       label: 'Dashboard',
-      path: '/dashboard/student',
+      path: '/student',
       icon: <LayoutDashboard size={20} />,
     },
     {
       label: 'My Courses',
-      path: '/dashboard/student/courses',
+      path: '/student/courses',
       icon: <BookOpen size={20} />,
     },
   ],
