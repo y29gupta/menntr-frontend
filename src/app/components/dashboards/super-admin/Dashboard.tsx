@@ -10,7 +10,11 @@ import { institutions } from './institution.data';
 import DataTable from '../../table/DataTable';
 import { Search, Filter } from 'lucide-react';
 
-const Dashboard = () => {
+type Props = {
+  onCreateInstitution: () => void;
+};
+
+const Dashboard = ({ onCreateInstitution }: Props) => {
   const [search, setSearch] = useState('');
   const [showColumnFilters, setShowColumnFilters] = useState(false);
 
@@ -92,7 +96,10 @@ const Dashboard = () => {
             All Institutions
           </h2>
 
-          <button className="whitespace-nowrap text-xs sm:text-sm !text-white bg-[linear-gradient(90deg,#904BFF_0%,#C053C2_100%)] px-4 sm:px-6 py-2 rounded-full flex items-center gap-2 font-medium">
+          <button
+            onClick={onCreateInstitution}
+            className=" cursor-pointer whitespace-nowrap text-xs sm:text-sm !text-white bg-[linear-gradient(90deg,#904BFF_0%,#C053C2_100%)] px-4 sm:px-6 py-2 rounded-full flex items-center gap-2 font-medium"
+          >
             <span className="text-lg">+</span> Onboard Institution
           </button>
         </div>
