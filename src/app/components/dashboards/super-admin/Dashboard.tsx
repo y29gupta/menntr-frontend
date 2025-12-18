@@ -2,53 +2,29 @@
 
 import React, { useState } from 'react';
 import SuperAdminIcon from '@/app/components/icons/SuperAdminIcon';
-import { Button } from 'antd';
 import { MetricCard } from '@/app/components/dashboards/super-admin/MetricCard';
-import { logout } from '@/app/lib/loginService';
 import { institutionColumns } from './institution.columns';
 import { institutions } from './institution.data';
 import DataTable from '../../table/DataTable';
 import { Search, Filter } from 'lucide-react';
+import Logout from '@/app/ui/Logout';
+import Profile from '@/app/ui/Profile';
 
 const Dashboard = () => {
   const [search, setSearch] = useState('');
   const [showColumnFilters, setShowColumnFilters] = useState(false);
 
-  const handlelogout = async () => {
-    const res = await logout();
-    if (res) alert('admin is logged out');
-  };
-
   return (
-    <main
-      className="
-        h-screen
-        px-4 sm:px-6 lg:px-8 xl:px-10
-        py-5
-        flex flex-col gap-6
-        text-[13px] sm:text-sm lg:text-base
-        overflow-hidden
-      "
-    >
+    <main className="h-screen px-4 sm:px-6 lg:px-8 xl:px-10 py-5 flex flex-col gap-6 text-[13px] sm:text-sm lg:text-base overflow-y-auto hide-scrollbar">
       {/* ================= Header ================= */}
       <div className="flex items-center justify-between gap-4">
-        <h1
-          className="
-            flex items-center gap-2
-            font-semibold text-gray-800
-            text-sm sm:text-base lg:text-lg
-            whitespace-nowrap
-          "
-        >
+        <h1 className="flex items-center gap-2 font-semibold text-gray-800 text-sm sm:text-base lg:text-lg whitespace-nowrap">
           <SuperAdminIcon />
           <span>
             Super Admin Portal –<span className="text-gray-500 ml-1">System admin</span>
           </span>
         </h1>
-
-        <Button danger type="default" onClick={handlelogout} className="text-xs sm:text-sm">
-          Log out
-        </Button>
+        <Profile />
       </div>
 
       {/* ================= Metrics ================= */}
@@ -83,7 +59,7 @@ const Dashboard = () => {
           border border-[#DBDFE7]
           bg-white
           p-4 sm:p-6 lg:p-8
-          overflow-y-auto
+         
         "
       >
         {/* Heading + Create Button */}

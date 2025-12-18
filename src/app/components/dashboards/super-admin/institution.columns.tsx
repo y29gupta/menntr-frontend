@@ -60,7 +60,7 @@ export const institutionColumns: ColumnDef<Institution>[] = [
     header: 'Actions',
     cell: () => (
       <button className="flex items-center gap-2 text-[#3B82F6] font-medium">
-        <Settings className="w-4 h-4" /> Configure
+        <Settings className="w-4 h-4 text-[#3B82F6]" /> Configure
       </button>
     ),
   },
