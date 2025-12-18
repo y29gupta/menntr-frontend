@@ -21,7 +21,7 @@ const Buttons = ({ role, status }: ButtonsProps) => {
 
   return (
     <Button
-      htmlType="submit" // ✅ THIS IS THE FIX
+      htmlType="submit"
       loading={status}
       className="
         !rounded-full
