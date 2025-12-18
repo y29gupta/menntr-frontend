@@ -1,18 +1,27 @@
 'use client';
 
-import React, { useState } from 'react';
+import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import SuperAdminIcon from '@/app/components/icons/SuperAdminIcon';
 import { Button } from 'antd';
 import { MetricCard } from '@/app/components/dashboards/super-admin/MetricCard';
 import { logout } from '@/app/lib/loginService';
 import { institutionColumns } from './institution.columns';
-import { institutions } from './institution.data';
 import DataTable from '../../table/DataTable';
 import { Search, Filter } from 'lucide-react';
+
+import { fetchInstitutions, mapInstitutions, Institution } from '@/app/lib/institutions.api';
 
 const Dashboard = () => {
   const [search, setSearch] = useState('');
   const [showColumnFilters, setShowColumnFilters] = useState(false);
+
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ['institutions'],
+    queryFn: fetchInstitutions,
+  });
+
+  const institutions: Institution[] = data ? mapInstitutions(data.data) : [];
 
   const handlelogout = async () => {
     const res = await logout();
@@ -55,7 +64,7 @@ const Dashboard = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <MetricCard
           title="Total Institutions"
-          value="30"
+          value={isLoading ? '—' : String(data?.count ?? 0)}
           bg="bg-[linear-gradient(106.82deg,#F2F7FF_3.46%,#D2E3FE_96.84%)]"
         />
         <MetricCard
@@ -120,13 +129,18 @@ const Dashboard = () => {
         </div>
 
         {/* TanStack Table */}
-        <DataTable
-          columns={institutionColumns}
-          data={institutions}
-          globalFilter={search}
-          onGlobalFilterChange={setSearch}
-          showColumnFilters={showColumnFilters}
-        />
+        {isLoading && <p>Loading institutions...</p>}
+        {isError && <p className="text-red-500">Failed to load institutions</p>}
+
+        {!isLoading && !isError && (
+          <DataTable
+            columns={institutionColumns}
+            data={institutions}
+            globalFilter={search}
+            onGlobalFilterChange={setSearch}
+            showColumnFilters={showColumnFilters}
+          />
+        )}
       </div>
     </main>
   );
