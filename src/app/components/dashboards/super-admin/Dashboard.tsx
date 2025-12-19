@@ -14,9 +14,10 @@ import { fetchInstitutions, mapInstitutions, Institution } from '@/app/lib/insti
 
 type Props = {
   onCreateInstitution: () => void;
+  onEditInstitution: (row: any) => void;
 };
 
-const Dashboard = ({ onCreateInstitution }: Props) => {
+const Dashboard = ({ onCreateInstitution, onEditInstitution }: Props) => {
   const [search, setSearch] = useState('');
   const [showColumnFilters, setShowColumnFilters] = useState(false);
 
@@ -141,7 +142,7 @@ const Dashboard = ({ onCreateInstitution }: Props) => {
 
         {!isLoading && !isError && (
           <DataTable
-            columns={institutionColumns}
+            columns={institutionColumns(onEditInstitution)}
             data={institutions}
             globalFilter={search}
             onGlobalFilterChange={setSearch}

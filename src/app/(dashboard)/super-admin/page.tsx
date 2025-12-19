@@ -23,6 +23,10 @@ export default function SuperAdminPage() {
             setEditData(null);
             setView('create');
           }}
+          onEditInstitution={(row) => {
+            setEditData(row);
+            setView('edit');
+          }}
         />
       )}
 

@@ -1,4 +1,5 @@
 // Backend institution (API response item)
+import { InstitutionFormValues } from '@/app/lib/institution';
 export type InstitutionApi = {
   id: number;
   name: string;
@@ -31,7 +32,7 @@ export type Institution = {
 };
 
 export async function fetchInstitutions(): Promise<InstitutionApiResponse> {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL_LOCAL_HOST}/institutions`, {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/institutions`, {
     method: 'GET',
     credentials: 'include',
   });
@@ -49,7 +50,39 @@ export function mapInstitutions(apiData: InstitutionApi[]): Institution[] {
     name: item.name,
     code: item.code,
     plan: item.plan?.name,
+    contactEmail:item.contactEmail,
     students: '—',
     status: item.status,
   }));
+}
+
+
+
+
+export async function updateInstitution(
+  id: number | string,
+  payload: InstitutionFormValues
+) {
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_API_BASE_URL}/institutions/${id}`,
+    {
+      method: 'PUT', // or PATCH (backend dependent)
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+      body: JSON.stringify({
+        name: payload.name,
+        code: payload.code,
+        contactEmail: payload.contactEmail,
+        plan: payload.plan, // BASIC / PREMIUM
+      }),
+    }
+  );
+
+  if (!res.ok) {
+    throw new Error('Failed to update institution');
+  }
+
+  return res.json();
 }

@@ -1,6 +1,6 @@
 import { ColumnDef } from '@tanstack/react-table';
 import { Settings } from 'lucide-react';
-
+import { useRouter } from 'next/navigation';
 export type Institution = {
   id: number;
   name: string;
@@ -8,9 +8,12 @@ export type Institution = {
   plan: string;
   students: string;
   status: string;
+  contactEmail?: string;
 };
 
-export const institutionColumns: ColumnDef<Institution>[] = [
+export const institutionColumns = (
+  onEditInstitution: (row: Institution) => void
+): ColumnDef<Institution>[] => [
   {
     accessorKey: 'name',
     header: 'Institution',
@@ -30,11 +33,16 @@ export const institutionColumns: ColumnDef<Institution>[] = [
       const bg = plan === 'Premium' ? 'bg-[#C89A2A]' : 'bg-[#E8F0FF]';
       const text = plan === 'Premium' ? 'text-white' : 'text-black';
 
-      return (
-        <span className={`${bg} ${text} px-3 py-1 rounded text-[11px] sm:text-xs font-medium`}>
-          {plan}
-        </span>
-      );
+      return <span className={`${bg} ${text} px-3 py-1 rounded text-xs font-medium`}>{plan}</span>;
+    },
+  },
+  {
+    accessorKey: 'contactEmail',
+    header: 'Email',
+    cell: ({ row }) => {
+      console.log(row.original.contactEmail, 'value');
+
+      return row.original.contactEmail;
     },
   },
   {
@@ -49,7 +57,7 @@ export const institutionColumns: ColumnDef<Institution>[] = [
 
       return (
         <div className="flex items-center gap-2">
-          <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+          <span className="w-2 h-2 bg-green-500 rounded-full" />
           <span>{status}</span>
         </div>
       );
@@ -58,10 +66,18 @@ export const institutionColumns: ColumnDef<Institution>[] = [
   {
     id: 'actions',
     header: 'Actions',
-    cell: () => (
-      <button className="flex items-center gap-2 text-[#3B82F6] font-medium">
-        <Settings className="w-4 h-4" /> Configure
-      </button>
-    ),
+    cell: ({ row }) => {
+      const router = useRouter();
+      return (
+        <button
+          onClick={() => router.push(`/super-admin/institutions/${row.original.id}`)}
+          className="flex items-center gap-2 p-2 cursor-pointer  hover:bg-[rgba(185,205,237,0.6)]
+ rounded-lg !text-blue-500 font-medium"
+        >
+          <Settings className="w-4 h-4" />
+          Configure
+        </button>
+      );
+    },
   },
 ];

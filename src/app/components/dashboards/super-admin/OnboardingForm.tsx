@@ -27,7 +27,7 @@ export default function OnboardingForm({ mode, defaultValues, onCancel, onSubmit
     defaultValues: defaultValues ?? {
       name: '',
       code: '',
-      email: '',
+      contactEmail: '',
       plan: 'PREMIUM',
     },
   });
@@ -42,12 +42,6 @@ export default function OnboardingForm({ mode, defaultValues, onCancel, onSubmit
     ],
   };
 
-  //   const premiumFeatures = [
-  //     'User & Role Management',
-  //     'Organization Structure',
-  //     'Student Management',
-  //     'Assessment Management',
-  //   ];
   const resourceLimits = [
     {
       label: 'Max Students',
@@ -78,7 +72,7 @@ export default function OnboardingForm({ mode, defaultValues, onCancel, onSubmit
           "
         >
           <button onClick={onCancel} className="text-sm flex gap-2 text-gray-500 mb-4">
-            <img src="/Go-back.svg" alt="" />
+            <img src="/Go-back.svg" alt="" className="cursor-pointer" />
             Go back to dashboard
           </button>
         </h1>
@@ -140,11 +134,13 @@ export default function OnboardingForm({ mode, defaultValues, onCancel, onSubmit
               <div>
                 <label className="text-sm text-[#0F172A]">Contact Email</label>
                 <input
-                  {...register('email')}
+                  {...register('contactEmail')}
                   className="w-full border-b border-gray-300 py-2 focus:outline-none"
                   placeholder="admin@abc.edu"
                 />
-                {errors.email && <p className="text-xs text-red-500">{errors.email.message}</p>}
+                {errors.contactEmail && (
+                  <p className="text-xs text-red-500">{errors.contactEmail.message}</p>
+                )}
               </div>
             </div>
           </div>

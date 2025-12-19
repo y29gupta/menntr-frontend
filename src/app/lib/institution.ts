@@ -9,7 +9,7 @@ export const institutionSchema = z.object({
     .string()
     .min(1, 'Institution code is required'),
 
-  email: z
+  contactEmail: z
     .string()
     .min(1, 'Contact email is required')
     .email('Invalid email address'),
