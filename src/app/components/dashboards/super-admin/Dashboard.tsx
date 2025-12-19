@@ -15,7 +15,7 @@ const Dashboard = () => {
   const [showColumnFilters, setShowColumnFilters] = useState(false);
 
   return (
-    <main className="h-screen px-4 sm:px-6 lg:px-8 xl:px-10 py-5 flex flex-col gap-6 text-[13px] sm:text-sm lg:text-base overflow-y-auto hide-scrollbar">
+    <main className="h-screen px-4 sm:px-6 lg:px-8 xl:px-10 py-5 flex flex-col gap-6 text-[13px] sm:text-sm lg:text-base overflow-y-auto [&::-webkit-scrollbar]:hidden scrollbar-none1">
       {/* ================= Header ================= */}
       <div className="flex items-center justify-between gap-4 min-w-0">
         <h1 className="flex items-center gap-2 font-semibold text-gray-800 text-base whitespace-nowrap overflow-hidden text-ellipsis">
