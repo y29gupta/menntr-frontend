@@ -3,12 +3,13 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import SuperAdminIcon from '@/app/components/icons/SuperAdminIcon';
-import { Button } from 'antd';
 import { MetricCard } from '@/app/components/dashboards/super-admin/MetricCard';
-import { logout } from '@/app/lib/loginService';
 import { institutionColumns } from './institution.columns';
 import DataTable from '../../table/DataTable';
 import { Search, Filter } from 'lucide-react';
+import Logout from '@/app/ui/Logout';
+import Profile from '@/app/ui/Profile';
+import { Spin } from 'antd';
 
 import { fetchInstitutions, mapInstitutions, Institution } from '@/app/lib/institutions.api';
 
@@ -28,41 +29,21 @@ const Dashboard = ({ onCreateInstitution, onEditInstitution }: Props) => {
 
   const institutions: Institution[] = data ? mapInstitutions(data.data) : [];
 
-  const handlelogout = async () => {
-    const res = await logout();
-    if (res) alert('admin is logged out');
-  };
-
   return (
-    <main
-      className="
-        h-screen
-        px-4 sm:px-6 lg:px-8 xl:px-10
-        py-5
-        flex flex-col gap-6
-        text-[13px] sm:text-sm lg:text-base
-        overflow-hidden
-      "
-    >
+    <main className="h-screen px-4 sm:px-6 lg:px-8 xl:px-10 py-5 flex flex-col gap-6 text-[13px] sm:text-sm lg:text-base overflow-y-auto hide-scrollbar">
       {/* ================= Header ================= */}
-      <div className="flex items-center justify-between gap-4">
-        <h1
-          className="
-            flex items-center gap-2
-            font-semibold text-gray-800
-            text-sm sm:text-base lg:text-lg
-            whitespace-nowrap
-          "
-        >
+      <div className="flex items-center justify-between gap-4 min-w-0">
+        <h1 className="flex items-center gap-2 font-semibold text-gray-800 text-base whitespace-nowrap overflow-hidden text-ellipsis">
           <SuperAdminIcon />
-          <span>
-            Super Admin Portal –<span className="text-gray-500 ml-1">System admin</span>
+          <span className="truncate">
+            Super Admin Portal –
+            <span className="text-gray-500 ml-1 hidden sm:inline">System admin</span>
           </span>
         </h1>
 
-        <Button danger type="default" onClick={handlelogout} className="text-xs sm:text-sm">
-          Log out
-        </Button>
+        <div className="shrink-0">
+          <Profile />
+        </div>
       </div>
 
       {/* ================= Metrics ================= */}
@@ -97,20 +78,20 @@ const Dashboard = ({ onCreateInstitution, onEditInstitution }: Props) => {
           border border-[#DBDFE7]
           bg-white
           p-4 sm:p-6 lg:p-8
-          overflow-y-auto
+         
         "
       >
         {/* Heading + Create Button */}
         <div className="flex items-center justify-between gap-4 mb-4">
-          <h2 className="font-semibold text-gray-800 text-sm sm:text-base lg:text-lg">
+          <h2 className="hidden sm:block font-semibold text-gray-800 text-sm sm:text-base lg:text-lg">
             All Institutions
           </h2>
 
           <button
             onClick={onCreateInstitution}
-            className=" cursor-pointer whitespace-nowrap text-xs sm:text-sm !text-white bg-[linear-gradient(90deg,#904BFF_0%,#C053C2_100%)] px-4 sm:px-6 py-2 rounded-full flex items-center gap-2 font-medium"
+            className="w-full sm:w-auto whitespace-nowrap text-xs sm:text-sm !text-white bg-[linear-gradient(90deg,#904BFF_0%,#C053C2_100%)] px-4 sm:px-6 !py-2.5 sm:py-1 rounded-full flex items-center justify-center gap-2 font-medium"
           >
-            <span className="text-lg">+</span> Onboard Institution
+            <span>+</span> Onboard Institution
           </button>
         </div>
 
@@ -137,7 +118,11 @@ const Dashboard = ({ onCreateInstitution, onEditInstitution }: Props) => {
         </div>
 
         {/* TanStack Table */}
-        {isLoading && <p>Loading institutions...</p>}
+        {isLoading && (
+          <div className="flex items-center justify-center min-h-[60vh]">
+            <Spin size="large" />
+          </div>
+        )}
         {isError && <p className="text-red-500">Failed to load institutions</p>}
 
         {!isLoading && !isError && (
