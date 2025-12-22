@@ -7,10 +7,10 @@ import { z } from 'zod';
 
 import Buttons from './Button';
 import ForgotPassword from '../components/icons/ForgotPassword';
+import { forgotPasswordSchema } from '../lib/loginSchema';
+import { sendForgotPassword, validateForgotPassword } from '../lib/loginService';
 
-const schema = z.object({
-  email: z.string().email('Enter a valid email'),
-});
+const schema = forgotPasswordSchema;
 
 type Values = z.infer<typeof schema>;
 
@@ -26,8 +26,14 @@ const ForgotPasswordForm = ({ role }: { role: string }) => {
   });
 
   const onSubmit = async (data: Values) => {
-    console.log('FORGOT:', data);
-    alert('Reset link sent!');
+    try {
+      console.log('link sent to ur email', data);
+      await validateForgotPassword(data);
+      await sendForgotPassword(data);
+      alert('Reset link sent!');
+    } catch (err: any) {
+      console.log(err?.response?.data?.message || err?.message || 'Something went wrong');
+    }
   };
 
   let imageSrc = '/assets/Admin.png';

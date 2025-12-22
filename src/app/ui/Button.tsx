@@ -21,7 +21,14 @@ const Buttons = ({ role, status, mode = 'login' }: ButtonsProps) => {
         ? 'Login to Super Admin Portal'
         : 'Login to Admin Portal';
 
-  const label = mode === 'forgot' ? 'Send link now' : mode === 'reset' ? 'Reset now' : loginLabel;
+  const label =
+    mode === 'forgot'
+      ? 'Send link now'
+      : mode === 'validate'
+        ? 'validate now '
+        : mode === 'reset'
+          ? 'Reset now'
+          : loginLabel;
 
   return (
     <button

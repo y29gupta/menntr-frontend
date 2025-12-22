@@ -7,7 +7,6 @@ import { institutionColumns } from './institution.columns';
 import { institutions } from './institution.data';
 import DataTable from '../../table/DataTable';
 import { Search, Filter } from 'lucide-react';
-import Logout from '@/app/ui/Logout';
 import Profile from '@/app/ui/Profile';
 
 const Dashboard = () => {
@@ -16,7 +15,6 @@ const Dashboard = () => {
 
   return (
     <main className="h-screen px-4 sm:px-6 lg:px-8 xl:px-10 py-5 flex flex-col gap-6 text-[13px] sm:text-sm lg:text-base overflow-y-auto [&::-webkit-scrollbar]:hidden scrollbar-none1">
-      {/* ================= Header ================= */}
       <div className="flex items-center justify-between gap-4 min-w-0">
         <h1 className="flex items-center gap-2 font-semibold text-gray-800 text-base whitespace-nowrap overflow-hidden text-ellipsis">
           <SuperAdminIcon />
@@ -31,7 +29,6 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* ================= Metrics ================= */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <MetricCard
           title="Total Institutions"
@@ -55,7 +52,6 @@ const Dashboard = () => {
         />
       </div>
 
-      {/* ================= Institutions Section ================= */}
       <div
         className="
           w-full
@@ -66,7 +62,6 @@ const Dashboard = () => {
          
         "
       >
-        {/* Heading + Create Button */}
         <div className="flex items-center justify-between gap-4 mb-4">
           <h2 className="hidden sm:block font-semibold text-gray-800 text-sm sm:text-base lg:text-lg">
             All Institutions
@@ -77,7 +72,6 @@ const Dashboard = () => {
           </button>
         </div>
 
-        {/* Search + Filter */}
         <div className="flex flex-col sm:flex-row gap-3 mb-4">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-2.5 text-gray-400 w-4 h-4" />
@@ -99,7 +93,6 @@ const Dashboard = () => {
           </button>
         </div>
 
-        {/* TanStack Table */}
         <DataTable
           columns={institutionColumns}
           data={institutions}
