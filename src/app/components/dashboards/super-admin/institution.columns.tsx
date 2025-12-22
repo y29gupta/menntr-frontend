@@ -40,8 +40,6 @@ export const institutionColumns = (
     accessorKey: 'contactEmail',
     header: 'Email',
     cell: ({ row }) => {
-      console.log(row.original.contactEmail, 'value');
-
       return row.original.contactEmail;
     },
   },

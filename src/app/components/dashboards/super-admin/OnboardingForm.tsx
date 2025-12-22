@@ -6,7 +6,6 @@ import { InstitutionFormValues, institutionSchema } from '@/app/lib/institution'
 import { Button } from 'antd';
 import CheckedIcon from '../../icons/CheckedIcon';
 import { Check } from 'lucide-react';
-// import { institutionSchema, InstitutionFormValues } from '@/lib/institution';
 
 type Props = {
   mode: 'create' | 'edit';
@@ -149,15 +148,6 @@ export default function OnboardingForm({ mode, defaultValues, onCancel, onSubmit
             <h3 className="font-medium mb-4 text-[18px] text-[#0F172A]">Select Plan / Modules</h3>
 
             <div className="flex justify-around gap-4 mb-6">
-              {/* <button
-                type="button"
-                onClick={() => setValue('plan', 'BASIC')}
-                className={`px-10 py-3 rounded-full border ${
-                  plan === 'BASIC' ? 'border-purple-500 text-purple-600' : 'border-gray-300'
-                }`}
-              >
-                Basic
-              </button> */}
               <button
                 type="button"
                 onClick={() => setValue('plan', 'BASIC')}
@@ -204,32 +194,8 @@ export default function OnboardingForm({ mode, defaultValues, onCancel, onSubmit
                 )}
                 Premium
               </button>
-
-              {/* <button
-                type="button"
-                onClick={() => setValue('plan', 'PREMIUM')}
-                className={`px-10 py-2 rounded-full border flex items-center gap-3 ${
-                  plan === 'PREMIUM' ? 'border-purple-500 !text-purple-600' : 'border-gray-300'
-                }`}
-              >
-                <CheckedIcon /> Premium
-              </button> */}
             </div>
 
-            {/* {plan === 'PREMIUM' && (
-              <ul className="space-y-3 text-sm text-gray-700">
-                {plan === 'PREMIUM' && (
-                  <ul className="space-y-3 text-sm text-gray-700">
-                    {premiumFeatures.map((feature) => (
-                      <li key={feature} className="flex items-center gap-2 text-[16px]">
-                        <Check className="w-4 h-4 text-purple-600 shrink-0" />
-                        <span>{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </ul>
-            )} */}
             <ul className="space-y-3 text-sm text-gray-700">
               {planFeatures[plan].map((feature) => (
                 <li key={feature} className="flex items-center gap-2 text-[16px]">
