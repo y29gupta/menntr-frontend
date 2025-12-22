@@ -1,18 +1,40 @@
 'use client';
 
-import React, { useState } from 'react';
+import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import SuperAdminIcon from '@/app/components/icons/SuperAdminIcon';
 import { MetricCard } from '@/app/components/dashboards/super-admin/MetricCard';
 import { institutionColumns } from './institution.columns';
-import { institutions } from './institution.data';
 import DataTable from '../../table/DataTable';
 import { Search, Filter } from 'lucide-react';
 import Profile from '@/app/ui/Profile';
 
-const Dashboard = () => {
+import { fetchInstitutions, mapInstitutions, Institution } from '@/app/lib/institutions.api';
+
+type Props = {
+  onCreateInstitution: () => void;
+  onEditInstitution: (row: any) => void;
+};
+
+const Dashboard = ({ onCreateInstitution, onEditInstitution }: Props) => {
   const [search, setSearch] = useState('');
   const [showColumnFilters, setShowColumnFilters] = useState(false);
 
+<<<<<<< HEAD
+=======
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ['institutions'],
+    queryFn: fetchInstitutions,
+  });
+
+  const institutions: Institution[] = data ? mapInstitutions(data.data) : [];
+
+  const handlelogout = async () => {
+    const res = await logout();
+    if (res) alert('admin is logged out');
+  };
+
+>>>>>>> 6b0e577f0e460312105ba24ab9d32bed66c845f6
   return (
     <main className="h-screen px-4 sm:px-6 lg:px-8 xl:px-10 py-5 flex flex-col gap-6 text-[13px] sm:text-sm lg:text-base overflow-y-auto [&::-webkit-scrollbar]:hidden scrollbar-none1">
       <div className="flex items-center justify-between gap-4 min-w-0">
@@ -32,7 +54,7 @@ const Dashboard = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <MetricCard
           title="Total Institutions"
-          value="30"
+          value={isLoading ? '—' : String(data?.count ?? 0)}
           bg="bg-[linear-gradient(106.82deg,#F2F7FF_3.46%,#D2E3FE_96.84%)]"
         />
         <MetricCard
@@ -67,8 +89,16 @@ const Dashboard = () => {
             All Institutions
           </h2>
 
+<<<<<<< HEAD
           <button className="w-full sm:w-auto whitespace-nowrap text-xs sm:text-sm !text-white bg-[linear-gradient(90deg,#904BFF_0%,#C053C2_100%)] px-4 sm:px-6 py-2 sm:py-1 rounded-full flex items-center justify-center gap-2 font-medium">
             <span>+</span> Onboard Institution
+=======
+          <button
+            onClick={onCreateInstitution}
+            className=" cursor-pointer whitespace-nowrap text-xs sm:text-sm !text-white bg-[linear-gradient(90deg,#904BFF_0%,#C053C2_100%)] px-4 sm:px-6 py-2 rounded-full flex items-center gap-2 font-medium"
+          >
+            <span className="text-lg">+</span> Onboard Institution
+>>>>>>> 6b0e577f0e460312105ba24ab9d32bed66c845f6
           </button>
         </div>
 
@@ -93,6 +123,7 @@ const Dashboard = () => {
           </button>
         </div>
 
+<<<<<<< HEAD
         <DataTable
           columns={institutionColumns}
           data={institutions}
@@ -100,6 +131,21 @@ const Dashboard = () => {
           onGlobalFilterChange={setSearch}
           showColumnFilters={showColumnFilters}
         />
+=======
+        {/* TanStack Table */}
+        {isLoading && <p>Loading institutions...</p>}
+        {isError && <p className="text-red-500">Failed to load institutions</p>}
+
+        {!isLoading && !isError && (
+          <DataTable
+            columns={institutionColumns(onEditInstitution)}
+            data={institutions}
+            globalFilter={search}
+            onGlobalFilterChange={setSearch}
+            showColumnFilters={showColumnFilters}
+          />
+        )}
+>>>>>>> 6b0e577f0e460312105ba24ab9d32bed66c845f6
       </div>
     </main>
   );
