@@ -36,8 +36,6 @@ export default function SuperAdminPage() {
           defaultValues={editData ?? undefined}
           onCancel={() => setView('dashboard')}
           onSubmitForm={(data) => {
-            // console.log('SUBMIT:', data);
-            // API call later
             createInstitution(data);
             setView('dashboard');
           }}

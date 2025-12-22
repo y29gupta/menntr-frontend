@@ -16,7 +16,7 @@ function getRoleFromToken(token: string): string | null {
 export function middleware(req: NextRequest) {
   
   const token = req.cookies.get('auth_token')?.value;
-  console.log(token,"token")
+
 
   if (!token) {
     return NextResponse.redirect(new URL(`/`, req.url));

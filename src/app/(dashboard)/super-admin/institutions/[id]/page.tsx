@@ -20,7 +20,7 @@ export default function EditInstitutionPage() {
     queryKey: ['institutions'],
     queryFn: fetchInstitutions,
   });
-  console.log(data, 'data is here');
+
   if (isLoading || !data) {
     return <p>Loading...</p>;
   }
@@ -37,8 +37,6 @@ export default function EditInstitutionPage() {
       router.push('/super-admin');
     },
   });
-
-  console.log(institution, id, 'insti');
 
   if (!institution) return <p>Institution not found</p>;
 

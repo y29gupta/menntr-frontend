@@ -64,6 +64,7 @@ export async function updateInstitution(
   id: number | string,
   payload: InstitutionFormValues
 ) {
+  console.log(payload,"payload")
   const res = await fetch(
     `${process.env.NEXT_PUBLIC_API_BASE_URL}/institutions/${id}`,
     {

@@ -23,7 +23,7 @@ const Loginform = ({ role }: { role: string }) => {
   const navigate = useRouter();
   const searchParams = useSearchParams();
   const expectedRole = searchParams.get('role');
-  console.log(expectedRole, 'expected');
+
   const isSuperAdmin = role === 'superadmin';
 
   let imageSrc = '/assets/Admin.png';
@@ -42,10 +42,7 @@ const Loginform = ({ role }: { role: string }) => {
     try {
       const res = await loginUser({ ...data });
 
-      // setAuthCookies(res.token, role);
-
       const redirectPath = ROLE_REDIRECT[expectedRole as keyof typeof ROLE_REDIRECT];
-      console.log(redirectPath, 'path');
 
       if (!redirectPath) {
         throw new Error('Invalid role for redirect');
