@@ -1,6 +1,6 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 
@@ -14,13 +14,16 @@ import {
 } from '@/app/lib/loginSchema';
 
 import { loginUser } from '@/app/lib/loginService';
-import { setAuthCookies } from '@/app/lib/auth';
+// import { setAuthCookies } from '@/app/lib/auth';
 import { ROLE_REDIRECT } from '../lib/roles';
 
 type LoginFormValues = StudentAdminLogin | SuperAdminLogin;
 
 const Loginform = ({ role }: { role: string }) => {
   const navigate = useRouter();
+  const searchParams = useSearchParams();
+  const expectedRole = searchParams.get('role');
+  console.log(expectedRole, 'expected');
   const isSuperAdmin = role === 'superadmin';
 
   let imageSrc = '/assets/Admin.png';
@@ -37,15 +40,12 @@ const Loginform = ({ role }: { role: string }) => {
 
   const onSubmit = async (data: LoginFormValues) => {
     try {
-      console.log('Submitting:', data);
-
       const res = await loginUser({ ...data });
-      console.log('API RESPONSE:', res);
 
-      // ✅ STORE TOKEN + ROLE
-      setAuthCookies(res.token, role);
+      // setAuthCookies(res.token, role);
 
-      const redirectPath = ROLE_REDIRECT[role as keyof typeof ROLE_REDIRECT];
+      const redirectPath = ROLE_REDIRECT[expectedRole as keyof typeof ROLE_REDIRECT];
+      console.log(redirectPath, 'path');
 
       if (!redirectPath) {
         throw new Error('Invalid role for redirect');
