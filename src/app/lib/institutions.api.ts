@@ -1,0 +1,95 @@
+import { InstitutionFormValues } from '@/app/lib/institution';
+
+export const PLAN_CODE_TO_ID = {
+  BASIC: 1,
+  PREMIUM: 4,
+} as const;
+
+export const PLAN_ID_TO_CODE = {
+  1: 'BASIC',
+  4: 'PREMIUM',
+} as const;
+
+export type PlanCode = keyof typeof PLAN_CODE_TO_ID;
+export type PlanId = (typeof PLAN_CODE_TO_ID)[PlanCode];
+
+export type InstitutionApi = {
+  id: number;
+  name: string;
+  code: string;
+  contactEmail: string;
+  status: string;
+  planId: number;
+  createdAt?: string;
+  plan: {
+    id: number;
+    name: string;
+    code: string;
+  };
+};
+
+// API response
+export type InstitutionApiResponse = {
+  count: number;
+  data: InstitutionApi[];
+};
+
+export type Institution = {
+  id: number;
+  name: string;
+  code: string;
+  plan: string;
+  contactEmail: string;
+  students: string;
+  status: string;
+  planId: number;
+};
+
+export async function fetchInstitutions(): Promise<InstitutionApiResponse> {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/institutions`, {
+    method: 'GET',
+    credentials: 'include',
+  });
+
+  if (!res.ok) {
+    throw new Error('Failed to fetch institutions');
+  }
+
+  return res.json();
+}
+
+export function mapInstitutions(apiData: InstitutionApi[]): Institution[] {
+  return apiData.map((item) => ({
+    id: item.id,
+    name: item.name,
+    code: item.code,
+    plan: item.plan?.name ?? '—',
+    contactEmail: item.contactEmail,
+    students: '—',
+    status: item.status,
+    planId: item.planId,
+  }));
+}
+
+export async function updateInstitution(id: number | string, payload: InstitutionFormValues) {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/institutions/${id}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    credentials: 'include',
+
+    body: JSON.stringify({
+      name: payload.name,
+      code: payload.code,
+      contactEmail: payload.contactEmail,
+      planId: PLAN_CODE_TO_ID[payload.plan],
+    }),
+  });
+
+  if (!res.ok) {
+    throw new Error('Failed to update institution');
+  }
+
+  return res.json();
+}

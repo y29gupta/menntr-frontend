@@ -1,65 +1,128 @@
-import Image from 'next/image';
+'use client';
 
-export default function Home() {
+import Topbar from './components/layout/Topbar';
+import CampusUserCard from './components/layout/CampusUserCard';
+
+import { useRouter } from 'next/navigation';
+import RobotCard from './ui/RobotCard';
+
+export default function Page() {
+  const router = useRouter();
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{' '}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{' '}
-            or the{' '}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{' '}
-            center.
-          </p>
+    <div
+      className="
+        min-h-full
+        w-full
+        max-w-[1366px]
+        mx-auto
+        bg-white
+        px-4
+        sm:px-6
+        md:px-
+        lg:px-20
+        flex
+        flex-col
+        relative
+      "
+    >
+      {/* CONTENT CONTAINER */}
+      <div className=" relative w-full max-w-[1206px]  flex flex-col gap-6">
+        <Topbar />
+
+        {/* FLOATING ROBOT (LEFT) */}
+        <div
+          className="
+            absolute
+            left-0
+            top-[120px]
+            hidden
+            
+            lg:block
+            pointer-events-none
+          "
+        >
+          <RobotCard />
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
+
+        {/* CENTER HEADING */}
+        <div className="w-full flex justify-center">
+          <div className="relative flex flex-col items-center gap-[10px]">
+            <h6 className="text-[#0F172A] text-[32px] leading-[40px]">
+              Welcome to <span className="font-bold underline">Menntr</span>
+            </h6>
+
+            <p className="text-[#636771]">choose your role to continue</p>
+
+            {/* GIF */}
+            <img
+              src="/assets/animation.gif"
+              alt="Loading animation"
+              className="
+                absolute
+                left-full
+                ml-4
+                bottom-0
+                w-[77px]
+                h-[130px]
+                hidden
+                sm:block
+              "
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+          </div>
         </div>
-      </main>
+
+        {/* ROLE CARDS */}
+        <div className="w-full py-12 flex justify-center">
+          <div className="w-full flex flex-col items-center gap-6">
+            <div className="flex flex-wrap justify-center gap-6 w-full">
+              <CampusUserCard
+                label="For Campus User"
+                title="Student"
+                description="Access assessments, results, and placement opportunities."
+                image="/assets/studentIcon.png"
+                buttonText="Continue as Student"
+                onClick={() => router.push('/login?role=student')}
+              />
+
+              <CampusUserCard
+                label="For Admin Roles"
+                title="Institution"
+                description="Manage campus-wide department and placement workflow."
+                image="/assets/institutionIcon.png"
+                buttonText="Continue as Institution Admin"
+                onClick={() => router.push('/login?role=admin')}
+              />
+            </div>
+
+            {/* CTA PILL */}
+            <div className="w-full flex justify-end">
+              <div className="max-w-lg rounded-full border border-[#E5E7EB] bg-white shadow-sm px-4 py-2 flex items-center gap-3">
+                <div className="w-[19px] h-6 flex-shrink-0">
+                  <img src="/assets/cursorIcon.png" alt="" />
+                </div>
+
+                <span className="text-gray-700 text-sm">I want to level up my skills</span>
+
+                <span
+                  className="
+                    px-4
+                    py-1
+                    rounded-full
+                    text-xs
+                    font-medium
+                    text-[#3B82F6]
+                    bg-[linear-gradient(90deg,#F8FBFF_0%,#EEEBFF_100%)]
+                    shadow-sm
+                  "
+                >
+                  Exactly. Let&apos;s begin
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
