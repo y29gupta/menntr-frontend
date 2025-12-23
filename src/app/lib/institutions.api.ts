@@ -4,7 +4,7 @@ export type InstitutionApi = {
   id: number;
   name: string;
   code: string;
-  contactEmail?: string;
+  contactEmail: string;
   status: string;
   planId: number;
   createdAt?: string;
@@ -29,6 +29,7 @@ export type Institution = {
   plan: string;
   students: string;
   status: string;
+  contactEmail:string
 };
 
 export async function fetchInstitutions(): Promise<InstitutionApiResponse> {

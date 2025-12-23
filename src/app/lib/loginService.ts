@@ -42,8 +42,31 @@ export async function resetPassword(payload: {
 }
 
 export async function logout() {
-  const res = await api.post('/auth/logout', {
-    withCredentials: true,
-  });
-  return res.data;
+  try {
+    const res = await api.post(
+      '/auth/logout',
+      {},
+      {
+        withCredentials: true,
+      }
+    );
+
+    return res.data;
+  } catch (error) {
+    console.error('Logout API call failed', error);
+    throw error;
+  }
 }
+
+// export async function performLogout() {
+//   try {
+//     await logout();
+//   } catch (error) {
+//     console.error('Backend logout failed, continuing with local cleanup:', error);
+//   } finally {
+//     localStorage.clear();
+//     sessionStorage.clear();
+
+//     // window.location.href = '/login';
+//   }
+// }

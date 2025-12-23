@@ -8,6 +8,7 @@ import { institutionColumns } from './institution.columns';
 import DataTable from '../../table/DataTable';
 import { Search, Filter } from 'lucide-react';
 import Profile from '@/app/ui/Profile';
+import { Spin } from 'antd';
 
 import { fetchInstitutions, mapInstitutions, Institution } from '@/app/lib/institutions.api';
 import { logout } from '@/app/lib/loginService';
@@ -27,11 +28,6 @@ const Dashboard = ({ onCreateInstitution, onEditInstitution }: Props) => {
   });
 
   const institutions: Institution[] = data ? mapInstitutions(data.data) : [];
-
-  const handlelogout = async () => {
-    const res = await logout();
-    if (res) alert('admin is logged out');
-  };
 
   return (
     <main className="h-screen px-4 sm:px-6 lg:px-8 xl:px-10 py-5 flex flex-col gap-6 text-[13px] sm:text-sm lg:text-base overflow-y-auto [&::-webkit-scrollbar]:hidden scrollbar-none1">
@@ -89,9 +85,9 @@ const Dashboard = ({ onCreateInstitution, onEditInstitution }: Props) => {
 
           <button
             onClick={onCreateInstitution}
-            className=" cursor-pointer whitespace-nowrap text-xs sm:text-sm !text-white bg-[linear-gradient(90deg,#904BFF_0%,#C053C2_100%)] px-4 sm:px-6 py-2 rounded-full flex items-center gap-2 font-medium"
+            className="w-full sm:w-auto whitespace-nowrap text-xs sm:text-sm !text-white bg-[linear-gradient(90deg,#904BFF_0%,#C053C2_100%)] px-4 sm:px-6 !py-2.5 sm:py-1 rounded-full flex items-center justify-center gap-2 font-medium"
           >
-            <span className="text-lg">+</span> Onboard Institution
+            <span>+</span> Onboard Institution
           </button>
         </div>
 
@@ -117,7 +113,11 @@ const Dashboard = ({ onCreateInstitution, onEditInstitution }: Props) => {
         </div>
 
         {/* TanStack Table */}
-        {isLoading && <p>Loading institutions...</p>}
+        {isLoading && (
+          <div className="flex items-center justify-center min-h-[60vh]">
+            <Spin size="large" />
+          </div>
+        )}
         {isError && <p className="text-red-500">Failed to load institutions</p>}
 
         {!isLoading && !isError && (

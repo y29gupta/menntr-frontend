@@ -3,10 +3,16 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import ProfileDropdown from './modals/ProfileDropdownModal';
+import { logout } from '../lib/loginService';
+import { usePathname, useRouter } from 'next/navigation';
 
 export default function Profile() {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const pathname = usePathname();
+  console.log(typeof pathname, 'pathname');
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -25,9 +31,13 @@ export default function Profile() {
     setIsOpen(false);
   };
 
-  const handleLogout = () => {
-    alert('Logout clicked');
-    setIsOpen(false);
+  const handleLogout = async () => {
+    try {
+      const res = await logout();
+      router.push(`/`);
+    } catch (error) {
+      console.log(error, 'logout failed');
+    }
   };
 
   return (
