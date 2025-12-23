@@ -7,18 +7,24 @@ import OnboardingForm from '@/app/components/dashboards/super-admin/OnboardingFo
 import { fetchInstitutions, mapInstitutions, updateInstitution } from '@/app/lib/institutions.api';
 import { InstitutionFormValues } from '@/app/lib/institution';
 
-// import { updateInstitution } from '@/app/lib/api/institution';
-
 export default function EditInstitutionPage() {
-  // const { id } = useParams();
   const params = useParams();
   const id = Array.isArray(params.id) ? params.id[0] : params.id;
-
   const router = useRouter();
+  const queryClient = useQueryClient();
 
   const { data, isLoading } = useQuery({
     queryKey: ['institutions'],
     queryFn: fetchInstitutions,
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: (formData: InstitutionFormValues) => updateInstitution(id!, formData),
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['institutions'] });
+      router.push('/super-admin');
+    },
   });
 
   if (isLoading || !data) {
@@ -29,14 +35,7 @@ export default function EditInstitutionPage() {
 
   const institution = institutions.find((inst) => String(inst.id) === id);
 
-  const queryClient = useQueryClient();
-  const updateMutation = useMutation({
-    mutationFn: (formData: InstitutionFormValues) => updateInstitution(id!, formData),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['institutions'] });
-      router.push('/super-admin');
-    },
-  });
+  console.log(institution, id, 'insti');
 
   if (!institution) return <p>Institution not found</p>;
 
@@ -46,7 +45,7 @@ export default function EditInstitutionPage() {
       defaultValues={{
         name: institution.name,
         code: institution.code,
-        contactEmail: 'y@gmail.com',
+        contactEmail: institution.contactEmail,
         plan: institution.plan === 'Premium' ? 'PREMIUM' : 'BASIC',
       }}
       onCancel={() => router.push('/super-admin')}

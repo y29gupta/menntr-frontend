@@ -5,19 +5,29 @@ import { ArrowUpOutlined } from '@ant-design/icons';
 interface ButtonsProps {
   role?: string | null;
   status?: boolean;
+  label?: string;
 }
 
-const Buttons = ({ role, status }: ButtonsProps) => {
+const Buttons = ({ role, status, label }: ButtonsProps) => {
   if (!role) {
     return <div className="h-[48px] w-[260px]" />;
   }
 
-  const label =
+  // const label =
+  //   role === 'student'
+  //     ? 'Login to Student Portal'
+  //     : role === 'superadmin'
+  //       ? 'Login to Super Admin Portal'
+  //       : 'Login to Admin Portal';
+
+  const defaultLabel =
     role === 'student'
       ? 'Login to Student Portal'
       : role === 'superadmin'
         ? 'Login to Super Admin Portal'
         : 'Login to Admin Portal';
+
+  const buttonLabel = label ?? defaultLabel;
 
   return (
     <Button
@@ -35,7 +45,8 @@ const Buttons = ({ role, status }: ButtonsProps) => {
         flex items-center gap-2
       "
     >
-      <span className="whitespace-nowrap">{label}</span>
+      {/* <span className="whitespace-nowrap">{label}</span> */}
+      <span className="whitespace-nowrap">{buttonLabel}</span>
 
       <span className="w-[20px] h-[20px] flex items-center justify-center">
         <ArrowUpOutlined className="rotate-45" />

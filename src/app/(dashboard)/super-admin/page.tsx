@@ -1,9 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-// import DashboardOverview from '@/components/super-admin/DashboardOverview';
-// import InstitutionForm from '@/components/super-admin/InstitutionForm';
-// import { InstitutionFormValues } from '@/lib/institution';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import Dashboard from '@/app/components/dashboards/super-admin/Dashboard';
 import OnboardingForm from '@/app/components/dashboards/super-admin/OnboardingForm';
 import { InstitutionFormValues } from '@/app/lib/institution';
@@ -14,6 +12,19 @@ type View = 'dashboard' | 'create' | 'edit';
 export default function SuperAdminPage() {
   const [view, setView] = useState<View>('dashboard');
   const [editData, setEditData] = useState<InstitutionFormValues | null>(null);
+
+  const queryClient = useQueryClient();
+
+  const createMutation = useMutation({
+    mutationFn: createInstitution,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['institutions'] });
+      setView('dashboard');
+    },
+    onError: (err) => {
+      console.error('Create institution failed', err);
+    },
+  });
 
   return (
     <div className="w-full">
@@ -36,7 +47,7 @@ export default function SuperAdminPage() {
           defaultValues={editData ?? undefined}
           onCancel={() => setView('dashboard')}
           onSubmitForm={(data) => {
-            createInstitution(data);
+            createMutation.mutate(data);
             setView('dashboard');
           }}
         />

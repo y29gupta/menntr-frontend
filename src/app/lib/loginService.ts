@@ -24,15 +24,18 @@ export async function logout() {
   }
 }
 
-// export async function performLogout() {
-//   try {
-//     await logout();
-//   } catch (error) {
-//     console.error('Backend logout failed, continuing with local cleanup:', error);
-//   } finally {
-//     localStorage.clear();
-//     sessionStorage.clear();
 
-//     // window.location.href = '/login';
-//   }
-// }
+export const adminPasswordSetup = (payload: {
+  password: string;
+  confirmPassword: string;
+}) => {
+
+ const  sendPayload = {
+   confirmNewPassword: payload.confirmPassword,
+   newPassword:payload.password
+  }
+  console.log("payload",payload.confirmPassword)
+  const passwordSetupResponse = api.post('/auth/change-password', sendPayload);
+  console.log(passwordSetupResponse, "passsword setup response")
+  return passwordSetupResponse
+};
