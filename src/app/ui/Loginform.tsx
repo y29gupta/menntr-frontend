@@ -132,7 +132,7 @@ const Loginform = ({ role }: { role: string }) => {
         {/* MAIN CONTENT */}
         <div className="flex flex-col lg:flex-row w-full bg-white items-start justify-between max-w-[1206px] gap-8 lg:gap-0">
           <div className="flex gap-3 sm:gap-5 bg-white min-h-auto w-full lg:w-auto">
-            <div className="w-4px max-h-[100vh] bg-[#3B82F6]">|</div>
+            <div className="w-4px max-h-[100vh] bg-[#3B82F6] text-[#3B82F6]">|</div>
 
             <div className="flex-1 lg:flex-none">
               {/* HEADER */}
@@ -301,6 +301,12 @@ const Loginform = ({ role }: { role: string }) => {
                     </>
                   )}
                 </div>
+                <p
+                  onClick={() => navigate.push(`/forgot-password?role=${role}`)}
+                  className="flex justify-end text-[#636771] text-sm cursor-pointer mt-1 font-medium"
+                >
+                  Forgot Password?
+                </p>
 
                 <div className="flex justify-center">
                   {/* <Buttons role={role} status={isSubmitting} /> */}
@@ -308,6 +314,7 @@ const Loginform = ({ role }: { role: string }) => {
                     role={role}
                     status={isSubmitting}
                     label={isOneTimeLogin ? 'Set Password' : undefined}
+                    mode="login"
                   />
                 </div>
               </form>
