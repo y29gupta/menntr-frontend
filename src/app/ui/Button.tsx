@@ -6,7 +6,7 @@ import { ArrowUpOutlined } from '@ant-design/icons';
 interface ButtonsProps {
   role?: string | null;
   status?: boolean;
-  mode?: 'login' | 'forgot' | 'reset';
+  mode?: 'login' | 'forgot' | 'validate' | 'reset';
 }
 
 const Buttons = ({ role, status, mode = 'login' }: ButtonsProps) => {
