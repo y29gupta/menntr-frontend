@@ -9,6 +9,7 @@ import Buttons from './Button';
 import ForgotPassword from '../components/icons/ForgotPassword';
 import { forgotPasswordSchema } from '../lib/loginSchema';
 import { sendForgotPassword, validateForgotPassword } from '../lib/loginService';
+import { useState } from 'react';
 
 const schema = forgotPasswordSchema;
 
@@ -17,22 +18,44 @@ type Values = z.infer<typeof schema>;
 const ForgotPasswordForm = ({ role }: { role: string }) => {
   const navigate = useRouter();
 
+  const [started, setStarted] = useState(false);
+  const [timer, setTimer] = useState(0);
+  const [canResend, setCanResend] = useState(false);
+
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
+    getValues,
   } = useForm<Values>({
     resolver: zodResolver(schema),
   });
 
+  const startTimer = () => {
+    setStarted(true);
+    setCanResend(false);
+    setTimer(10);
+
+    const interval = setInterval(() => {
+      setTimer((prev) => {
+        if (prev === 1) {
+          clearInterval(interval);
+          setCanResend(true);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  };
+
   const onSubmit = async (data: Values) => {
     try {
-      console.log('link sent to ur email', data);
       await validateForgotPassword(data);
       await sendForgotPassword(data);
       alert('Reset link sent!');
-    } catch (err: any) {
-      console.log(err?.response?.data?.message || err?.message || 'Something went wrong');
+      startTimer();
+    } catch (err) {
+      console.log('error', err);
     }
   };
 
@@ -102,12 +125,30 @@ const ForgotPasswordForm = ({ role }: { role: string }) => {
                 </div>
                 <div className="flex gap-2">
                   <ForgotPassword />
-                  <p className="text-[#636771]">We use this email to send you the reset link</p>
+                  <p className="text-[#636771]">
+                    {!started
+                      ? 'We use this email to send you the reset link'
+                      : 'Email has been sent to reset password'}
+                  </p>
+
+                  {started &&
+                    (canResend ? (
+                      <span
+                        onClick={() => onSubmit(getValues())}
+                        className="text-blue-600 underline cursor-pointer ml-2"
+                      >
+                        Resend
+                      </span>
+                    ) : (
+                      <span className="text-gray-500 ml-2">{timer}s</span>
+                    ))}
                 </div>
 
-                <div className="flex justify-center">
-                  <Buttons role={role} status={isSubmitting} mode="forgot" />
-                </div>
+                {!started && (
+                  <div className="flex justify-center">
+                    <Buttons role={role} status={isSubmitting} mode="forgot" />
+                  </div>
+                )}
               </form>
             </div>
           </div>

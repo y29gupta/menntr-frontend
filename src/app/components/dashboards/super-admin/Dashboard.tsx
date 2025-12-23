@@ -10,6 +10,7 @@ import { Search, Filter } from 'lucide-react';
 import Profile from '@/app/ui/Profile';
 
 import { fetchInstitutions, mapInstitutions, Institution } from '@/app/lib/institutions.api';
+import { logout } from '@/app/lib/loginService';
 
 type Props = {
   onCreateInstitution: () => void;
@@ -20,8 +21,6 @@ const Dashboard = ({ onCreateInstitution, onEditInstitution }: Props) => {
   const [search, setSearch] = useState('');
   const [showColumnFilters, setShowColumnFilters] = useState(false);
 
-<<<<<<< HEAD
-=======
   const { data, isLoading, isError } = useQuery({
     queryKey: ['institutions'],
     queryFn: fetchInstitutions,
@@ -34,7 +33,6 @@ const Dashboard = ({ onCreateInstitution, onEditInstitution }: Props) => {
     if (res) alert('admin is logged out');
   };
 
->>>>>>> 6b0e577f0e460312105ba24ab9d32bed66c845f6
   return (
     <main className="h-screen px-4 sm:px-6 lg:px-8 xl:px-10 py-5 flex flex-col gap-6 text-[13px] sm:text-sm lg:text-base overflow-y-auto [&::-webkit-scrollbar]:hidden scrollbar-none1">
       <div className="flex items-center justify-between gap-4 min-w-0">
@@ -89,16 +87,11 @@ const Dashboard = ({ onCreateInstitution, onEditInstitution }: Props) => {
             All Institutions
           </h2>
 
-<<<<<<< HEAD
-          <button className="w-full sm:w-auto whitespace-nowrap text-xs sm:text-sm !text-white bg-[linear-gradient(90deg,#904BFF_0%,#C053C2_100%)] px-4 sm:px-6 py-2 sm:py-1 rounded-full flex items-center justify-center gap-2 font-medium">
-            <span>+</span> Onboard Institution
-=======
           <button
             onClick={onCreateInstitution}
             className=" cursor-pointer whitespace-nowrap text-xs sm:text-sm !text-white bg-[linear-gradient(90deg,#904BFF_0%,#C053C2_100%)] px-4 sm:px-6 py-2 rounded-full flex items-center gap-2 font-medium"
           >
             <span className="text-lg">+</span> Onboard Institution
->>>>>>> 6b0e577f0e460312105ba24ab9d32bed66c845f6
           </button>
         </div>
 
@@ -123,15 +116,6 @@ const Dashboard = ({ onCreateInstitution, onEditInstitution }: Props) => {
           </button>
         </div>
 
-<<<<<<< HEAD
-        <DataTable
-          columns={institutionColumns}
-          data={institutions}
-          globalFilter={search}
-          onGlobalFilterChange={setSearch}
-          showColumnFilters={showColumnFilters}
-        />
-=======
         {/* TanStack Table */}
         {isLoading && <p>Loading institutions...</p>}
         {isError && <p className="text-red-500">Failed to load institutions</p>}
@@ -145,7 +129,6 @@ const Dashboard = ({ onCreateInstitution, onEditInstitution }: Props) => {
             showColumnFilters={showColumnFilters}
           />
         )}
->>>>>>> 6b0e577f0e460312105ba24ab9d32bed66c845f6
       </div>
     </main>
   );

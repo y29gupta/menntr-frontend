@@ -66,13 +66,6 @@ export const institutionColumns = (
   {
     id: 'actions',
     header: 'Actions',
-<<<<<<< HEAD
-    cell: () => (
-      <button className="flex items-center gap-2 text-[#3B82F6] font-medium">
-        <Settings className="w-4 h-4 text-[#3B82F6]" /> Configure
-      </button>
-    ),
-=======
     cell: ({ row }) => {
       const router = useRouter();
       return (
@@ -86,6 +79,5 @@ export const institutionColumns = (
         </button>
       );
     },
->>>>>>> 6b0e577f0e460312105ba24ab9d32bed66c845f6
   },
 ];
