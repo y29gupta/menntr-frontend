@@ -1,6 +1,7 @@
 import { ColumnDef } from '@tanstack/react-table';
 import { Settings } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+
 export type Institution = {
   id: number;
   name: string;
@@ -69,8 +70,7 @@ export const institutionColumns = (
       return (
         <button
           onClick={() => router.push(`/super-admin/institutions/${row.original.id}`)}
-          className="flex items-center gap-2 p-2 cursor-pointer  hover:bg-[rgba(185,205,237,0.6)]
- rounded-lg !text-blue-500 font-medium"
+          className="flex items-center gap-2 p-2 cursor-pointer hover:bg-[rgba(185,205,237,0.6)] rounded-lg !text-blue-500 font-medium"
         >
           <Settings className="w-4 h-4" />
           Configure
