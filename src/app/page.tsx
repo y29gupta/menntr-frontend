@@ -5,6 +5,7 @@ import CampusUserCard from './components/layout/CampusUserCard';
 
 import { useRouter } from 'next/navigation';
 import RobotCard from './ui/RobotCard';
+import { ROLE_REDIRECT } from './lib/roles';
 
 export default function Page() {
   const router = useRouter();
@@ -91,7 +92,7 @@ export default function Page() {
                 description="Manage campus-wide department and placement workflow."
                 image="/assets/institutionIcon.png"
                 buttonText="Continue as Institution Admin"
-                onClick={() => router.push('/login?role=admin')}
+                onClick={() => router.push(`/login?role=${ROLE_REDIRECT['institution Admin']}`)}
               />
             </div>
 

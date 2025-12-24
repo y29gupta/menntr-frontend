@@ -12,7 +12,6 @@ export default function Profile() {
   const router = useRouter();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const pathname = usePathname();
-  console.log(typeof pathname, 'pathname');
 
   // Close dropdown when clicking outside
   useEffect(() => {

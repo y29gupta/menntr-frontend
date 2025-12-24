@@ -45,12 +45,22 @@ export const SIDEBAR_CONFIG = {
       icon: <LayoutDashboard size={20} />,
     },
     {
-      label: 'Faculty',
-      path: '/dashboard/admin/faculty',
+      label: 'Organization',
+      path: '/admin/organization',
       icon: <Users size={20} />,
     },
     {
-      label: 'Reports',
+      label: 'User Management',
+      path: '/admin/reports',
+      icon: <BarChart3 size={20} />,
+    },
+    {
+      label: 'Student Management',
+      path: '/admin/reports',
+      icon: <BarChart3 size={20} />,
+    },
+    {
+      label: 'Assessment',
       path: '/admin/reports',
       icon: <BarChart3 size={20} />,
     },

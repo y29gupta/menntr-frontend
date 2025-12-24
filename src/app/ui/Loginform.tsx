@@ -3,58 +3,98 @@
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useParams } from 'next/navigation';
+import { adminPasswordSetup, loginUser } from '@/app/lib/loginService';
 
 import Buttons from './Button';
-
 import {
   studentAdminSchema,
   superAdminSchema,
+  setPasswordSchema,
   StudentAdminLogin,
   SuperAdminLogin,
+  SetPasswordForm,
 } from '@/app/lib/loginSchema';
 
-import { loginUser } from '@/app/lib/loginService';
-// import { setAuthCookies } from '@/app/lib/auth';
 import { ROLE_REDIRECT } from '../lib/roles';
 
 type LoginFormValues = StudentAdminLogin | SuperAdminLogin;
+// type LoginFormValues = StudentAdminLogin | SuperAdminLogin | SetPasswordForm;
 
 const Loginform = ({ role }: { role: string }) => {
   const navigate = useRouter();
   const searchParams = useSearchParams();
   const expectedRole = searchParams.get('role');
-  console.log(expectedRole, 'expected');
-  const isSuperAdmin = role === 'superadmin';
+
+  const params = useParams();
+  const slug = params?.slug as string[] | undefined;
+  const isOneTimeLogin = slug?.[0] === 'one-time-login';
+
+  const token = searchParams.get('token') || '';
+  const setupEmail = searchParams.get('email') || '';
+
+  const isSuperAdmin = role === 'Super Admin';
 
   let imageSrc = '/assets/Admin.png';
   if (role === 'student') imageSrc = '/assets/HappyStudent.png';
-  if (role === 'superadmin') imageSrc = '/assets/superadmin.png';
+  if (role === 'Super Admin') imageSrc = '/assets/superadmin.png';
+  const resolver = isOneTimeLogin
+    ? zodResolver(setPasswordSchema)
+    : zodResolver(isSuperAdmin ? superAdminSchema : studentAdminSchema);
 
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm<LoginFormValues>({
-    resolver: zodResolver(isSuperAdmin ? superAdminSchema : studentAdminSchema),
+  } = useForm<any>({
+    // resolver: zodResolver(isSuperAdmin ? superAdminSchema : studentAdminSchema),
+    resolver,
   });
 
-  const onSubmit = async (data: LoginFormValues) => {
+  // const onSubmit = async (data: LoginFormValues) => {
+  //   try {
+  //     const res = await loginUser({ ...data });
+
+  //     const redirectPath = ROLE_REDIRECT[expectedRole as keyof typeof ROLE_REDIRECT];
+
+  //     if (!redirectPath) {
+  //       throw new Error('Invalid role for redirect');
+  //     }
+
+  //     navigate.push(redirectPath);
+  //     alert('successfully logged in to super-admin page');
+  //   } catch (err: any) {
+  //     alert(err?.response?.data?.message || err.message || 'Login failed');
+  //   }
+  // };
+
+  const onSubmit = async (data: any) => {
     try {
-      const res = await loginUser({ ...data });
+      if (isOneTimeLogin) {
+        if (data.password !== data.confirmPassword) {
+          alert('Passwords do not match');
+          return;
+        }
 
-      // setAuthCookies(res.token, role);
-
-      const redirectPath = ROLE_REDIRECT[expectedRole as keyof typeof ROLE_REDIRECT];
-      console.log(redirectPath, 'path');
-
-      if (!redirectPath) {
-        throw new Error('Invalid role for redirect');
+        const setup = await adminPasswordSetup({
+          // token,
+          // email: setupEmail,
+          password: data.password,
+          confirmPassword: data.confirmPassword,
+        });
+        if (setup) {
+          navigate.push('/auth/login?role=admin');
+          return;
+        }
       }
 
+      const res = await loginUser({ ...data });
+
+      const redirectPath = ROLE_REDIRECT[expectedRole as keyof typeof ROLE_REDIRECT];
+
       navigate.push(redirectPath);
-      alert('successfully logged in to super-admin page');
     } catch (err: any) {
-      alert(err?.response?.data?.message || err.message || 'Login failed');
+      alert(err?.response?.data?.message || err.message || 'Action failed');
     }
   };
 
@@ -83,7 +123,7 @@ const Loginform = ({ role }: { role: string }) => {
               className="flex gap-2 mb-6 cursor-pointer hover:opacity-80 transition-opacity w-fit"
               onClick={() => navigate.push('/')}
             >
-              <img src={'Go-back.svg'} alt="Loading" />
+              <img src={'/Go-back.svg'} alt="Loading" />
               <p className="text-slate-900 text-[14px] sm:text-[16px] pt-4">Go back</p>
             </div>
           )}
@@ -97,13 +137,22 @@ const Loginform = ({ role }: { role: string }) => {
             <div className="flex-1 lg:flex-none">
               {/* HEADER */}
               <div className="flex items-center gap-4 sm:gap-7 bg-white max-w-xs mb-6 sm:mb-8 rounded-3xl px-4 sm:px-5 shadow-[0px_0px_24px_0px_#0F172A40]">
-                <img src={'vector.svg'} alt="loading" />
-                <p className="text-[#0F172A] text-[16px] sm:text-[20px] font-semibold pt-4">
+                <img src={'/vector.svg'} alt="loading" />
+                {/* <p className="text-[#0F172A] text-[16px] sm:text-[20px] font-semibold pt-4">
                   {role === 'student'
                     ? 'Student Login'
                     : role === 'superadmin'
                       ? 'Super Admin Login'
                       : 'Admin Login'}
+                </p> */}
+                <p className="text-[#0F172A] text-[16px] sm:text-[20px] font-semibold pt-4">
+                  {isOneTimeLogin
+                    ? 'Institution Admin Setup'
+                    : role === 'student'
+                      ? 'Student Login'
+                      : role === 'Super Admin'
+                        ? 'Super Admin Login'
+                        : 'Admin Login'}
                 </p>
               </div>
 
@@ -112,15 +161,24 @@ const Loginform = ({ role }: { role: string }) => {
                 onSubmit={handleSubmit(onSubmit)}
                 className="space-y-4 sm:space-y-6 bg-white p-4 sm:p-6 lg:p-8 rounded-2xl w-full min-w-full sm:min-w-lg mx-auto shadow-[0px_0px_16px_0px_#0F172A26]"
               >
-                <p className="text-[#1A2C50] text-[14px] sm:text-[16px] font-semibold text-center">
+                {/* <p className="text-[#1A2C50] text-[14px] sm:text-[16px] font-semibold text-center">
                   {role === 'student'
                     ? 'Enter your student login details'
                     : role === 'superadmin'
                       ? 'Enter your super admin login details'
                       : 'Enter your admin login details'}
+                </p> */}
+                <p className="text-[#1A2C50] text-[14px] sm:text-[16px] font-semibold text-center">
+                  {isOneTimeLogin
+                    ? 'Set your password to activate your account'
+                    : role === 'student'
+                      ? 'Enter your student login details'
+                      : role === 'Super Admin'
+                        ? 'Enter your super admin login details'
+                        : 'Enter your admin login details'}
                 </p>
 
-                <div className="flex flex-col gap-4 sm:gap-5">
+                {/* <div className="flex flex-col gap-4 sm:gap-5">
                   {!isSuperAdmin && (
                     <div className="w-full">
                       <input
@@ -162,6 +220,86 @@ const Loginform = ({ role }: { role: string }) => {
                       <p className="text-red-500 text-xs">{errors.password.message as string}</p>
                     )}
                   </div>
+                </div> */}
+                <div className="flex flex-col gap-4 sm:gap-5">
+                  {isOneTimeLogin ? (
+                    <>
+                      {/* SET PASSWORD */}
+                      <div className="w-full">
+                        <input
+                          type="password"
+                          {...register('password')}
+                          placeholder="Set Password"
+                          className="w-full border-0 border-b border-gray-300 focus:border-blue-500 py-2 outline-none"
+                        />
+                        {errors.password && (
+                          <p className="text-red-500 text-xs mt-1">
+                            {errors.password.message as string}
+                          </p>
+                        )}
+                      </div>
+
+                      {/* CONFIRM PASSWORD */}
+                      <div className="w-full">
+                        <input
+                          type="password"
+                          {...register('confirmPassword')}
+                          placeholder="Confirm Password"
+                          className="w-full border-0 border-b border-gray-300 focus:border-blue-500 py-2 outline-none"
+                        />
+                        {errors.confirmPassword && (
+                          <p className="text-red-500 text-xs mt-1">
+                            {errors.confirmPassword.message as string}
+                          </p>
+                        )}
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      {/* EXISTING LOGIN FIELDS (UNCHANGED) */}
+                      {!isSuperAdmin && (
+                        <div className="w-full">
+                          <input
+                            {...register('institutionCode' as keyof StudentAdminLogin)}
+                            placeholder="Institution Code"
+                            className="w-full border-0 border-b border-gray-300 focus:border-blue-500 py-2 outline-none"
+                          />{' '}
+                          {errors.institutionCode && (
+                            <p className="text-red-500 text-xs mt-1">
+                              {errors.institutionCode.message as string}
+                            </p>
+                          )}
+                        </div>
+                      )}
+
+                      <div className="w-full">
+                        <input
+                          {...register('email')}
+                          placeholder="Email"
+                          className="w-full border-0 border-b border-gray-300 focus:border-blue-500 py-2 outline-none"
+                        />
+                        {errors.email && (
+                          <p className="text-red-500 text-xs mt-1">
+                            {errors.email.message as string}
+                          </p>
+                        )}
+                      </div>
+
+                      <div className="w-full">
+                        <input
+                          type="password"
+                          {...register('password')}
+                          placeholder="Password"
+                          className="w-full border-0 border-b border-gray-300 focus:border-blue-500 py-2 outline-none"
+                        />
+                        {errors.password && (
+                          <p className="text-red-500 text-xs mt-1">
+                            {errors.password.message as string}
+                          </p>
+                        )}
+                      </div>
+                    </>
+                  )}
                 </div>
                 <p
                   onClick={() => navigate.push(`/forgot-password?role=${role}`)}
@@ -171,7 +309,13 @@ const Loginform = ({ role }: { role: string }) => {
                 </p>
 
                 <div className="flex justify-center">
-                  <Buttons role={role} status={isSubmitting} mode="login" />
+                  {/* <Buttons role={role} status={isSubmitting} /> */}
+                  <Buttons
+                    role={role}
+                    status={isSubmitting}
+                    label={isOneTimeLogin ? 'Set Password' : undefined}
+                    mode="login"
+                  />
                 </div>
               </form>
             </div>

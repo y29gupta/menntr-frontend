@@ -16,12 +16,12 @@ function getRoleFromToken(token: string): string | null {
 export function middleware(req: NextRequest) {
   
   const token = req.cookies.get('auth_token')?.value;
-  console.log(token,"token")
+
 
   if (!token) {
     return NextResponse.redirect(new URL(`/`, req.url));
   }
-
+ 
   const role = getRoleFromToken(token);
   const pathname = req.nextUrl.pathname;
 
@@ -31,15 +31,15 @@ export function middleware(req: NextRequest) {
   }
 
   if (pathname.startsWith('/admin') && role !== 'Admin') {
-    return NextResponse.redirect(new URL('/unauthorized', req.url));
+    return NextResponse.redirect(new URL('/login?role=institution Admin', req.url));
   }
 
   if (pathname.startsWith('/student') && role !== 'Student') {
-    return NextResponse.redirect(new URL('/unauthorized', req.url));
+    return NextResponse.redirect(new URL('/', req.url));
   }
 
   if (pathname.startsWith('/faculty') && role !== 'Faculty') {
-    return NextResponse.redirect(new URL('/unauthorized', req.url));
+    return NextResponse.redirect(new URL('/', req.url));
   }
 
   if (
@@ -55,7 +55,7 @@ export function middleware(req: NextRequest) {
 export const config = {
   matcher: [
     '/super-admin/:path*',
-    '/admin/:path*',
+    // '/admin/:path*',
     '/student/:path*',
     '/faculty/:path*',
     '/procurement-head/:path*',
