@@ -1,14 +1,14 @@
 export type Role =
   | 'student'
-  | 'admin'
+  | 'institution Admin'
   | 'faculty'
   | 'procurement-head'
-  | 'superadmin';
+  | 'Super Admin';
 
 export const ROLE_REDIRECT: Record<Role, string> = {
-  student: '/student',
-  admin: '/admin',
-  faculty: '/faculty',
-  'procurement-head': '/procurement-head',
-  superadmin: '/super-admin',
+  student: 'student',
+  "institution Admin": 'insitution Admin',
+  faculty: 'faculty',
+  'procurement-head': 'procurement-head',
+  "Super Admin": 'super-admin',
 };

@@ -21,7 +21,7 @@ export function middleware(req: NextRequest) {
   if (!token) {
     return NextResponse.redirect(new URL(`/`, req.url));
   }
-
+ 
   const role = getRoleFromToken(token);
   const pathname = req.nextUrl.pathname;
 
@@ -31,7 +31,7 @@ export function middleware(req: NextRequest) {
   }
 
   if (pathname.startsWith('/admin') && role !== 'Admin') {
-    return NextResponse.redirect(new URL('/', req.url));
+    return NextResponse.redirect(new URL('/login?role=institution Admin', req.url));
   }
 
   if (pathname.startsWith('/student') && role !== 'Student') {
@@ -55,7 +55,7 @@ export function middleware(req: NextRequest) {
 export const config = {
   matcher: [
     '/super-admin/:path*',
-    '/admin/:path*',
+    // '/admin/:path*',
     '/student/:path*',
     '/faculty/:path*',
     '/procurement-head/:path*',

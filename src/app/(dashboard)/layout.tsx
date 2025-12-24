@@ -21,7 +21,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }, []);
 
   return (
-    <div className="flex h-screen bg-[#F7F9FC] overflow-hidden">
+    <div className="flex h-screen bg-[#F7F9FC] border-5 border-red-300 overflow-hidden">
       <Sidebar role={role} collapsed={collapsed} onToggle={() => setCollapsed(!collapsed)} />
 
       <main className="flex-1 overflow-hidden p-6">{children}</main>

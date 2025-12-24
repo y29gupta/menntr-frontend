@@ -33,11 +33,11 @@ const Loginform = ({ role }: { role: string }) => {
   const token = searchParams.get('token') || '';
   const setupEmail = searchParams.get('email') || '';
 
-  const isSuperAdmin = role === 'superadmin';
+  const isSuperAdmin = role === 'Super Admin';
 
   let imageSrc = '/assets/Admin.png';
   if (role === 'student') imageSrc = '/assets/HappyStudent.png';
-  if (role === 'superadmin') imageSrc = '/assets/superadmin.png';
+  if (role === 'Super Admin') imageSrc = '/assets/superadmin.png';
   const resolver = isOneTimeLogin
     ? zodResolver(setPasswordSchema)
     : zodResolver(isSuperAdmin ? superAdminSchema : studentAdminSchema);
@@ -150,7 +150,7 @@ const Loginform = ({ role }: { role: string }) => {
                     ? 'Institution Admin Setup'
                     : role === 'student'
                       ? 'Student Login'
-                      : role === 'superadmin'
+                      : role === 'Super Admin'
                         ? 'Super Admin Login'
                         : 'Admin Login'}
                 </p>
@@ -173,7 +173,7 @@ const Loginform = ({ role }: { role: string }) => {
                     ? 'Set your password to activate your account'
                     : role === 'student'
                       ? 'Enter your student login details'
-                      : role === 'superadmin'
+                      : role === 'Super Admin'
                         ? 'Enter your super admin login details'
                         : 'Enter your admin login details'}
                 </p>
