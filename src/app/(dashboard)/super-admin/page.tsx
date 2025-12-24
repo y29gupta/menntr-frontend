@@ -46,7 +46,10 @@ export default function SuperAdminPage() {
           mode={view}
           defaultValues={editData ?? undefined}
           onCancel={() => setView('dashboard')}
-          onSubmitForm={(data) => createMutation.mutate(data)}
+          onSubmitForm={(data) => {
+            createMutation.mutate(data);
+            setView('dashboard');
+          }}
         />
       )}
     </div>

@@ -1,3 +1,5 @@
+'use client';
+
 import React from 'react';
 import { Button } from 'antd';
 import { ArrowUpOutlined } from '@ant-design/icons';
@@ -5,19 +7,35 @@ import { ArrowUpOutlined } from '@ant-design/icons';
 interface ButtonsProps {
   role?: string | null;
   status?: boolean;
+  label?: string;
+  mode?: 'login' | 'forgot' | 'validate' | 'reset';
 }
 
-const Buttons = ({ role, status }: ButtonsProps) => {
-  if (!role) {
+const Buttons = ({ role, status, label, mode = 'login' }: ButtonsProps) => {
+  // Used in flows where role is not present (forgot/reset)
+  if (!role && !label && mode === 'login') {
     return <div className="h-[48px] w-[260px]" />;
   }
 
-  const label =
+  // Default login label
+  const loginLabel =
     role === 'student'
       ? 'Login to Student Portal'
       : role === 'superadmin'
         ? 'Login to Super Admin Portal'
         : 'Login to Admin Portal';
+
+  // Mode-based label (his logic)
+  const modeLabel =
+    mode === 'forgot'
+      ? 'Send link now'
+      : mode === 'validate'
+        ? 'Validate now'
+        : mode === 'reset'
+          ? 'Reset now'
+          : loginLabel;
+
+  const buttonLabel = label ?? modeLabel;
 
   return (
     <Button
@@ -35,7 +53,7 @@ const Buttons = ({ role, status }: ButtonsProps) => {
         flex items-center gap-2
       "
     >
-      <span className="whitespace-nowrap">{label}</span>
+      <span className="whitespace-nowrap">{buttonLabel}</span>
 
       <span className="w-[20px] h-[20px] flex items-center justify-center">
         <ArrowUpOutlined className="rotate-45" />

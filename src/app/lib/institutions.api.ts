@@ -42,6 +42,7 @@ export type Institution = {
   contactEmail: string;
   students: string;
   status: string;
+  planId: number;
 };
 
 export async function fetchInstitutions(): Promise<InstitutionApiResponse> {
