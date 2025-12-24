@@ -21,7 +21,7 @@ export async function sendForgotPassword(payload: any) {
   return res.data;
 }
 
-export async function validateResetToken(token: string, email: string) {
+export async function validateResetToken(token: string, email: string, role: string) {
   const res = await api.post(
     '/auth/forgot-password/verify',
     { token, email },
@@ -33,6 +33,7 @@ export async function validateResetToken(token: string, email: string) {
 export async function resetPassword(payload: {
   email: string;
   token: string;
+  role: string;
   newPassword: string;
 }) {
   const res = await api.post('/auth/forgot-password/reset', payload, {
