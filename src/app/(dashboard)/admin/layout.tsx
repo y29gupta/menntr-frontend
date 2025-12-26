@@ -16,7 +16,7 @@ const layout = ({ children }: { children: React.ReactNode }) => {
           <Profile />
         </div>
       </div>
-      <div className="flex flex-1 border">{children}</div>
+      <div className="flex flex-1 ">{children}</div>
     </div>
   );
 };
