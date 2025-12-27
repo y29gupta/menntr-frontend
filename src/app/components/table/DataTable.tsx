@@ -47,7 +47,7 @@ function DataTable<T extends RowData>({
   });
 
   return (
-    <div className="w-full overflow-x-auto">
+    <div className="w-full  overflow-x-auto">
       <table className="min-w-[900px] w-full border border-gray-200 rounded-lg text-xs sm:text-sm">
         {/* Header */}
         <thead className="bg-gray-50 border-b border-gray-200">

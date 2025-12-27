@@ -5,6 +5,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import ProfileDropdown from './modals/ProfileDropdownModal';
 import { logout } from '../lib/loginService';
 import { usePathname, useRouter } from 'next/navigation';
+import { useQueryClient } from '@tanstack/react-query';
 
 export default function Profile() {
   const [isOpen, setIsOpen] = useState(false);
@@ -12,6 +13,7 @@ export default function Profile() {
   const router = useRouter();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const pathname = usePathname();
+  const queryclient = useQueryClient();
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -33,7 +35,8 @@ export default function Profile() {
   const handleLogout = async () => {
     try {
       const res = await logout();
-      router.push(`/`);
+      queryclient.clear();
+      router.replace(`/`);
     } catch (error) {
       console.log(error, 'logout failed');
     }

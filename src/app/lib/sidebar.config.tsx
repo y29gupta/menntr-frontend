@@ -6,7 +6,9 @@ import {
   Users,
   BarChart3,
   BookOpen,
+  UserRound,
 } from 'lucide-react';
+import StudentIcon from '../components/icons/StudentIcon';
 
 export type SidebarItem = {
   label: string;
@@ -51,17 +53,17 @@ export const SIDEBAR_CONFIG = {
     },
     {
       label: 'User Management',
-      path: '/admin/reports',
-      icon: <BarChart3 size={20} />,
+      path: '/admin/user-management',
+      icon: <UserRound />,
     },
     {
       label: 'Student Management',
-      path: '/admin/reports',
-      icon: <BarChart3 size={20} />,
+      path: '/admin/student-management',
+      icon: <StudentIcon />,
     },
     {
       label: 'Assessment',
-      path: '/admin/reports',
+      path: '/admin/assessment',
       icon: <BarChart3 size={20} />,
     },
   ],

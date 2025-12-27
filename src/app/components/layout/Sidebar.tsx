@@ -71,7 +71,7 @@ export default function Sidebar({ role, collapsed, onToggle }: Props) {
                 href={item.path}
                 className={clsx(
                   'flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition',
-                  active ? 'bg-[#3B82F6] text-white' : 'text-slate-600 hover:bg-slate-100',
+                  active ? 'bg-[#FFEEFF] text-[#7B3AEC]' : 'text-slate-600 hover:bg-slate-100',
                   collapsed && 'justify-center'
                 )}
               >
