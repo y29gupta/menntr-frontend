@@ -30,12 +30,29 @@ export default function Sidebar({ role, collapsed, onToggle }: Props) {
     <>
       <aside
         className={clsx(
-          'h-screen bg-white shadow-[0px_8px_16px_0px_rgba(26,44,80,0.2)] transition-all duration-300 shrink-0 relative z-100  ',
-          collapsed ? 'w-[72px]' : 'w-[300px]'
+          `
+    h-screen bg-white
+    shadow-[0px_8px_16px_0px_rgba(26,44,80,0.2)]
+    z-50
+    fixed inset-y-0 left-0
+    transition-transform duration-300 ease-in-out
+    md:static md:transition-all 
+    `,
+          // Mobile: slide in/out
+          collapsed
+            ? `
+        w-[72px]
+        relative
+      `
+            : `
+        w-[300px]
+        
+        
+      `
         )}
       >
         {/* Logo Section */}
-        <div className={clsx('pt-[30px]', !collapsed && 'px-4 pb-6')}>
+        <div className={clsx('pt-[30px] relative', !collapsed && 'px-4 pb-6')}>
           {!collapsed && (
             <div>
               <img src="/assets/menntrLogo.svg" alt="menntrLogo" className="mb-1" />

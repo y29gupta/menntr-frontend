@@ -131,6 +131,8 @@ const DepartmentForm = ({ mode, defaultValues, onBack, onSubmit }: Props) => {
                 render={({ field }) => (
                   <FormDropdown
                     placeholder="Select User"
+                    searchable
+                    searchPlaceholder="Search for Users"
                     value={field.value}
                     onChange={field.onChange}
                     options={[

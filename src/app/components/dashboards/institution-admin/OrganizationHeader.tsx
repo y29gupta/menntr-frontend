@@ -40,14 +40,22 @@ export default function OrganizationHeader({ activeTab, onTabChange }: Props) {
         <p className="text-sm text-gray-500">Manage categories, departments and batches</p>
 
         {/* Tabs */}
-        <div className="flex mt-3 ml-2 gap-6 border-b border-[#616573]">
+        <div
+          className=" mt-3 ml-2
+  flex gap-4
+  border-b border-[#616573]
+  overflow-x-auto
+  overflow-y-hidden
+  whitespace-nowrap
+  scrollbar-hide"
+        >
           {tabs.map((tab) => (
             <button
               key={tab}
               onClick={() => onTabChange(tab)}
-              className={`relative pb-2 text-sm px-3 font-medium transition-colors
-              ${activeTab === tab ? '!text-[#7C3AED] ' : '!text-[#616570] hover:text-gray-700'}
-            `}
+              className={`relative pb-2 px-3 text-sm font-medium transition-colors shrink-0
+  ${activeTab === tab ? '!text-[#7C3AED]' : '!text-[#616570] hover:text-gray-700'}
+`}
             >
               {tab}
 

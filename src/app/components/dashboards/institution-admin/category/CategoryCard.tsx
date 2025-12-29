@@ -1,26 +1,17 @@
-import CardEditIcon from '../../icons/CardEditIcon';
+import CardEditIcon from '../../../icons/CardEditIcon';
+import { CategoryListItem } from './category.types';
 
-interface CategoryCardProps {
-  name: string;
-  departments: number;
-  students: number;
-  head: string;
-  code: string;
-}
+type Props = CategoryListItem & {
+  onEdit: () => void;
+};
 
-export default function CategoryCard({
-  name,
-  departments,
-  students,
-  head,
-  code,
-}: CategoryCardProps) {
+export default function CategoryCard({ name, departments, students, head, code, onEdit }: Props) {
   return (
     <div className="bg-white border border-gray-200 rounded-2xl p-4 shadow-sm">
       {/* Header */}
       <div className="flex justify-between items-start">
         <h3 className="text-base font-semibold text-gray-800">{name}</h3>
-        <button className="text-gray-400 hover:text-gray-600">
+        <button type="button" onClick={onEdit} className="text-gray-400 hover:text-gray-600">
           <CardEditIcon />
         </button>
       </div>

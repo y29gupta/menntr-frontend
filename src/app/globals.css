@@ -3,6 +3,12 @@
 /* Load Tailwind v4 */
 @import 'tailwindcss';
 
+html, body {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+
 
 /* Now everything else */
 :root {
@@ -11,6 +17,15 @@
 
   --font-geist-sans: 'Plus Jakarta Sans', sans-serif;
   --font-geist-mono: monospace;
+}
+
+@layer base {
+  button,
+  input,
+  textarea,
+  select {
+    @apply text-inherit;
+  }
 }
 
 @theme inline {

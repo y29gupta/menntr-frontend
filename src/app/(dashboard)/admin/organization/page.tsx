@@ -6,19 +6,24 @@ import { Search, Filter } from 'lucide-react';
 import OrganizationHeader from '@/app/components/dashboards/institution-admin/OrganizationHeader';
 import DepartmentsTable from '@/app/components/dashboards/institution-admin/Department-table';
 import DepartmentForm from '@/app/components/dashboards/institution-admin/Department-form';
-import Categories from '@/app/components/dashboards/institution-admin/Categories';
+import Categories from '@/app/components/dashboards/institution-admin/category/Categories';
+import Hierarchy from '@/app/components/dashboards/institution-admin/hierarchy/Hierarchy';
 
 const Page = () => {
   const [activeTab, setActiveTab] = useState<'Categories' | 'Departments' | 'Hierarchy'>(
     'Departments'
   );
   const [departmentView, setDepartmentView] = useState<'list' | 'form'>('list');
+  const [categoryView, setCategoryView] = useState<'list' | 'form'>('list');
+
   const [selectedDepartment, setSelectedDepartment] = useState<any>(null);
   const [formMode, setFormMode] = useState<'create' | 'edit'>('create');
 
   const [search, setSearch] = useState('');
   const [showColumnFilters, setShowColumnFilters] = useState(false);
-  const hideOrganizationHeader = activeTab === 'Departments' && departmentView === 'form';
+  const hideOrganizationHeader =
+    (activeTab === 'Departments' && departmentView === 'form') ||
+    (activeTab === 'Categories' && categoryView === 'form');
 
   return (
     <div className="flex rounded-2xl  flex-col p-4 gap-4  shadow-[0_0_16px_0_#0F172A26] w-full">
@@ -117,10 +122,12 @@ const Page = () => {
         </>
       )}
 
-      {activeTab === 'Categories' && <Categories />}
+      {activeTab === 'Categories' && <Categories setCategoryView={setCategoryView} />}
 
       {activeTab === 'Hierarchy' && (
-        <div className="p-6 border rounded-lg bg-white">Hierarchy content (next)</div>
+        <div className="p-6  rounded-lg bg-white">
+          <Hierarchy />
+        </div>
       )}
     </div>
   );
