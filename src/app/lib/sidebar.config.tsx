@@ -43,7 +43,7 @@ export const SIDEBAR_CONFIG = {
   admin: [
     {
       label: 'Dashboard',
-      path: '/admin',
+      path: '/admin/dashboard',
       icon: <LayoutDashboard size={20} />,
     },
     {
