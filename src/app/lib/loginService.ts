@@ -7,6 +7,15 @@ export async function loginUser(payload: any) {
   return res.data;
 }
 
+
+
+export async function loginpasswordsetup(payload: any) {
+  console.log(payload,"payload")
+  const res = await api.post('/auth/consume-invite', payload, {
+    withCredentials: true,
+  });
+  return res.data;
+}
 export async function validateForgotPassword(payload: any) {
   const res = await api.post('/auth/forgot-password/validate', payload, {
     withCredentials: true,
@@ -60,17 +69,27 @@ export async function logout() {
 }
 
 
-export const adminPasswordSetup = (payload: {
-  password: string;
-  confirmPassword: string;
-}) => {
+export const adminPasswordSetup = ( payload: {
+    password: string;
+    confirmPassword: string;
+  },
+  setupToken: string) => {
 
  const  sendPayload = {
    confirmNewPassword: payload.confirmPassword,
    newPassword:payload.password
   }
-  console.log("payload",payload.confirmPassword)
-  const passwordSetupResponse = api.post('/auth/change-password', sendPayload);
-  console.log(passwordSetupResponse, "passsword setup response")
-  return passwordSetupResponse
+  return api.post(
+    '/auth/change-password',
+    sendPayload,
+    {
+      headers: {
+        Authorization: `Bearer ${setupToken}`, 
+      },
+    }
+  );
+ 
+  // const passwordSetupResponse = api.post('/auth/change-password', sendPayload);
+ 
+  // return passwordSetupResponse
 };
