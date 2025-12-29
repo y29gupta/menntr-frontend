@@ -12,10 +12,10 @@ import PlacementReadinessCard from '@/app/ui/PlacementReadinessCard';
 
 const Page = () => {
   const departmentData: DepartmentMetric[] = [
-    { department: 'CSE', percentage: 95 },
+    { department: 'CSE', percentage: 35 },
     { department: 'EEE', percentage: 55 },
-    { department: 'MECH', percentage: 69 },
-    { department: 'ECE', percentage: 85 },
+    { department: 'MECH', percentage: 49 },
+    { department: 'ECE', percentage: 55 },
     { department: 'CHEM', percentage: 55 },
   ];
   return (
