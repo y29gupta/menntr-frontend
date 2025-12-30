@@ -7,8 +7,24 @@ export type CategoryListItem = {
   code: string;
 };
 
+
+
+export interface CategoryApiItem {
+  id: number;
+  name: string;
+  code: string;
+  departmentCount: number;
+  head: {
+    id: string;
+    name: string;
+    email: string;
+  };
+}
+
+
 // Used ONLY for add/edit form
 export type CategoryFormData = {
+    id?: string;
   name: string;
   code: string;
   assignedUserId: string;
@@ -19,4 +35,28 @@ export type UserOption = {
   id: string;
   name: string;
   department: string;
+};
+
+
+
+export type CategoryMetaResponse = {
+  users: {
+    id: string;
+    name: string;
+    email: string;
+  }[];
+  departments: {
+    id: string;
+    name: string;
+    categoryId: string | null;
+    isAssigned: boolean;
+  }[];
+};
+
+
+export type CreateCategoryPayload = {
+  name: string;
+  code: string;
+  headUserId: number;
+  departmentIds: number[];
 };

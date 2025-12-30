@@ -1,5 +1,6 @@
 import { InstitutionFormValues } from '@/app/lib/institution';
 import { api } from './api';
+import { CategoryApiItem, CategoryMetaResponse, CreateCategoryPayload } from '../components/dashboards/institution-admin/category/category.types';
 
 export const PLAN_CODE_TO_ID = {
   BASIC: 1,
@@ -10,6 +11,13 @@ export const PLAN_ID_TO_CODE = {
   1: 'BASIC',
   4: 'PREMIUM',
 } as const;
+
+// export type CreateCategoryPayload = {
+//   name: string;
+//   code: string;
+//   headId: string;
+//   departmentIds: string[];
+// };
 
 export type PlanCode = keyof typeof PLAN_CODE_TO_ID;
 export type PlanId = (typeof PLAN_CODE_TO_ID)[PlanCode];
@@ -104,3 +112,34 @@ export async function updateInstitution(id: number | string, payload: Institutio
 
   return res.json();
 }
+
+
+// institution admin api
+
+export const getCategories = async (
+  institutionId: string
+): Promise<CategoryApiItem[]> => {
+  const res = await api.get(`/organization/categories`);
+  return res.data;
+};
+
+// institutions.api.ts
+
+export const getCategoryMeta = async (): Promise<CategoryMetaResponse> => {
+  const res = await api.get(`/organization/categories/meta`);
+  return res.data;
+};
+
+export const createCategory = async (payload: CreateCategoryPayload) => {
+  console.log(payload,"payload")
+  const res = await api.post('/organization/categories', payload);
+  return res.data;
+};
+
+export const updateCategory = async (
+  categoryId: string,
+  payload: CreateCategoryPayload
+) => {
+  const res = await api.put(`/organization/categories/${categoryId}`, payload);
+  return res.data;
+};
