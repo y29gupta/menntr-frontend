@@ -1,6 +1,6 @@
 'use client';
 
-import DepartmentBarGraph, { DepartmentMetric } from '../components/graphs/DepartmentBarGraph';
+import DepartmentBarGraph, { DepartmentMetric } from '../../../graphs/DepartmentBarGraph';
 
 interface Props {
   data: DepartmentMetric[];

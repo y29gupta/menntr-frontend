@@ -2,19 +2,19 @@
 import { DepartmentMetric } from '@/app/components/graphs/DepartmentBarGraph';
 import { studentMetric } from '@/app/constants/studentMetric';
 import { buildRequirementItems } from '@/app/lib/departmentUtils';
-import AcademicPerformanceCard from '@/app/ui/AcademicPerformanceCard';
-import DashboardCard from '@/app/ui/DashboardCard';
-import DepartmentAnalyticsCard from '@/app/ui/DepartmentAnalyticsCard';
-import DepartmentSummaryStrip from '@/app/ui/DepartmentSummaryStrip';
-import HighestAvgDepartmentCard from '@/app/ui/HighestAvgDepartmentCard';
-import MinimumScoreRequirementCard from '@/app/ui/MinimumScoreRequirementCard';
-import PlacementReadinessCard from '@/app/ui/PlacementReadinessCard';
+import AcademicPerformanceCard from '@/app/components/dashboards/institution-admin/dashboard/AcademicPerformanceCard';
+import DashboardCard from '@/app/components/dashboards/institution-admin/dashboard/DashboardCard';
+import DepartmentAnalyticsCard from '@/app/components/dashboards/institution-admin/dashboard/DepartmentAnalyticsCard';
+import MinimumScoreRequirementCard from '@/app/components/dashboards/institution-admin/dashboard/MinimumScoreRequirementCard';
+import PlacementReadinessCard from '@/app/components/dashboards/institution-admin/dashboard/PlacementReadinessCard';
+import DepartmentSummaryStrip from '@/app/components/dashboards/institution-admin/dashboard/DepartmentSummaryStrip';
+import HighestAvgDepartmentCard from '@/app/components/dashboards/institution-admin/dashboard/HighestAvgDepartmentCard';
 
 const Page = () => {
   const departmentData: DepartmentMetric[] = [
-    { department: 'CSE', percentage: 35 },
+    { department: 'CSE', percentage: 85 },
     { department: 'EEE', percentage: 55 },
-    { department: 'MECH', percentage: 49 },
+    { department: 'MECH', percentage: 79 },
     { department: 'ECE', percentage: 55 },
     { department: 'CHEM', percentage: 55 },
   ];

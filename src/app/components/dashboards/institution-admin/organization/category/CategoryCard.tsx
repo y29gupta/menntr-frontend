@@ -1,4 +1,4 @@
-import CardEditIcon from '../../../icons/CardEditIcon';
+import CardEditIcon from '../../../../icons/CardEditIcon';
 import { CategoryListItem } from './category.types';
 
 type Props = CategoryListItem & {

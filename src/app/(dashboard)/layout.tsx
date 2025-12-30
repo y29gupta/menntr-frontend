@@ -21,7 +21,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }, []);
 
   return (
-    <div className="flex  w-full min-h-screen bg-[#F7F9FC] ">
+    <div className="flex  w-full max-h-screen bg-[#F7F9FC] ">
       {!collapsed && (
         <div
           className="fixed inset-0 bg-black/40 z-40 md:hidden"

@@ -30,7 +30,7 @@ export function middleware(req: NextRequest) {
     return NextResponse.redirect(new URL('/', req.url));
   }
 
-  if (pathname.startsWith('/admin') && role !== 'Institution Admin') {
+  if (pathname.startsWith('/admin/dashboard') && role !== 'Institution Admin') {
     return NextResponse.redirect(new URL('/login?role=institution Admin', req.url));
   }
 

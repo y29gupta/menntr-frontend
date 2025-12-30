@@ -4,7 +4,7 @@ import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 // import { departmentSchema, DepartmentFormValues } from './department.schema';
 import { z } from 'zod';
-import DropdownIcon from '../../icons/DropdownIcon';
+import DropdownIcon from '../../../../icons/DropdownIcon';
 import FormDropdown from '@/app/ui/FormDropdown';
 
 export const departmentSchema = z.object({
@@ -62,16 +62,11 @@ const DepartmentForm = ({ mode, defaultValues, onBack, onSubmit }: Props) => {
         </button>
       </div>
 
-      {/* 🔹 FORM CARD */}
-      {/* 🔹 FORM CARD */}
-      <div className="bg-white  rounded-xl border border-[#C3CAD9] p-6">
+      <div className=" rounded-xl border border-[#C3CAD9] p-6">
         <div className="relative grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6">
-          {/* 🔹 VERTICAL DIVIDER (FIGMA) */}
           <div className="hidden md:block absolute left-1/2 top-0 h-full w-px bg-[#C3CAD9]" />
 
-          {/* LEFT COLUMN */}
           <div className="space-y-6 pr-6">
-            {/* Department Name */}
             <div>
               <label className="text-sm text-gray-700 font-medium">Department Name</label>
               <input

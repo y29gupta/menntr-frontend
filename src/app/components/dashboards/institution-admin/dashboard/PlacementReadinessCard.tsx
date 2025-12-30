@@ -1,6 +1,6 @@
 'use client';
 
-import ProgressGraph from '../components/graphs/ProgressGraph';
+import ProgressGraph from '../../../graphs/ProgressGraph';
 
 /* backend-style data */
 const placementReadinessData = {

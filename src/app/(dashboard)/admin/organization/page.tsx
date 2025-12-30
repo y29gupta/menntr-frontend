@@ -4,10 +4,10 @@ import { useState } from 'react';
 import { Search, Filter } from 'lucide-react';
 
 import OrganizationHeader from '@/app/components/dashboards/institution-admin/OrganizationHeader';
-import DepartmentsTable from '@/app/components/dashboards/institution-admin/Department-table';
-import DepartmentForm from '@/app/components/dashboards/institution-admin/Department-form';
-import Categories from '@/app/components/dashboards/institution-admin/category/Categories';
-import Hierarchy from '@/app/components/dashboards/institution-admin/hierarchy/Hierarchy';
+import DepartmentForm from '@/app/components/dashboards/institution-admin/organization/department/Department-form';
+import Categories from '@/app/components/dashboards/institution-admin/organization/category/Categories';
+import Hierarchy from '@/app/components/dashboards/institution-admin/organization/hierarchy/Hierarchy';
+import DepartmentsTable from '@/app/components/dashboards/institution-admin/organization/department/Department-table';
 
 const Page = () => {
   const [activeTab, setActiveTab] = useState<'Categories' | 'Departments' | 'Hierarchy'>(
