@@ -1,3 +1,4 @@
+import axios from 'axios';
 import { api } from './api';
 
 export async function loginUser(payload: any) {
@@ -11,7 +12,7 @@ export async function loginUser(payload: any) {
 
 export async function loginpasswordsetup(payload: any) {
   console.log(payload,"payload")
-  const res = await api.post('/auth/consume-invite', payload, {
+  const res = await axios.post('https://menntr-backend.onrender.com/auth/consume-invite', payload, {
     withCredentials: true,
   });
   return res.data;

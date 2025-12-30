@@ -4,6 +4,7 @@ export const institutionSchema = z.object({
   name: z.string().min(1, 'Institution name is required'),
 
   code: z.string().min(1, 'Institution code is required'),
+  subDomain: z.string().min(1, 'Sub Domain is required'),
 
   contactEmail: z.string().min(1, 'Contact email is required').email('Invalid email address'),
 

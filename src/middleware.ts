@@ -29,9 +29,12 @@ export function middleware(req: NextRequest) {
   if (pathname.startsWith('/super-admin') && role !== 'Super Admin') {
     return NextResponse.redirect(new URL('/', req.url));
   }
-
+  
+ if (pathname.startsWith('/admin') && role !== 'Institution Admin') {
+    return NextResponse.redirect(new URL('/', req.url));
+  }
   if (pathname.startsWith('/admin/dashboard') && role !== 'Institution Admin') {
-    return NextResponse.redirect(new URL('/login?role=institution Admin', req.url));
+    return NextResponse.redirect(new URL('/login?role=Institution Admin', req.url));
   }
 
   if (pathname.startsWith('/student') && role !== 'Student') {
@@ -41,6 +44,7 @@ export function middleware(req: NextRequest) {
   if (pathname.startsWith('/faculty') && role !== 'Faculty') {
     return NextResponse.redirect(new URL('/', req.url));
   }
+
 
   if (
     pathname.startsWith('/procurement-head') &&
@@ -55,9 +59,10 @@ export function middleware(req: NextRequest) {
 export const config = {
   matcher: [
     '/super-admin/:path*',
-    // '/admin/:path*',
+    '/admin/:path*',
     '/student/:path*',
     '/faculty/:path*',
     '/procurement-head/:path*',
+    '/admin'
   ],
 };

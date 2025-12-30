@@ -7,6 +7,7 @@ export const createInstitution = async (data: InstitutionFormValues) => {
   const payload = {
     name: data.name,
     code: data.code,
+    subdomain:data.subDomain,
     contactEmail: data.contactEmail,
     planId: PLAN_CODE_TO_ID[data.plan],
   };

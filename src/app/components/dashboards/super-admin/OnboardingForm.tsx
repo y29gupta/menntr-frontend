@@ -26,6 +26,7 @@ export default function OnboardingForm({ mode, defaultValues, onCancel, onSubmit
     defaultValues: defaultValues ?? {
       name: '',
       code: '',
+      subDomain: '',
       contactEmail: '',
       plan: 'PREMIUM',
     },
@@ -128,6 +129,17 @@ export default function OnboardingForm({ mode, defaultValues, onCancel, onSubmit
                   placeholder="ABC-ENG-001"
                 />
                 {errors.code && <p className="text-xs text-red-500">{errors.code.message}</p>}
+              </div>
+              <div>
+                <label className="text-sm text-[#0F172A]">Sub Domain</label>
+                <input
+                  {...register('subDomain')}
+                  className="w-full border-b border-gray-300 py-2 focus:outline-none"
+                  placeholder="ABC-ENG-001"
+                />
+                {errors.subDomain && (
+                  <p className="text-xs text-red-500">{errors.subDomain.message}</p>
+                )}
               </div>
 
               <div>

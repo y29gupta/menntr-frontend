@@ -1,4 +1,5 @@
 import { InstitutionFormValues } from '@/app/lib/institution';
+import { api } from './api';
 
 export const PLAN_CODE_TO_ID = {
   BASIC: 1,
@@ -45,17 +46,27 @@ export type Institution = {
   planId: number;
 };
 
-export async function fetchInstitutions(): Promise<InstitutionApiResponse> {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/institutions`, {
-    method: 'GET',
-    credentials: 'include',
-  });
+// export async function fetchInstitutions(): Promise<InstitutionApiResponse> {
+//   const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/institutions`, {
+//     method: 'GET',
+//     credentials: 'include',
+//   });
 
-  if (!res.ok) {
+//   if (!res.ok) {
+//     throw new Error('Failed to fetch institutions');
+//   }
+
+//   return res.json();
+// }
+
+export async function fetchInstitutions(): Promise<InstitutionApiResponse> {
+  const res = await api.get(`/institutions`);
+
+  if (!res.data) {
     throw new Error('Failed to fetch institutions');
   }
 
-  return res.json();
+  return res.data;
 }
 
 export function mapInstitutions(apiData: InstitutionApi[]): Institution[] {

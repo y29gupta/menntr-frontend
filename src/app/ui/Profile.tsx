@@ -34,6 +34,7 @@ export default function Profile() {
 
   const handleLogout = async () => {
     try {
+      console.log('logge out');
       const res = await logout();
       queryclient.clear();
       router.replace(`/`);

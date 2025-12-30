@@ -30,6 +30,7 @@ const Loginform = ({ role, setupToken }: LoginFormProps) => {
   const navigate = useRouter();
   const searchParams = useSearchParams();
   const expectedRole = searchParams.get('role');
+  console.log(expectedRole, 'role');
 
   const params = useParams();
   const slug = params?.slug as string[] | undefined;
@@ -80,16 +81,20 @@ const Loginform = ({ role, setupToken }: LoginFormProps) => {
           setupToken
         );
         if (setup) {
-          navigate.push('/auth/login?role=admin');
+          navigate.push('/');
           return;
         }
       }
 
       const res = await loginUser({ ...data });
+      console.log(res, 'resp');
+      if (res.status == true) {
+        console.log('true');
+        const redirectPath = ROLE_REDIRECT[expectedRole as keyof typeof ROLE_REDIRECT];
+        console.log(redirectPath, 'path');
 
-      const redirectPath = ROLE_REDIRECT[expectedRole as keyof typeof ROLE_REDIRECT];
-
-      navigate.push(redirectPath);
+        navigate.push(redirectPath);
+      }
     } catch (err: any) {
       alert(err?.response?.data?.message || err.message || 'Action failed');
     }
