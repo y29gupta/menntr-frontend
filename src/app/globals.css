@@ -3,12 +3,11 @@
 /* Load Tailwind v4 */
 @import 'tailwindcss';
 
-html, body {
+html,
+body {
   max-width: 100%;
   overflow-x: hidden;
 }
-
-
 
 /* Now everything else */
 :root {

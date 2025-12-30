@@ -13,9 +13,11 @@ import { resetPassword } from '../lib/loginService';
 
 type Values = z.infer<typeof resetPasswordSchema>;
 
-const ResetPasswordForm = ({ role, token }: { role: string; token: string }) => {
+const ResetPasswordForm = ({ token }: { token: string }) => {
   const navigate = useRouter();
+
   const [done, setDone] = useState(false);
+  const [role, setRole] = useState<string>('admin');
 
   const {
     register,
@@ -31,22 +33,27 @@ const ResetPasswordForm = ({ role, token }: { role: string; token: string }) => 
       const email = params.get('email');
       if (!email) throw new Error('Missing email');
 
-      await resetPassword({
+      const res = await resetPassword({
         email,
         token,
-        role,
         newPassword: data.password,
       });
 
+      // ✅ role from backend JSON
+      const roleFromApi = res?.roles?.name || 'admin';
+      setRole(roleFromApi);
+
       setDone(true);
       alert('Password reset successful');
-      navigate.push(`/login?role=${role}`);
+
+      navigate.push(`/login?role=${roleFromApi}`);
     } catch (err) {
       console.log(err);
       alert('Reset failed');
     }
   };
 
+ 
   let imageSrc = '/assets/Admin.png';
   if (role === 'student') imageSrc = '/assets/HappyStudent.png';
   if (role === 'superadmin') imageSrc = '/assets/superadmin.png';

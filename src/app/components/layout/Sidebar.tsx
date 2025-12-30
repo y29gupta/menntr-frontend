@@ -31,7 +31,7 @@ export default function Sidebar({ role, collapsed, onToggle }: Props) {
       <aside
         className={clsx(
           `
-    h-full bg-white
+    h-screen bg-white
     shadow-[0px_8px_16px_0px_rgba(26,44,80,0.2)]
     z-50
     fixed inset-y-0 left-0

@@ -1,5 +1,6 @@
-import DataTable from '../../table/DataTable';
-import { Department, departmentColumns } from './department.column';
+import DataTable from "@/app/components/table/DataTable";
+import { Department, departmentColumns } from "./department.column";
+
 type Props = {
   globalFilter: string;
   onGlobalFilterChange: (value: string) => void;

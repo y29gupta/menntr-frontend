@@ -1,5 +1,5 @@
 'use client';
-import AreaSparkline from '../components/graphs/AreaSparkline';
+import AreaSparkline from '../../../graphs/AreaSparkline';
 
 type Props = {
   title: string;
