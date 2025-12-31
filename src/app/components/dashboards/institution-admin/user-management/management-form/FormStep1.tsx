@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import FormHeader from './FormHeader';
 
 type FormValues = {
   firstName: string;
@@ -6,6 +7,8 @@ type FormValues = {
   email: string;
   mobile: string;
 };
+
+const STORAGE_KEY = 'profile-form-step-1';
 
 type ProfileFormProps = {
   mode: 'create' | 'edit';
@@ -16,13 +19,26 @@ type ProfileFormProps = {
 
 const ProfileForm = ({ mode, defaultValues, onBack, onSubmit }: ProfileFormProps) => {
   const [preview, setPreview] = useState<string | null>(null);
-  const [formData, setFormData] = useState<FormValues>({
-    firstName: defaultValues?.firstName || '',
-    lastName: defaultValues?.lastName || '',
-    email: defaultValues?.email || '',
-    mobile: defaultValues?.mobile || '',
+  const [formData, setFormData] = useState<FormValues>(() => {
+    const saved = localStorage.getItem(STORAGE_KEY);
+
+    if (saved) {
+      return JSON.parse(saved);
+    }
+
+    return {
+      firstName: defaultValues?.firstName || '',
+      lastName: defaultValues?.lastName || '',
+      email: defaultValues?.email || '',
+      mobile: defaultValues?.mobile || '',
+    };
   });
+
   const [errors, setErrors] = useState<Partial<Record<keyof FormValues, string>>>({});
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(formData));
+  }, [formData]);
 
   const handleChange = (field: keyof FormValues) => (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData((prev) => ({ ...prev, [field]: e.target.value }));
@@ -64,20 +80,7 @@ const ProfileForm = ({ mode, defaultValues, onBack, onSubmit }: ProfileFormProps
 
   return (
     <div className="w-full h-full flex flex-col">
-      <div className="flex flex-col flex-shrink-0 mb-3 sm:mb-4 gap-2">
-        <button
-          onClick={onBack}
-          className="text-sm flex  items-center gap-2 font-medium text-gray-600 hover:text-gray-900"
-        >
-          <span>
-            <img src="/Go-back.svg" alt="goback" />
-          </span>
-          Go back
-        </button>
-        <h2 className="text-base sm:text-lg font-bold text-[#1A2C50]">
-          {mode === 'edit' ? 'Edit User' : 'Add User'}
-        </h2>
-      </div>
+      <FormHeader onBack={onBack} title={mode === 'edit' ? 'Edit User' : 'Add User'} />
 
       <div className="flex justify-center mb-6 sm:mb-8 flex-shrink-0">
         <div className="relative">
