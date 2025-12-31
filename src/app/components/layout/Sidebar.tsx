@@ -29,13 +29,29 @@ export default function Sidebar({ role, collapsed, onToggle }: Props) {
   return (
     <>
       <aside
-        className={clsx(
-          'h-screen bg-white shadow-[0px_8px_16px_0px_rgba(26,44,80,0.2)] transition-all duration-300 shrink-0 relative z-100  ',
-          collapsed ? 'w-[72px]' : 'w-[300px]'
+        className={clsx( `
+    h-screen bg-white
+    shadow-[0px_8px_16px_0px_rgba(26,44,80,0.2)]
+    z-50
+    fixed inset-y-0 left-0
+    transition-transform duration-300 ease-in-out
+    md:static md:transition-all 
+    `,
+          // Mobile: slide in/out
+          collapsed
+            ? `
+        w-[72px]
+        relative
+      `
+            : `
+        w-[300px]
+        
+        
+      `
         )}
       >
         {/* Logo Section */}
-        <div className={clsx('pt-[30px]', !collapsed && 'px-4 pb-6')}>
+        <div className={clsx('pt-[30px] relative', !collapsed && 'px-4 pb-6')}>
           {!collapsed && (
             <div>
               <img src="/assets/menntrLogo.svg" alt="menntrLogo" className="mb-1" />
@@ -71,7 +87,7 @@ export default function Sidebar({ role, collapsed, onToggle }: Props) {
                 href={item.path}
                 className={clsx(
                   'flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition',
-                  active ? 'bg-[#3B82F6] text-white' : 'text-slate-600 hover:bg-slate-100',
+                  active ? 'bg-[#FFEEFF] text-[#7B3AEC]' : 'text-slate-600 hover:bg-slate-100',
                   collapsed && 'justify-center'
                 )}
               >

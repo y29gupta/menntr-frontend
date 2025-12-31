@@ -10,12 +10,9 @@ import { Search, Filter } from 'lucide-react';
 import Profile from '@/app/ui/Profile';
 import { Spin } from 'antd';
 
-import {
-  fetchInstitutions,
-  mapInstitutions,
-  Institution,
-  FilterParams,
-} from '@/app/lib/institutions.api';
+import { fetchInstitutions, mapInstitutions, Institution } from '@/app/lib/institutions.api';
+import { logout } from '@/app/lib/loginService';
+import TopProfileBar from '@/app/ui/TopProfileBar';
 
 type Props = {
   onCreateInstitution: () => void;
@@ -113,8 +110,8 @@ const Dashboard = ({ onCreateInstitution, onEditInstitution }: Props) => {
   };
 
   return (
-    <main className="h-screen px-4 sm:px-6 lg:px-8 xl:px-10 py-5 flex flex-col gap-6 text-[13px] sm:text-sm lg:text-base overflow-y-auto [&::-webkit-scrollbar]:hidden scrollbar-none1">
-      <div className="flex items-center justify-between gap-4 min-w-0">
+    <main className=" h-full px-4 sm:px-6 lg:px-8 xl:px-10 py-5 flex flex-col gap-6 text-[13px] sm:text-sm lg:text-base overflow-y-auto [&::-webkit-scrollbar]:hidden scrollbar-none1">
+      {/* <div className="flex border items-center justify-between gap-4 min-w-0">
         <h1 className="flex items-center gap-2 font-semibold text-gray-800 text-base whitespace-nowrap overflow-hidden text-ellipsis">
           <SuperAdminIcon />
           <span className="truncate">
@@ -126,7 +123,8 @@ const Dashboard = ({ onCreateInstitution, onEditInstitution }: Props) => {
         <div className="shrink-0">
           <Profile />
         </div>
-      </div>
+      </div> */}
+      <TopProfileBar userRole="Super Admin Portal- System Admin" RoleIcon={<SuperAdminIcon />} />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <MetricCard

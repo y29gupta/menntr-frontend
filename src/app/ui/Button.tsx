@@ -21,7 +21,7 @@ const Buttons = ({ role, status, label, mode = 'login' }: ButtonsProps) => {
   const loginLabel =
     role === 'student'
       ? 'Login to Student Portal'
-      : role === 'superadmin'
+      : role === 'Super Admin'
         ? 'Login to Super Admin Portal'
         : 'Login to Admin Portal';
 

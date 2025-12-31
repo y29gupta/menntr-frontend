@@ -2,8 +2,10 @@
 
 import Image from 'next/image';
 import HelpSupportIcon from '../icons/HelpSupportIcon';
+import { useRouter } from 'next/navigation';
 
 export default function Navbar() {
+  const router = useRouter();
   return (
     // <div className="w-full max-w-301.5 border ">
     <header className="w-full">
@@ -25,7 +27,8 @@ export default function Navbar() {
             width={84}
             height={25}
             alt="Menntr Logo"
-            className="object-contain"
+            className="object-contain cursor-pointer"
+            onClick={() => router.push('/')}
             priority
           />
 

@@ -15,9 +15,16 @@ function ResetPasswordPageContent() {
 
   const [valid, setValid] = useState<boolean | null>(null);
 
+  const isDev = process.env.NODE_ENV === 'development';
+
   useEffect(() => {
-    if (!token || !email) {
+    if (!token || !email ) {
       router.push('/error?reason=missing_params');
+      return;
+    }
+
+    if (isDev) {
+      setValid(true);
       return;
     }
 

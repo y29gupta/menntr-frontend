@@ -21,10 +21,17 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }, []);
 
   return (
-    <div className="flex h-screen bg-[#F7F9FC] overflow-hidden">
+    <div className="flex  w-full max-h-screen bg-[#F7F9FC] ">
+      {!collapsed && (
+        <div
+          className="fixed inset-0 bg-black/40 z-40 md:hidden"
+          onClick={() => setCollapsed(true)}
+        />
+      )}
+
       <Sidebar role={role} collapsed={collapsed} onToggle={() => setCollapsed(!collapsed)} />
 
-      <main className="flex-1 overflow-hidden p-6">{children}</main>
+      <main className="flex-1 min-w-0 h-screen overflow-hidden p-6">{children}</main>
     </div>
   );
 }

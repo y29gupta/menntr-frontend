@@ -1,11 +1,16 @@
-import React from 'react';
+"use client";
 
-const page = () => {
-  return (
-    <div>
-      <h1>this is admin page redirected </h1>
-    </div>
-  );
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+
+const Page = () => {
+  const router = useRouter();
+
+  useEffect(() => {
+    router.replace("/admin/dashboard"); 
+  }, [router]);
+
+  return null; 
 };
 
-export default page;
+export default Page;
