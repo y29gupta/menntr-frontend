@@ -1,6 +1,5 @@
 'use client';
 
-import FormDropdown from '@/app/ui/FormDropdown';
 import FormHeader from './FormHeader';
 import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -24,7 +23,7 @@ type ModuleKey =
   | 'assessmentManagement'
   | 'reportAndAnalytics';
 
-interface FormData {
+export interface FormData {
   roleHierarchy?: RoleKey;
   roleCategory?: CategoryKey;
   roleDepartment?: string;
@@ -40,8 +39,15 @@ interface FormData {
 
 /* ---------------- COMPONENT ---------------- */
 
-const UserPermission = ({ mode, onBack, onSubmit }: any) => {
-  const { register, watch, handleSubmit, setValue } = useForm<FormData>({
+type Props = {
+  mode: 'create' | 'edit';
+  onBack: () => void;
+  onSubmit: (data: FormData) => void;
+  defaultValues?: FormData; // ✅ ADD ONLY THIS
+};
+
+const UserPermission = ({ mode, onBack, onSubmit, defaultValues }: Props) => {
+  const { register, watch, handleSubmit, setValue, reset } = useForm<FormData>({
     defaultValues: {
       roleHierarchy: undefined,
       roleCategory: undefined,
@@ -57,27 +63,37 @@ const UserPermission = ({ mode, onBack, onSubmit }: any) => {
     },
   });
 
+  /* ✅ ONLY REAL FIX — PREFILL ON EDIT */
+  useEffect(() => {
+    if (mode === 'edit' && defaultValues) {
+      reset(defaultValues);
+    }
+  }, [mode, defaultValues, reset]);
+
+  const [openPermissions, setOpenPermissions] = useState(false);
+  const [activeModule, setActiveModule] = useState<string | null>(null);
+  const [modulePermissions, setModulePermissions] = useState<Record<string, string[]>>({});
+
   const values = watch();
   const selectedRole = values.roleHierarchy;
   const selectedCategory = values.roleCategory;
 
   const roleRules = selectedRole ? ROLE_CONFIG.hierarchy[selectedRole] : null;
 
-  const [openPermissions, setOpenPermissions] = useState(false);
-  const [activeModule, setActiveModule] = useState<string | null>(null);
-
-  /* -------- AUTO CLEAR DEPENDENT FIELDS -------- */
+  /* -------- AUTO CLEAR DEPENDENT FIELDS (UNCHANGED) -------- */
   useEffect(() => {
+    if (mode === 'edit') return;
+
     if (!roleRules?.showCategories) setValue('roleCategory', undefined);
     if (!roleRules?.showDepartment) setValue('roleDepartment', undefined);
     if (!roleRules?.showBatch) setValue('roleBatch', undefined);
-  }, [selectedRole, roleRules, setValue]);
+  }, [mode, selectedRole, roleRules, setValue]);
 
   useEffect(() => {
     setValue('roleDepartment', undefined);
   }, [selectedCategory, setValue]);
 
-  /* ---------------- MODULES ---------------- */
+  /* ---------------- MODULES (UNCHANGED) ---------------- */
 
   const modules = [
     'User role and management',
@@ -183,44 +199,50 @@ const UserPermission = ({ mode, onBack, onSubmit }: any) => {
             className="grid gap-4 w-full max-w-7xl"
             style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))' }}
           >
-            {selectedModules.map((m) => (
-              <div
-                key={m}
-                className="bg-white border-2 border-purple-300 rounded-3xl p-6 shadow-sm flex flex-col"
-              >
-                <header className="font-semibold text-gray-700 text-base pb-4 border-b border-gray-200">
-                  {m}
-                </header>
+            {selectedModules.map((m) => {
+              const key = getModuleKey(m);
+              return (
+                <div
+                  key={m}
+                  className="bg-white border-2 border-purple-300 rounded-3xl p-6 shadow-sm flex flex-col"
+                >
+                  <header className="font-semibold text-gray-700 text-base pb-4 border-b border-gray-200">
+                    {m}
+                  </header>
 
-                <div className="space-y-4 mt-4 flex-grow">
-                  {moduleOptions[m].map((opt, index) => (
-                    <label key={opt} className="flex items-center gap-3 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        defaultChecked={index === 0}
-                        className="w-5 h-5 rounded border-2 border-gray-300 shrink-0"
-                      />
-                      <span className={index === 0 ? 'text-gray-700 font-medium' : 'text-gray-600'}>
-                        {opt}
-                      </span>
-                    </label>
-                  ))}
+                  <div className="space-y-4 mt-4 flex-grow">
+                    {moduleOptions[m].map((opt, index) => (
+                      <label key={opt} className="flex items-center gap-3 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          defaultChecked={index === 0}
+                          className="w-5 h-5 shrink-0 rounded border-2 border-gray-300"
+                        />
+
+                        <span
+                          className={index === 0 ? 'text-gray-700 font-medium' : 'text-gray-600'}
+                        >
+                          {opt}
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+
+                  <footer className="pt-4 mt-4 border-t border-gray-200 text-[#7B3AEC]">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setActiveModule(m);
+                        setOpenPermissions(true);
+                      }}
+                      className="w-full font-semibold text-base"
+                    >
+                      Set Permissions
+                    </button>
+                  </footer>
                 </div>
-
-                <footer className="pt-4 mt-4 border-t border-gray-200 text-[#7B3AEC]">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setActiveModule(m);
-                      setOpenPermissions(true);
-                    }}
-                    className="w-full font-semibold text-base hover:text-purple-700"
-                  >
-                    Set Permissions
-                  </button>
-                </footer>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
 
@@ -234,13 +256,24 @@ const UserPermission = ({ mode, onBack, onSubmit }: any) => {
             Go Next
           </button>
         </div>
+        <SetPermissionsModal
+          open={openPermissions}
+          moduleName={activeModule}
+          existingPermissions={activeModule ? modulePermissions[activeModule] : []}
+          onClose={() => {
+            setOpenPermissions(false);
+            setActiveModule(null);
+          }}
+          onConfirm={(moduleName, permissions) => {
+            setModulePermissions((prev) => ({
+              ...prev,
+              [moduleName]: permissions,
+            }));
+            setOpenPermissions(false);
+            setActiveModule(null);
+          }}
+        />
       </div>
-
-      <SetPermissionsModal
-        open={openPermissions}
-        moduleName={activeModule}
-        onClose={() => setOpenPermissions(false)}
-      />
     </div>
   );
 };

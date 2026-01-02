@@ -9,7 +9,7 @@ const FormHeader = ({ title, onBack }: FormHeaderProps) => {
       <button
         onClick={onBack}
         type="button"
-        className="text-sm flex items-center gap-2 font-medium text-gray-600 hover:text-gray-900"
+        className="text-sm flex items-center gap-2 font-medium text-gray-600 hover:text-gray-900 cursor-pointer"
       >
         <span>
           <img src="/Go-back.svg" alt="goback" />

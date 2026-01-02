@@ -4,7 +4,7 @@ const ModuleSelector = ({ modules, selectedModules, register }: any) => (
       <label
         key={m}
         className={`px-4 py-2 rounded-full cursor-pointer text-sm border
-          ${selectedModules.includes(m) ? 'bg-purple-100 text-purple-700 border-purple-300' : 'bg-gray-100'}`}
+          ${selectedModules.includes(m) ? 'bg-purple-100 text-purple-700 border border-purple-300' : 'bg-gray-100 text-gray-600 border border-gray-200 hover:border-purple-300'}`}
       >
         <input type="checkbox" value={m} {...register('selectedModules')} className="sr-only" />
         {selectedModules.includes(m) && '✓ '} {m}
