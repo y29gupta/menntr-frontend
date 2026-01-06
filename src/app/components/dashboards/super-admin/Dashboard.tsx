@@ -10,7 +10,12 @@ import { Search, Filter } from 'lucide-react';
 import Profile from '@/app/ui/Profile';
 import { Spin } from 'antd';
 
-import { fetchInstitutions, mapInstitutions, Institution } from '@/app/lib/institutions.api';
+import {
+  fetchInstitutions,
+  mapInstitutions,
+  Institution,
+  FilterParams,
+} from '@/app/lib/institutions.api';
 import { logout } from '@/app/lib/loginService';
 import TopProfileBar from '@/app/ui/TopProfileBar';
 

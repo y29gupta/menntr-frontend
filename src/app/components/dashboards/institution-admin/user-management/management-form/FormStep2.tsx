@@ -5,7 +5,7 @@ import FormHeader from './FormHeader';
 import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
-import { ROLE_CONFIG } from '@/app/constants/roleConfig';
+import { ROLE_CONFIG, getRoleRules } from '@/app/constants/roleConfig';
 import RoleSelector from './selectors/RoleSelector';
 import CategorySelector from './selectors/CategorySelector';
 import ScopeSelectors from './selectors/ScopeSelectors';
@@ -14,7 +14,6 @@ import { SetPermissionsModal } from '@/app/ui/modals/SetPermissionsModal';
 
 /* ---------------- TYPES ---------------- */
 
-type RoleKey = keyof typeof ROLE_CONFIG.hierarchy;
 type CategoryKey = keyof typeof ROLE_CONFIG.categories;
 
 type ModuleKey =
@@ -25,7 +24,7 @@ type ModuleKey =
   | 'reportAndAnalytics';
 
 interface FormData {
-  roleHierarchy?: RoleKey;
+  roleHierarchy?: string; 
   roleCategory?: CategoryKey;
   roleDepartment?: string;
   roleBatch?: string;
@@ -61,7 +60,8 @@ const UserPermission = ({ mode, onBack, onSubmit }: any) => {
   const selectedRole = values.roleHierarchy;
   const selectedCategory = values.roleCategory;
 
-  const roleRules = selectedRole ? ROLE_CONFIG.hierarchy[selectedRole] : null;
+  // Get role rules based on selected role name
+  const roleRules = selectedRole ? getRoleRules(selectedRole) : null;
 
   const [openPermissions, setOpenPermissions] = useState(false);
   const [activeModule, setActiveModule] = useState<string | null>(null);
