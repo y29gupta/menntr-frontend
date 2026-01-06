@@ -19,7 +19,7 @@ export type InstitutionApi = {
   code: string;
   contactEmail: string;
   status: string;
-  planId: number;
+  planId?: number;
   createdAt?: string;
   plan: {
     id: number;
@@ -28,10 +28,18 @@ export type InstitutionApi = {
   };
 };
 
-// API response
 export type InstitutionApiResponse = {
-  count: number;
   data: InstitutionApi[];
+  meta: {
+    isFirstPage: boolean;
+    isLastPage: boolean;
+    currentPage: number;
+    previousPage: number | null;
+    nextPage: number | null;
+    pageCount: number;
+    totalCount: number;
+    currentPageCount: number;
+  };
 };
 
 export type Institution = {
@@ -45,8 +53,32 @@ export type Institution = {
   planId: number;
 };
 
-export async function fetchInstitutions(): Promise<InstitutionApiResponse> {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/institutions`, {
+export type FilterParams = {
+  page?: number;
+  limit?: number;
+  search?: string;
+  status?: string;
+  code?: string;
+  contactEmail?: string;
+  planCode?: string;
+  name?: string;
+};
+
+export async function fetchInstitutions(filters: FilterParams = {}): Promise<InstitutionApiResponse> {
+  const queryParams = new URLSearchParams();
+
+  if (filters.page) queryParams.append('page', String(filters.page));
+  if (filters.limit) queryParams.append('limit', String(filters.limit));
+  if (filters.search) queryParams.append('search', filters.search);
+  if (filters.status) queryParams.append('status', filters.status);
+  if (filters.code) queryParams.append('code', filters.code);
+  if (filters.contactEmail) queryParams.append('contactEmail', filters.contactEmail);
+  if (filters.planCode) queryParams.append('planCode', filters.planCode);
+  if (filters.name) queryParams.append('name', filters.name);
+
+  const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/institutions${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+
+  const res = await fetch(url, {
     method: 'GET',
     credentials: 'include',
   });
@@ -67,7 +99,7 @@ export function mapInstitutions(apiData: InstitutionApi[]): Institution[] {
     contactEmail: item.contactEmail,
     students: '—',
     status: item.status,
-    planId: item.planId,
+    planId: item.plan?.id || 1,
   }));
 }
 
@@ -78,7 +110,6 @@ export async function updateInstitution(id: number | string, payload: Institutio
       'Content-Type': 'application/json',
     },
     credentials: 'include',
-
     body: JSON.stringify({
       name: payload.name,
       code: payload.code,

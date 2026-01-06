@@ -92,7 +92,7 @@ export default function Page() {
                 description="Manage campus-wide department and placement workflow."
                 image="/assets/institutionIcon.png"
                 buttonText="Continue as Institution Admin"
-                onClick={() => router.push(`/login?role=${ROLE_REDIRECT['institution Admin']}`)}
+                onClick={() => router.push(`/login?role=Institution Admin`)}
               />
             </div>
 

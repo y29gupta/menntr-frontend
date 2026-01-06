@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import SuperAdminIcon from '@/app/components/icons/SuperAdminIcon';
 import { MetricCard } from '@/app/components/dashboards/super-admin/MetricCard';
@@ -10,7 +10,12 @@ import { Search, Filter } from 'lucide-react';
 import Profile from '@/app/ui/Profile';
 import { Spin } from 'antd';
 
-import { fetchInstitutions, mapInstitutions, Institution } from '@/app/lib/institutions.api';
+import {
+  fetchInstitutions,
+  mapInstitutions,
+  Institution,
+  FilterParams,
+} from '@/app/lib/institutions.api';
 import { logout } from '@/app/lib/loginService';
 import TopProfileBar from '@/app/ui/TopProfileBar';
 
@@ -19,16 +24,95 @@ type Props = {
   onEditInstitution: (row: any) => void;
 };
 
-const Dashboard = ({ onCreateInstitution, onEditInstitution }: Props) => {
-  const [search, setSearch] = useState('');
-  const [showColumnFilters, setShowColumnFilters] = useState(false);
+const ITEMS_PER_PAGE = 10;
+const DEBOUNCE_DELAY = 500;
 
-  const { data, isLoading, isError } = useQuery({
-    queryKey: ['institutions'],
-    queryFn: fetchInstitutions,
+const Dashboard = ({ onCreateInstitution, onEditInstitution }: Props) => {
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(ITEMS_PER_PAGE);
+  const [search, setSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [showColumnFilters, setShowColumnFilters] = useState(false);
+  const [columnFilters, setColumnFilters] = useState<Record<string, string>>({});
+  const [debouncedColumnFilters, setDebouncedColumnFilters] = useState<Record<string, string>>({});
+  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+
+    debounceTimerRef.current = setTimeout(() => {
+      setDebouncedSearch(search);
+      setDebouncedColumnFilters(columnFilters);
+      setPage(1);
+    }, DEBOUNCE_DELAY);
+
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+    };
+  }, [search, columnFilters]);
+
+  const filters: FilterParams = {
+    page,
+    limit,
+    search: debouncedSearch || undefined,
+    name: debouncedColumnFilters.name || undefined,
+    code: debouncedColumnFilters.code || undefined,
+    status: debouncedColumnFilters.status || undefined,
+    contactEmail: debouncedColumnFilters.contactEmail || undefined,
+    planCode: debouncedColumnFilters.plan || undefined,
+  };
+
+  const {
+    data = {
+      data: [],
+      meta: {
+        isFirstPage: true,
+        isLastPage: false,
+        currentPage: 1,
+        previousPage: null,
+        nextPage: null,
+        pageCount: 0,
+        totalCount: 0,
+        currentPageCount: 0,
+      },
+    },
+    isLoading,
+    isError,
+  } = useQuery({
+    queryKey: ['institutions', filters],
+    queryFn: () => fetchInstitutions(filters),
+    placeholderData: (previousData) => previousData,
   });
 
   const institutions: Institution[] = data ? mapInstitutions(data.data) : [];
+  const totalCount = data?.meta?.totalCount ?? 0;
+
+  const handleColumnFilterChange = (columnName: string, value: string) => {
+    setColumnFilters((prev) => ({
+      ...prev,
+      [columnName]: value,
+    }));
+  };
+
+  const handleGlobalSearchChange = (value: string) => {
+    setSearch(value);
+  };
+
+  const handlePreviousPage = () => {
+    if (data?.meta?.previousPage) {
+      setPage(data.meta.previousPage);
+    }
+  };
+
+  const handleNextPage = () => {
+    if (data?.meta?.nextPage) {
+      setPage(data.meta.nextPage);
+    }
+  };
 
   return (
     <main className=" h-full px-4 sm:px-6 lg:px-8 xl:px-10 py-5 flex flex-col gap-6 text-[13px] sm:text-sm lg:text-base overflow-y-auto [&::-webkit-scrollbar]:hidden scrollbar-none1">
@@ -50,7 +134,7 @@ const Dashboard = ({ onCreateInstitution, onEditInstitution }: Props) => {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <MetricCard
           title="Total Institutions"
-          value={isLoading ? '—' : String(data?.count ?? 0)}
+          value={isLoading ? '—' : String(totalCount ?? 0)}
           bg="bg-[linear-gradient(106.82deg,#F2F7FF_3.46%,#D2E3FE_96.84%)]"
         />
         <MetricCard
@@ -70,16 +154,7 @@ const Dashboard = ({ onCreateInstitution, onEditInstitution }: Props) => {
         />
       </div>
 
-      <div
-        className="
-          w-full
-          rounded-3xl
-          border border-[#DBDFE7]
-          bg-white
-          p-4 sm:p-6 lg:p-8
-         
-        "
-      >
+      <div className="w-full rounded-3xl border border-[#DBDFE7] bg-white p-4 sm:p-6 lg:p-8">
         <div className="flex items-center justify-between gap-4 mb-4">
           <h2 className="hidden sm:block font-semibold text-gray-800 text-sm sm:text-base lg:text-lg">
             All Institutions
@@ -98,7 +173,7 @@ const Dashboard = ({ onCreateInstitution, onEditInstitution }: Props) => {
             <Search className="absolute left-3 top-2.5 text-gray-400 w-4 h-4" />
             <input
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e) => handleGlobalSearchChange(e.target.value)}
               type="text"
               placeholder="Search for Institution"
               className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
@@ -114,7 +189,6 @@ const Dashboard = ({ onCreateInstitution, onEditInstitution }: Props) => {
           </button>
         </div>
 
-        {/* TanStack Table */}
         {isLoading && (
           <div className="flex items-center justify-center min-h-[60vh]">
             <Spin size="large" />
@@ -126,9 +200,15 @@ const Dashboard = ({ onCreateInstitution, onEditInstitution }: Props) => {
           <DataTable
             columns={institutionColumns(onEditInstitution)}
             data={institutions}
-            globalFilter={search}
-            onGlobalFilterChange={setSearch}
+            columnFilters={columnFilters}
+            onColumnFilterChange={handleColumnFilterChange}
             showColumnFilters={showColumnFilters}
+            currentPage={data?.meta?.currentPage ?? 1}
+            pageCount={data?.meta?.pageCount ?? 1}
+            onPreviousPage={handlePreviousPage}
+            onNextPage={handleNextPage}
+            canPreviousPage={!!data?.meta?.previousPage}
+            canNextPage={!!data?.meta?.nextPage}
           />
         )}
       </div>

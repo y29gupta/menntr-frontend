@@ -29,7 +29,9 @@ export function middleware(req: NextRequest) {
   if (pathname.startsWith('/super-admin') && role !== 'Super Admin') {
     return NextResponse.redirect(new URL('/', req.url));
   }
-
+if (pathname.startsWith('/admin') && role !== 'Institution Admin') {
+    return NextResponse.redirect(new URL('/', req.url));
+  }
   if (pathname.startsWith('/admin/dashboard') && role !== 'Institution Admin') {
     return NextResponse.redirect(new URL('/login?role=institution Admin', req.url));
   }
@@ -59,5 +61,6 @@ export const config = {
     '/student/:path*',
     '/faculty/:path*',
     '/procurement-head/:path*',
+    // '/admin'
   ],
 };
