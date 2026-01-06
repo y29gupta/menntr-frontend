@@ -3,24 +3,14 @@
 import FormHeader from './FormHeader';
 import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
-
-import { ROLE_CONFIG, getRoleRules } from '@/app/constants/roleConfig';
+import { useRouter } from 'next/navigation';
+import { ROLE_CONFIG } from '@/app/constants/roleConfig';
 import RoleSelector from './selectors/RoleSelector';
 import CategorySelector from './selectors/CategorySelector';
 import ScopeSelectors from './selectors/ScopeSelectors';
-import ModuleSelector from './selectors/ModuleSelector';
-import { SetPermissionsModal } from '@/app/ui/modals/SetPermissionsModal';
-
-/* ---------------- TYPES ---------------- */
+import ModulesSection from './module/ModulesSection';
 
 type CategoryKey = keyof typeof ROLE_CONFIG.categories;
-
-type ModuleKey =
-  | 'userRoleAndManagement'
-  | 'organizationStructure'
-  | 'studentManagement'
-  | 'assessmentManagement'
-  | 'reportAndAnalytics';
 
 interface FormData {
   roleHierarchy?: string;
@@ -36,23 +26,26 @@ interface FormData {
   reportAndAnalytics: string[];
 }
 
-/* ---------------- COMPONENT ---------------- */
-
 type Props = {
   mode: 'create' | 'edit';
   onBack: () => void;
-  onSubmit: (data: FormData) => void;
+  onFormSubmit: (data: FormData) => void;
   defaultValues?: FormData;
+  onNext: () => void;
 };
 
-const UserPermission = ({ mode, onBack, onSubmit, defaultValues }: Props) => {
-  const { register, watch, handleSubmit, setValue, reset } = useForm<FormData>({
-    defaultValues: {
-      roleHierarchy: undefined,
-      roleCategory: undefined,
-      roleDepartment: undefined,
-      roleBatch: undefined,
+const UserPermission = ({ mode, onBack, onFormSubmit, defaultValues, onNext }: Props) => {
+  const router = useRouter();
 
+  const [modulePermissions, setModulePermissions] = useState<Record<string, string[]>>({});
+  const [roleMeta, setRoleMeta] = useState<{
+    roleHierarchyId: number;
+    roleType: string;
+    categories: string[];
+  } | null>(null);
+
+  const { register, watch, handleSubmit, setValue, reset } = useForm<FormData>({
+    defaultValues: defaultValues ?? {
       selectedModules: [],
       userRoleAndManagement: [],
       organizationStructure: [],
@@ -68,112 +61,82 @@ const UserPermission = ({ mode, onBack, onSubmit, defaultValues }: Props) => {
     }
   }, [mode, defaultValues, reset]);
 
-  const [openPermissions, setOpenPermissions] = useState(false);
-  const [activeModule, setActiveModule] = useState<string | null>(null);
-  const [modulePermissions, setModulePermissions] = useState<Record<string, string[]>>({});
+  const selectedRole = watch('roleHierarchy');
+  const selectedCategory = watch('roleCategory');
+  const selectedModules = watch('selectedModules') ?? [];
 
-  const values = watch();
-  const selectedRole = values.roleHierarchy;
-  const selectedCategory = values.roleCategory;
+  const roleRules = roleMeta
+    ? {
+        showCategories: roleMeta.roleType.includes('Category'),
+        showDepartment: roleMeta.roleType.includes('Department'),
+        showBatch: roleMeta.roleType === 'Student',
+      }
+    : null;
 
-  // Get role rules based on selected role name
-  const roleRules = selectedRole ? getRoleRules(selectedRole) : null;
-
-  /* -------- AUTO CLEAR DEPENDENT FIELDS (UNCHANGED) -------- */
-  useEffect(() => {
-    if (mode === 'edit') return;
-
-    if (!roleRules?.showCategories) setValue('roleCategory', undefined);
-    if (!roleRules?.showDepartment) setValue('roleDepartment', undefined);
-    if (!roleRules?.showBatch) setValue('roleBatch', undefined);
-  }, [mode, selectedRole, roleRules, setValue]);
-
-  useEffect(() => {
-    setValue('roleDepartment', undefined);
-  }, [selectedCategory, setValue]);
-
-  /* ---------------- MODULES (UNCHANGED) ---------------- */
-
-  const modules = [
-    'User role and management',
-    'Organization structure',
-    'Student management',
-    'Assessment management',
-    'Report and analytics',
-  ];
-
-  const moduleOptions: Record<string, string[]> = {
-    'User role and management': ['All', 'Role & User Management', 'Advanced Permission Control'],
-    'Organization structure': [
-      'All',
-      'Institution/Organization',
-      'Org Chart & Visualization',
-      'Faculty Management',
-    ],
-    'Student management': [
-      'All',
-      'Student Data Management',
-      'Advanced Student Tracking',
-      'Student Analytics (Advanced)',
-      'Alumni tracking',
-    ],
-    'Assessment management': [
-      'All',
-      'CO-PO Assessments',
-      "Revised Bloom's Types",
-      'Coding Challenges (Advanced, multi-language)',
-      'AI Theory Question (Advanced)',
-      'AI Practice Sets (CO-PO based+scenario/use+NFL)',
-      'AI Proctoring',
-      'Token assessments',
-    ],
-    'Report and analytics': [
-      'All',
-      'Status Reports',
-      'Department Analytics',
-      'Dashboard (Advanced)',
-      'Advanced Analytics (Custom reports, scheduled)',
-    ],
-  };
-
-  const getModuleKey = (moduleName: string): ModuleKey => {
-    const keyMap: Record<string, ModuleKey> = {
-      'User role and management': 'userRoleAndManagement',
-      'Organization structure': 'organizationStructure',
-      'Student management': 'studentManagement',
-      'Assessment management': 'assessmentManagement',
-      'Report and analytics': 'reportAndAnalytics',
-    };
-    return keyMap[moduleName];
-  };
-
-  const selectedModules = values.selectedModules ?? [];
-
-  const departmentOptions = selectedCategory
-    ? ROLE_CONFIG.categories[selectedCategory].map((dept) => ({
-        label: dept,
-        value: dept,
-      }))
-    : [];
+  const departmentOptions =
+    ROLE_CONFIG.categories[selectedCategory as CategoryKey]?.map((d) => ({
+      label: d,
+      value: d,
+    })) ?? [];
 
   const batchOptions = ROLE_CONFIG.batches.map((b) => ({
     label: b,
     value: b,
   }));
 
+  const handleRoleSelect = async (roleHierarchyId: number) => {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_API_BASE_URL}/institutionsadmin/role-hierarchy/roles/${roleHierarchyId}`
+    );
+
+    const json = await res.json();
+
+    const mappedRoles = json.data.roles.map((role: string) => {
+      const [roleType, category] = role.split(' - ').map((v) => v.trim());
+      return { roleType, category };
+    });
+
+    setRoleMeta({
+      roleHierarchyId,
+      roleType: mappedRoles[0].roleType,
+      categories: mappedRoles.map((r: any) => r.category),
+    });
+  };
+
+  useEffect(() => {
+    if (!roleMeta?.roleHierarchyId) return;
+
+    router.push(`/admin/user-management?roleHierarchyId=${roleMeta.roleHierarchyId}`, {
+      scroll: false,
+    });
+  }, [roleMeta?.roleHierarchyId, router]);
+
+  const categories = roleMeta?.categories?.filter(Boolean) ?? [];
+
   return (
-    <div className="w-full flex flex-col gap-4">
-      <FormHeader onBack={onBack} title={mode === 'edit' ? 'Edit User' : 'Add User'} />
+    <form onSubmit={handleSubmit(onFormSubmit)} className="w-full flex flex-col gap-4">
+      <FormHeader
+        onBack={() => {
+          (onBack(), router.back());
+        }}
+        title={mode === 'edit' ? 'Edit User' : 'Add User'}
+      />
 
-      {/* ROLE & SCOPE */}
       <div className="bg-white rounded-lg shadow-sm p-8">
-        <h2 className="text-xl font-semibold mb-6 text-gray-800">Select Role & Scope</h2>
-        <div className="border-t border-gray-300 mb-5" />
+        <h2 className="text-xl font-semibold mb-6">Select Role & Scope</h2>
 
-        <RoleSelector selectedRole={selectedRole} register={register} />
+        <RoleSelector
+          selectedRole={selectedRole}
+          register={register}
+          onRoleSelect={handleRoleSelect}
+        />
 
-        {roleRules?.showCategories && (
-          <CategorySelector selectedCategory={selectedCategory} register={register} />
+        {categories && categories.length > 0 && (
+          <CategorySelector
+            selectedCategory={selectedCategory}
+            register={register}
+            categories={categories}
+          />
         )}
 
         <ScopeSelectors
@@ -186,94 +149,14 @@ const UserPermission = ({ mode, onBack, onSubmit, defaultValues }: Props) => {
         />
       </div>
 
-      {/* MODULES */}
-      <div className="bg-white rounded-lg shadow-sm p-8">
-        <h2 className="text-xl font-semibold mb-6 text-gray-800">Select Modules/Features</h2>
-        <div className="border-t border-gray-300 mb-5" />
-
-        <ModuleSelector modules={modules} selectedModules={selectedModules} register={register} />
-
-        {selectedModules.length > 0 && (
-          <div
-            className="grid gap-4 w-full max-w-7xl"
-            style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))' }}
-          >
-            {selectedModules.map((m) => {
-              const key = getModuleKey(m);
-              return (
-                <div
-                  key={m}
-                  className="bg-white border-2 border-purple-300 rounded-3xl p-6 shadow-sm flex flex-col"
-                >
-                  <header className="font-semibold text-gray-700 text-base pb-4 border-b border-gray-200">
-                    {m}
-                  </header>
-
-                  <div className="space-y-4 mt-4 flex-grow">
-                    {moduleOptions[m].map((opt, index) => (
-                      <label key={opt} className="flex items-center gap-3 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          defaultChecked={index === 0}
-                          className="w-5 h-5 shrink-0 rounded border-2 border-gray-300"
-                        />
-
-                        <span
-                          className={index === 0 ? 'text-gray-700 font-medium' : 'text-gray-600'}
-                        >
-                          {opt}
-                        </span>
-                      </label>
-                    ))}
-                  </div>
-
-                  <footer className="pt-4 mt-4 border-t border-gray-200 text-[#7B3AEC]">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setActiveModule(m);
-                        setOpenPermissions(true);
-                      }}
-                      className="w-full font-semibold text-base"
-                    >
-                      Set Permissions
-                    </button>
-                  </footer>
-                </div>
-              );
-            })}
-          </div>
-        )}
-
-        <div className="m-4 flex justify-center text-white">
-          <button
-            type="button"
-            onClick={handleSubmit(onSubmit)}
-            className="px-10 py-2.5 rounded-full text-sm font-medium 
-              bg-[linear-gradient(90deg,#904BFF_0%,#C053C2_100%)]"
-          >
-            Go Next
-          </button>
-        </div>
-        <SetPermissionsModal
-          open={openPermissions}
-          moduleName={activeModule}
-          existingPermissions={activeModule ? modulePermissions[activeModule] : []}
-          onClose={() => {
-            setOpenPermissions(false);
-            setActiveModule(null);
-          }}
-          onConfirm={(moduleName, permissions) => {
-            setModulePermissions((prev) => ({
-              ...prev,
-              [moduleName]: permissions,
-            }));
-            setOpenPermissions(false);
-            setActiveModule(null);
-          }}
-        />
-      </div>
-    </div>
+      <ModulesSection
+        register={register}
+        selectedModules={selectedModules}
+        modulePermissions={modulePermissions}
+        setModulePermissions={setModulePermissions}
+        onNext={onNext}
+      />
+    </form>
   );
 };
 

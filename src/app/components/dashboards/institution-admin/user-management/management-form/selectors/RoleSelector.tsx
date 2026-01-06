@@ -17,7 +17,9 @@ interface RolesResponse {
 
 // Fetch function
 const fetchRoles = async (): Promise<RolesResponse> => {
-  const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/institutionsadmin/role-hierarchy`);
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_API_BASE_URL}/institutionsadmin/role-hierarchy`
+  );
   if (!response.ok) {
     throw new Error('Failed to fetch roles');
   }
@@ -25,7 +27,7 @@ const fetchRoles = async (): Promise<RolesResponse> => {
 };
 
 // RoleSelector Component
-const RoleSelector = ({ selectedRole, register }: any) => {
+const RoleSelector = ({ selectedRole, register, onRoleSelect }: any) => {
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ['roles'],
     queryFn: fetchRoles,
@@ -70,6 +72,7 @@ const RoleSelector = ({ selectedRole, register }: any) => {
         return (
           <label
             key={role.id}
+            onClick={() => onRoleSelect(role.id)}
             className={`flex items-center gap-2 px-4 py-2 rounded-full cursor-pointer text-sm transition-colors
               ${
                 selected

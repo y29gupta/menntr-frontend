@@ -6,14 +6,29 @@ import { SetPermissionsModal } from '@/app/ui/modals/SetPermissionsModal';
 import ModulesGrid from './ModulesGrid';
 import { moduleOptions, modules } from './module.config';
 
-const ModulesSection = ({ register, selectedModules, handleSubmit, onSubmit }: any) => {
+type Props = {
+  register: any;
+  selectedModules: string[];
+  onNext?: () => void; // ✅ optional (parent doesn’t pass it)
+
+  modulePermissions: Record<string, string[]>;
+  setModulePermissions: React.Dispatch<React.SetStateAction<Record<string, string[]>>>;
+};
+
+const ModulesSection = ({
+  register,
+  selectedModules,
+  onNext,
+  modulePermissions,
+  setModulePermissions,
+}: Props) => {
   const [openPermissions, setOpenPermissions] = useState(false);
   const [activeModule, setActiveModule] = useState<string | null>(null);
-  const [modulePermissions, setModulePermissions] = useState<Record<string, string[]>>({});
 
   return (
     <div className="bg-white rounded-lg shadow-sm p-8">
-      <h2 className="text-xl font-semibold mb-6 text-gray-800">Select Modules/Features</h2>
+      <h2 className="text-xl font-semibold mb-6 text-gray-800">Select Modules / Features</h2>
+
       <div className="border-t border-gray-300 mb-5" />
 
       <ModuleSelector modules={modules} selectedModules={selectedModules} register={register} />
@@ -29,12 +44,14 @@ const ModulesSection = ({ register, selectedModules, handleSubmit, onSubmit }: a
         />
       )}
 
-      <div className="m-4 flex justify-center text-white">
+      {/* GO NEXT */}
+
+      <div className="mt-8 flex justify-center">
         <button
           type="button"
-          onClick={handleSubmit(onSubmit)}
+          onClick={onNext}
           className="px-10 py-2.5 rounded-full text-sm font-medium 
-            bg-[linear-gradient(90deg,#904BFF_0%,#C053C2_100%)]"
+              bg-[linear-gradient(90deg,#904BFF_0%,#C053C2_100%)] text-white"
         >
           Go Next
         </button>

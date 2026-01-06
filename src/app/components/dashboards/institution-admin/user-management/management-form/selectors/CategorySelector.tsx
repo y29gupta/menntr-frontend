@@ -1,12 +1,18 @@
-import { ROLE_CONFIG, CategoryKey } from '@/app/constants/roleConfig';
+type Props = {
+  selectedCategory?: string;
+  register: any;
+  categories: string[];
+};
 
-const CategorySelector = ({ selectedCategory, register }: any) => {
+const CategorySelector = ({ selectedCategory, register, categories }: Props) => {
   return (
     <div className="mb-6">
       <h4 className="mb-2 text-sm font-medium text-gray-700">Role Category</h4>
+
       <div className="flex flex-wrap gap-2">
-        {(Object.keys(ROLE_CONFIG.categories) as CategoryKey[]).map((cat) => {
+        {categories.map((cat) => {
           const selected = selectedCategory === cat;
+
           return (
             <label
               key={cat}

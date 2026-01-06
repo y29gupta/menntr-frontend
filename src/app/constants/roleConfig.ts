@@ -1,25 +1,25 @@
 // Type for role rules
-export interface RoleRules {
-  showCategories: boolean;
-  showDepartment: boolean;
-  showBatch: boolean;
-}
+// export interface RoleRules {
+//   showCategories: boolean;
+//   showDepartment: boolean;
+//   showBatch: boolean;
+// }
 
 // Default rules mapping for roles fetched from API
-export const getRoleRules = (roleName: string): RoleRules => {
-  const rulesMap: Record<string, RoleRules> = {
-    'Institution Admin': { showCategories: false, showDepartment: false, showBatch: false },
-    'Category Admin': { showCategories: true, showDepartment: false, showBatch: false },
-    'Placement Officer': { showCategories: true, showDepartment: false, showBatch: false },
-    'Department Admin': { showCategories: true, showDepartment: true, showBatch: true },
-    'Department Admin (HOD)': { showCategories: true, showDepartment: true, showBatch: true },
-    Faculty: { showCategories: true, showDepartment: true, showBatch: true },
-    Student: { showCategories: false, showDepartment: false, showBatch: false },
-  };
+// export const getRoleRules = (roleName: string): RoleRules => {
+//   const rulesMap: Record<string, RoleRules> = {
+//     'Institution Admin': { showCategories: false, showDepartment: false, showBatch: false },
+//     'Category Admin': { showCategories: true, showDepartment: false, showBatch: false },
+//     'Placement Officer': { showCategories: true, showDepartment: false, showBatch: false },
+//     'Department Admin': { showCategories: true, showDepartment: false, showBatch: false },
+//     'Department Admin (HOD)': { showCategories: true, showDepartment: false, showBatch: false },
+//     Faculty: { showCategories: true, showDepartment: false, showBatch: false },
+//     Student: { showCategories: true, showDepartment: false, showBatch: false },
+//   };
 
-  // Return matching rules or default to all false
-  return rulesMap[roleName] || { showCategories: false, showDepartment: false, showBatch: false };
-};
+//   // Return matching rules or default to all false
+//   return rulesMap[roleName] || { showCategories: false, showDepartment: false, showBatch: false };
+// };
 
 export const ROLE_CONFIG = {
   categories: {

@@ -6,7 +6,7 @@ import ManagementTable from '@/app/components/dashboards/institution-admin/user-
 import ProfileForm from '@/app/components/dashboards/institution-admin/user-management/management-form/FormStep1';
 import UserPermission from '@/app/components/dashboards/institution-admin/user-management/management-form/FormStep2';
 import UserCredentials from '@/app/components/dashboards/institution-admin/user-management/management-form/FornStep3';
-import { CategoryKey, RoleKey } from '@/app/constants/roleConfig';
+import { CategoryKey } from '@/app/constants/roleConfig';
 import BulkUploadInterface from '@/app/components/dashboards/institution-admin/user-management/Bulkupload';
 
 /* ---------- TYPES ---------- */
@@ -18,7 +18,7 @@ type UserFormData = {
   mobile?: string;
 
   permissions?: {
-    roleHierarchy?: RoleKey;
+    roleHierarchy?: string;
     roleCategory?: CategoryKey;
     roleDepartment?: string;
     roleBatch?: string;
@@ -36,7 +36,7 @@ type UserFormData = {
 };
 
 /* ---------- ROLE NORMALIZER (MATCHES ROLE_CONFIG KEYS EXACTLY) ---------- */
-const roleNormalize: Record<string, RoleKey> = {
+const roleNormalize: Record<string, string> = {
   'Category admin': 'Category Admin',
   'Institution admin': 'Institution Admin',
   'Placement Officer': 'Placement Officer',
@@ -176,10 +176,11 @@ const Page = () => {
               mode={formMode}
               defaultValues={formData.permissions}
               onBack={() => setStep(1)}
-              onSubmit={(permissions) => {
+              onFormSubmit={(permissions: any) => {
                 setFormData((prev) => ({ ...prev, permissions }));
                 setStep(3);
               }}
+              onNext={() => setStep(3)}
             />
           )}
 
