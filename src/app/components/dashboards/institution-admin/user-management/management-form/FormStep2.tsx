@@ -43,7 +43,7 @@ type Props = {
   mode: 'create' | 'edit';
   onBack: () => void;
   onSubmit: (data: FormData) => void;
-  defaultValues?: FormData; // ✅ ADD ONLY THIS
+  defaultValues?: FormData;
 };
 
 const UserPermission = ({ mode, onBack, onSubmit, defaultValues }: Props) => {
@@ -63,7 +63,6 @@ const UserPermission = ({ mode, onBack, onSubmit, defaultValues }: Props) => {
     },
   });
 
-  /* ✅ ONLY REAL FIX — PREFILL ON EDIT */
   useEffect(() => {
     if (mode === 'edit' && defaultValues) {
       reset(defaultValues);

@@ -1,4 +1,5 @@
 'use client';
+import { LucideIcon } from 'lucide-react';
 import AreaSparkline from '../../../graphs/AreaSparkline';
 
 type Props = {
@@ -7,9 +8,10 @@ type Props = {
   percentage: number;
   trend: number[];
   subText?: string;
+  icon: LucideIcon;
 };
 
-const DashboardCard = ({ title, total, percentage, trend, subText }: Props) => {
+const DashboardCard = ({ title, total, percentage, trend, subText, icon: Icon }: Props) => {
   const isDown = trend[trend.length - 1] < trend[trend.length - 2];
 
   return (
@@ -20,11 +22,12 @@ const DashboardCard = ({ title, total, percentage, trend, subText }: Props) => {
       {/* LEFT CONTENT */}
       <div className="flex-1">
         <div className="flex items-center gap-2 mb-4">
-          <span className="text-gray-700 text-sm sm:text-base font-medium">{title}</span>
+          <Icon className="text-gray-500" />
+          <span className="text-gray-700 text-[18px] sm:text-base font-medium">{title}</span>
         </div>
 
         <div className="flex items-center gap-3 mb-2">
-          <div className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900">{total}</div>
+          <div className="text-3xl sm:text-[32px] font-semibold text-gray-900">{total}</div>
 
           <span
             className={`font-semibold text-xs sm:text-sm ${

@@ -1,5 +1,6 @@
 'use client';
 
+import { Target } from 'lucide-react';
 import ProgressGraph from '../../../graphs/ProgressGraph';
 
 /* backend-style data */
@@ -37,9 +38,12 @@ export default function PlacementReadinessCard() {
 
   return (
     <div className="w-full lg:min-w-fit bg-white rounded-2xl p-4 sm:p-6 shadow-[0px_4px_24px_rgba(15,23,42,0.08)]">
-      <h2 className="text-sm sm:text-base font-semibold text-slate-800 mb-4">
-        Placement Readiness Overview
-      </h2>
+      <div className="flex gap-2">
+        <Target className="text-gray-500" />
+        <h2 className="text-sm sm:text-base font-semibold text-slate-800 mb-4">
+          Placement Readiness Overview
+        </h2>
+      </div>
 
       {/* READY */}
       <div>

@@ -1,6 +1,7 @@
 'use client';
 
 import { RequirementItem, Status } from '@/app/lib/departmentUtils';
+import { MoreHorizontal } from 'lucide-react';
 
 interface Props {
   items: RequirementItem[];
@@ -16,6 +17,7 @@ const MinimumScoreRequirementCard = ({ items }: Props) => {
   return (
     <div className="w-full h-full rounded-2xl bg-white p-4 sm:p-6 shadow-[0px_0px_16px_0px_#0F172A1F]">
       <div className="flex items-center gap-2 font-semibold text-[#1E293B]">
+        <MoreHorizontal className="text-gray-500" />
         Minimum Score Requirement line
       </div>
 
