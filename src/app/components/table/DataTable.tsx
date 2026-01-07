@@ -9,11 +9,13 @@ import {
   RowData,
   useReactTable,
 } from '@tanstack/react-table';
+import { Spin } from 'antd';
 
 interface DataTableProps<T extends RowData> {
   columns: ColumnDef<T, any>[];
   data: T[];
   globalFilter: string;
+  isLoading: boolean;
   onGlobalFilterChange: (value: string) => void;
   showColumnFilters: boolean;
 }
@@ -22,6 +24,7 @@ function DataTable<T extends RowData>({
   columns,
   data,
   globalFilter,
+  isLoading,
   onGlobalFilterChange,
   showColumnFilters,
 }: DataTableProps<T>) {
@@ -50,7 +53,7 @@ function DataTable<T extends RowData>({
     <div className="w-full  overflow-x-auto">
       <table className="min-w-[900px] w-full border border-gray-200 rounded-lg text-xs sm:text-sm">
         {/* Header */}
-        <thead className="bg-gray-50 border-b border-gray-200">
+        <thead className="bg-gray-50  border-b border-gray-200">
           {table.getHeaderGroups().map((hg) => (
             <tr key={hg.id}>
               {hg.headers.map((header) => (
@@ -91,17 +94,29 @@ function DataTable<T extends RowData>({
 
         {/* Body */}
         <tbody>
-          {table.getRowModel().rows.map((row) => (
-            <tr key={row.id} className="border-b border-gray-200 last:border-none">
-              {row.getVisibleCells().map((cell) => (
-                <td key={cell.id} className="px-4 py-3 whitespace-nowrap">
-                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                </td>
-              ))}
-            </tr>
-          ))}
+          {isLoading &&
+            Array.from({ length: columns.length }).map((_, i) => (
+              <tr key={i}>
+                {columns.map((_, j) => (
+                  <td key={j} className="px-4 py-3">
+                    <div className="h-4 bg-gray-300 rounded animate-pulse" />
+                  </td>
+                ))}
+              </tr>
+            ))}
 
-          {table.getRowModel().rows.length === 0 && (
+          {!isLoading &&
+            table.getRowModel().rows.map((row) => (
+              <tr key={row.id} className="border-b border-gray-200 last:border-none">
+                {row.getVisibleCells().map((cell) => (
+                  <td key={cell.id} className="px-4 py-3 whitespace-nowrap">
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </td>
+                ))}
+              </tr>
+            ))}
+
+          {!isLoading && table.getRowModel().rows.length === 0 && (
             <tr>
               <td colSpan={columns.length} className="text-center py-4 text-gray-500">
                 No results found.

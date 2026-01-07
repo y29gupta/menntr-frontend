@@ -4,20 +4,21 @@ import { PLAN_CODE_TO_ID } from '../institutions.api';
 import { api } from '../api';
 
 export const createInstitution = async (data: InstitutionFormValues) => {
+  console.log(data,"sumi")
   const payload = {
     name: data.name,
     code: data.code,
-    subdomain:data.subDomain,
-    contactEmail: data.contactEmail,
-    planId: PLAN_CODE_TO_ID[data.plan],
+    subdomain:data.subdomain,
+    contact_email: data.contact_email,
+    plan_id: PLAN_CODE_TO_ID[data.plan_id],
   };
   const res = await api.post(`/institution`, payload); // onboarding new institution 
 
   if (res.status == 201) {
     console.log(res.data,"data")
     const passData = {
-      email: res.data.contactEmail,
-      institutionId:res.data.id
+      email: res.data.contact_email,
+      institution_id:res.data.id
     }
 
 
@@ -26,7 +27,7 @@ export const createInstitution = async (data: InstitutionFormValues) => {
       console.log(institutionAdminResponse,"adminresponse")
       const emailpayload = {
         email: institutionAdminResponse.data.user.email,
-        institutionId:institutionAdminResponse.data.user.institutionId
+        institution_id:institutionAdminResponse.data.user.institution_id
       }
       const response = await api.post(`/auth/invite`, emailpayload); // invite link email for complete institution password setup
       console.log(response,"email response")

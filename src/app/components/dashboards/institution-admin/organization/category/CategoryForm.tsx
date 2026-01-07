@@ -47,8 +47,8 @@ export default function CategoryForm({ mode, defaultValues, onCancel, onSubmitSu
   useEffect(() => {
     if (mode === 'edit' && defaultValues?.id && metaData) {
       const assignedDepartmentIds = metaData.departments
-        .filter((dept) => dept.categoryId === defaultValues.id && dept.isAssigned)
-        .map((dept) => dept.id);
+        .filter((dept: any) => dept.categoryId === defaultValues.id && dept.isAssigned)
+        .map((dept: any) => dept.id);
 
       setValue('departments', assignedDepartmentIds);
     }
@@ -73,6 +73,7 @@ export default function CategoryForm({ mode, defaultValues, onCancel, onSubmitSu
   });
 
   const onSubmit = (data: CategoryFormValues) => {
+    console.log(data, 'data');
     mutation.mutate({
       name: data.name,
       code: data.code,
@@ -88,7 +89,7 @@ export default function CategoryForm({ mode, defaultValues, onCancel, onSubmitSu
         <button
           type="button"
           onClick={onCancel}
-          className="flex items-center gap-2 text-sm text-muted-foreground"
+          className="flex cursor-pointer items-center gap-2 text-sm text-muted-foreground"
         >
           <img src="/Go-back.svg" alt="" /> Go back
         </button>
@@ -96,10 +97,10 @@ export default function CategoryForm({ mode, defaultValues, onCancel, onSubmitSu
         <button
           type="submit"
           disabled={mutation.isPending}
-          className="w-full sm:w-auto whitespace-nowrap text-xs sm:text-sm !text-white
+          className="w-full sm:w-auto  whitespace-nowrap text-xs sm:text-sm !text-white
     bg-[linear-gradient(90deg,#904BFF_0%,#C053C2_100%)]
     px-6 py-2.5 rounded-full flex items-center justify-center gap-2 font-medium
-    disabled:opacity-60 disabled:cursor-not-allowed"
+   "
         >
           {mutation.isPending ? (
             <>
@@ -178,7 +179,7 @@ export default function CategoryForm({ mode, defaultValues, onCancel, onSubmitSu
                 searchable
                 searchPlaceholder="Search for Users"
                 options={
-                  metaData?.users.map((user) => ({
+                  metaData?.users.map((user: any) => ({
                     label: user.name,
                     value: user.id,
                     subLabel: user.email,
@@ -226,7 +227,7 @@ export default function CategoryForm({ mode, defaultValues, onCancel, onSubmitSu
             })}
           </div> */}
           <div className="mt-2 flex flex-wrap gap-2">
-            {metaData?.departments.map((dept) => {
+            {metaData?.departments.map((dept: any) => {
               const active = selectedDepartments.includes(dept.id);
 
               return (

@@ -5,6 +5,9 @@ import 'antd/dist/reset.css';
 import { ConfigProvider } from 'antd';
 import QueryProvider from './providers/QueryProvider';
 
+import 'react-toastify/dist/ReactToastify.css';
+import { Bounce, ToastContainer } from 'react-toastify';
+
 const geistSans = Geist({
   variable: '--font-geist-sans',
   subsets: ['latin'],
@@ -29,7 +32,19 @@ export default function RootLayout({
     <html lang="en">
       <ConfigProvider>
         <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-          <QueryProvider>{children}</QueryProvider>
+          <QueryProvider>
+            {children}
+            <ToastContainer
+              position="top-right"
+              autoClose={3000}
+              hideProgressBar={true}
+              newestOnTop
+              closeOnClick
+              pauseOnHover
+              theme="dark"
+              transition={Bounce}
+            />
+          </QueryProvider>
         </body>
       </ConfigProvider>
     </html>

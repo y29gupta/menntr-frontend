@@ -262,13 +262,13 @@ const Loginform = ({ role, setupToken }: LoginFormProps) => {
                       {!isSuperAdmin && (
                         <div className="w-full">
                           <input
-                            {...register('institutionCode' as keyof StudentAdminLogin)}
+                            {...register('institution_code' as keyof StudentAdminLogin)}
                             placeholder="Institution Code"
                             className="w-full border-0 border-b border-gray-300 focus:border-blue-500 py-2 outline-none"
                           />{' '}
-                          {errors.institutionCode && (
+                          {errors.institution_code && (
                             <p className="text-red-500 text-xs mt-1">
-                              {errors.institutionCode.message as string}
+                              {errors.institution_code.message as string}
                             </p>
                           )}
                         </div>

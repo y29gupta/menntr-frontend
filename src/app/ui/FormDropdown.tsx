@@ -11,13 +11,15 @@ type Option = {
 };
 
 interface Props {
-  value?: string;
+  value?: string | string[];
   placeholder: string;
   options: Option[];
-  onChange: (value: string) => void;
+  onChange: (value: string | string[]) => void;
 
   searchable?: boolean;
   searchPlaceholder?: string;
+  multiple?: boolean;
+  renderChips?: boolean;
 }
 
 const FormDropdown = ({
@@ -27,11 +29,12 @@ const FormDropdown = ({
   onChange,
   searchable = false,
   searchPlaceholder = 'Search',
+  multiple = false,
+  renderChips = false,
 }: Props) => {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState('');
   const ref = useRef<HTMLDivElement>(null);
-
   // close on outside click
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -43,27 +46,62 @@ const FormDropdown = ({
     return () => document.removeEventListener('mousedown', handler);
   }, []);
 
-  const selected = options.find((o) => o.value === value);
+  // const selected = options.find((o) => o.value === value);
+
+  const selectedValues = Array.isArray(value) ? value : value ? [value] : [];
+  const selected = options.filter((o) => selectedValues.includes(o.value));
 
   const filteredOptions = searchable
     ? options.filter((o) => o.label.toLowerCase().includes(search.toLowerCase()))
     : options;
 
   return (
-    <div ref={ref} className="relative mt-2">
+    <div ref={ref} className="relative  mt-2">
       {/* Trigger */}
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
         className="
-          w-full flex items-center border-b border-[#C3CAD9] justify-between
+          w-full cursor-pointer flex gap-2 items-center border-b border-[#C3CAD9] justify-between
          bg-white px-1 py-2 text-sm text-gray-700
         
         "
       >
-        <span className={value ? 'text-gray-800' : 'text-gray-400'}>
+        {/* <span className={value ? 'text-gray-800' : 'text-gray-400'}>
           {selected?.label || placeholder}
-        </span>
+        </span> */}
+
+        {/* <span className={selected.length ? 'text-sm text-gray-800 ' : 'text-gray-400  text-sm'}>
+          {selected.length ? selected.map((o) => o.label).join(', ') : placeholder}
+        </span> */}
+        {renderChips && multiple && selected.length > 0 ? (
+          <div className="flex flex-wrap gap-2">
+            {selected.map((opt) => (
+              <span
+                key={opt.value}
+                className="flex border-[#C3CAD9] border items-center gap-2 px-3 py-1 rounded-full
+         text-sm text-gray-700"
+              >
+                {opt.label}
+                <button
+                  type="button"
+                  className="text-gray-500 hover:text-gray-700"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onChange(selectedValues.filter((v) => v !== opt.value));
+                  }}
+                >
+                  ×
+                </button>
+              </span>
+            ))}
+          </div>
+        ) : (
+          <span className={selected.length ? 'text-sm text-gray-800' : 'text-gray-400 text-sm'}>
+            {selected.length ? selected.map((o) => o.label).join(', ') : placeholder}
+          </span>
+        )}
+
         <DropdownIcon />
       </button>
 
@@ -106,9 +144,22 @@ const FormDropdown = ({
               <button
                 key={opt.value}
                 type="button"
+                // onClick={() => {
+                //   onChange(opt.value);
+                //   setOpen(false);
+                //   setSearch('');
+                // }}
                 onClick={() => {
-                  onChange(opt.value);
-                  setOpen(false);
+                  if (!multiple) {
+                    onChange(opt.value);
+                    setOpen(false);
+                  } else {
+                    const next = selectedValues.includes(opt.value)
+                      ? selectedValues.filter((v) => v !== opt.value)
+                      : [...selectedValues, opt.value];
+
+                    onChange(next);
+                  }
                   setSearch('');
                 }}
                 className="

@@ -53,6 +53,20 @@ export type CategoryMetaResponse = {
   }[];
 };
 
+export type DepartmentMetaResponse = {
+  hodUsers: {
+    id: string;
+    name: string;
+    email: string;
+  }[];
+  categories: {
+    id: string;
+    name: string;
+    // categoryId: string | null;
+    // isAssigned: boolean;
+  }[];
+};
+
 
 export type CreateCategoryPayload = {
   name: string;

@@ -26,9 +26,9 @@ export default function OnboardingForm({ mode, defaultValues, onCancel, onSubmit
     defaultValues: defaultValues ?? {
       name: '',
       code: '',
-      subDomain: '',
-      contactEmail: '',
-      plan: 'PREMIUM',
+      subdomain: '',
+      contact_email: '',
+      plan_id: 'PREMIUM',
     },
   });
 
@@ -57,7 +57,7 @@ export default function OnboardingForm({ mode, defaultValues, onCancel, onSubmit
     },
   ];
 
-  const plan = watch('plan');
+  const plan = watch('plan_id');
 
   return (
     <div className="bg-white  flex flex-col gap-[24px] pt-[10px]  p-9   justify-center items-center rounded-2xl shadow-sm">
@@ -133,24 +133,24 @@ export default function OnboardingForm({ mode, defaultValues, onCancel, onSubmit
               <div>
                 <label className="text-sm text-[#0F172A]">Sub Domain</label>
                 <input
-                  {...register('subDomain')}
+                  {...register('subdomain')}
                   className="w-full border-b border-gray-300 py-2 focus:outline-none"
                   placeholder="ABC-ENG-001"
                 />
-                {errors.subDomain && (
-                  <p className="text-xs text-red-500">{errors.subDomain.message}</p>
+                {errors.subdomain && (
+                  <p className="text-xs text-red-500">{errors.subdomain.message}</p>
                 )}
               </div>
 
               <div>
                 <label className="text-sm text-[#0F172A]">Contact Email</label>
                 <input
-                  {...register('contactEmail')}
+                  {...register('contact_email')}
                   className="w-full border-b border-gray-300 py-2 focus:outline-none"
                   placeholder="admin@abc.edu"
                 />
-                {errors.contactEmail && (
-                  <p className="text-xs text-red-500">{errors.contactEmail.message}</p>
+                {errors.contact_email && (
+                  <p className="text-xs text-red-500">{errors.contact_email.message}</p>
                 )}
               </div>
             </div>
@@ -162,7 +162,7 @@ export default function OnboardingForm({ mode, defaultValues, onCancel, onSubmit
             <div className="flex justify-around gap-4 mb-6">
               <button
                 type="button"
-                onClick={() => setValue('plan', 'BASIC')}
+                onClick={() => setValue('plan_id', 'BASIC')}
                 className={`
     px-10 py-3 rounded-full border
     flex items-center gap-3
@@ -185,7 +185,7 @@ export default function OnboardingForm({ mode, defaultValues, onCancel, onSubmit
 
               <button
                 type="button"
-                onClick={() => setValue('plan', 'PREMIUM')}
+                onClick={() => setValue('plan_id', 'PREMIUM')}
                 className={`
     group
     px-10 py-3 rounded-full border

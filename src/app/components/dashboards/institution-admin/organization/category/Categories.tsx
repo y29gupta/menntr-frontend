@@ -39,7 +39,6 @@ export default function Categories({ setCategoryView }: Props) {
 
   const institutionId = 'INSTITUTION_ID';
 
-  // 🔹 React Query
   const {
     data: categories = [],
     isLoading,

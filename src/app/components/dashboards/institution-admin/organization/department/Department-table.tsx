@@ -1,5 +1,14 @@
-import DataTable from "@/app/components/table/DataTable";
-import { Department, departmentColumns } from "./department.column";
+import DataTable from '@/app/components/table/DataTable';
+import {
+  Department,
+  DepartmentApiData,
+  DepartmentApiResponse,
+  departmentColumns,
+  mapApiDepartmentToDepartment,
+} from './department.column';
+import { useQuery } from '@tanstack/react-query';
+import { getDepartments } from '@/app/lib/institutions.api';
+import { useState } from 'react';
 
 type Props = {
   globalFilter: string;
@@ -482,13 +491,28 @@ export default function DepartmentsTable({
   showColumnFilters,
   onEdit,
 }: Props) {
+  // const [departmentData, setDepartmentData] = useState<DepartmentApiData[]>();
+  const {
+    data: departmentResponse,
+    isLoading,
+    isError,
+  } = useQuery<DepartmentApiResponse>({
+    queryKey: ['department'],
+    queryFn: getDepartments,
+    // enabled: !!institutionId,
+  });
+  const tableData: Department[] = departmentResponse?.data.map(mapApiDepartmentToDepartment) ?? [];
+
+  console.log(departmentResponse, 'department list');
+
   return (
     <DataTable
-      data={data}
+      data={tableData}
       columns={departmentColumns(
         (row) => onEdit(row),
         (row) => console.log('Delete', row)
       )}
+      isLoading={isLoading}
       globalFilter={globalFilter}
       onGlobalFilterChange={onGlobalFilterChange}
       showColumnFilters={showColumnFilters}

@@ -7,7 +7,7 @@ export const baseSchema = {
 };
 
 export const studentAdminSchema = z.object({
-  institutionCode: z.string().nonempty('Institution code is required'),
+  institution_code: z.string().nonempty('Institution code is required'),
 
   ...baseSchema,
 });

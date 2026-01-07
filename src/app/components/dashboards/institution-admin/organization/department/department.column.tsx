@@ -5,11 +5,73 @@ export type Department = {
   id: number;
   name: string;
   code: string;
+  categoryId?: number;
+  hodUserId?: number;
   category: string;
   hod: string;
   students: number;
   faculty: number;
 };
+
+export type DepartmentApiData = {
+  id: number;
+  name: string;
+  code: string | null;
+  category: {
+    id: number;
+    name: string;
+  } | null;
+  hod: {
+    id: number;
+    name: string;
+    email: string;
+  } | null;
+  // hod: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type DepartmentApiResponse = {
+  total: number;
+  page: number;
+  limit: number;
+  data: DepartmentApiData[];
+};
+
+export type CreateDepartmentPayload = {
+  name: string;
+  code: string;
+  categoryId?: number;
+  hodUserId?: number;
+};
+
+export type UpdateDepartmentPayload = {
+  name: string;
+  code: string;
+  categoryId?: number;
+  hodUserId?: number;
+};
+
+// export const mapApiDepartmentToDepartment = (apiData: DepartmentApiData): Department => ({
+//   id: apiData.id,
+//   name: apiData.name ?? '—',
+//   code: apiData.code ?? '—',
+//   category: apiData.category?.name ?? '—',
+//   hod: apiData.hod?.name ?? '—',
+//   students: 0,
+//   faculty: 0,
+// });
+export const mapApiDepartmentToDepartment = (apiData: DepartmentApiData): Department => ({
+  id: apiData.id,
+  name: apiData.name ?? '—',
+  code: apiData.code ?? '—',
+  categoryId: apiData.category?.id,
+  hodUserId: apiData.hod?.id,
+  category: apiData.category?.name ?? '—',
+  hod: apiData.hod?.name ?? '—',
+  students: 0,
+  faculty: 0,
+});
 
 export const departmentColumns = (
   onEditDepartment: (row: Department) => void,

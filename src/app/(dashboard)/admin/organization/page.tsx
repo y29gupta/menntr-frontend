@@ -4,17 +4,23 @@ import { useState } from 'react';
 import { Search, Filter } from 'lucide-react';
 
 import OrganizationHeader from '@/app/components/dashboards/institution-admin/OrganizationHeader';
-import DepartmentForm from '@/app/components/dashboards/institution-admin/organization/department/Department-form';
+import DepartmentForm, {
+  DepartmentFormValues,
+} from '@/app/components/dashboards/institution-admin/organization/department/Department-form';
 import Categories from '@/app/components/dashboards/institution-admin/organization/category/Categories';
 import Hierarchy from '@/app/components/dashboards/institution-admin/organization/hierarchy/Hierarchy';
 import DepartmentsTable from '@/app/components/dashboards/institution-admin/organization/department/Department-table';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { createDepartment, updateDepartment } from '@/app/lib/institutions.api';
+import Batches from '@/app/components/dashboards/institution-admin/organization/batches/Batches';
 
 const Page = () => {
-  const [activeTab, setActiveTab] = useState<'Categories' | 'Departments' | 'Hierarchy'>(
-    'Departments'
-  );
+  const [activeTab, setActiveTab] = useState<
+    'Categories' | 'Departments' | 'Batches' | 'Hierarchy'
+  >('Departments');
   const [departmentView, setDepartmentView] = useState<'list' | 'form'>('list');
   const [categoryView, setCategoryView] = useState<'list' | 'form'>('list');
+  const [batchView, setBatchView] = useState<'list' | 'form'>('list');
 
   const [selectedDepartment, setSelectedDepartment] = useState<any>(null);
   const [formMode, setFormMode] = useState<'create' | 'edit'>('create');
@@ -23,7 +29,49 @@ const Page = () => {
   const [showColumnFilters, setShowColumnFilters] = useState(false);
   const hideOrganizationHeader =
     (activeTab === 'Departments' && departmentView === 'form') ||
-    (activeTab === 'Categories' && categoryView === 'form');
+    (activeTab === 'Categories' && categoryView === 'form') ||
+    (activeTab === 'Batches' && batchView === 'form');
+
+  const queryClient = useQueryClient();
+
+  const createDepartmentMutation = useMutation({
+    mutationFn: createDepartment,
+    onSuccess: () => {
+      // refresh department list
+      queryClient.invalidateQueries({ queryKey: ['department'] });
+
+      // go back to list view
+      setDepartmentView('list');
+    },
+  });
+
+  const updateDepartmentMutation = useMutation({
+    mutationFn: ({ id, payload }: { id: number; payload: any }) => updateDepartment(id, payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['department'] });
+      setDepartmentView('list');
+      setSelectedDepartment(null);
+    },
+  });
+
+  const handleDepartmentSubmit = (data: DepartmentFormValues) => {
+    const payload = {
+      name: data.name,
+      code: data.code,
+      categoryId: data.parentCategoryId ? Number(data.parentCategoryId) : undefined,
+      hodUserId: data.hodId ? Number(data.hodId) : undefined,
+    };
+
+    if (formMode === 'create') {
+      createDepartmentMutation.mutate(payload);
+    } else {
+      console.log(payload, 'update');
+      updateDepartmentMutation.mutate({
+        id: selectedDepartment.id,
+        payload,
+      });
+    }
+  };
 
   return (
     <div className="flex rounded-2xl  flex-col p-4 gap-4  shadow-[0_0_16px_0_#0F172A26] w-full">
@@ -105,22 +153,34 @@ const Page = () => {
                 defaultValues={{
                   name: selectedDepartment?.name,
                   code: selectedDepartment?.code,
-                  parentCategoryId: selectedDepartment?.parentCategoryId,
-                  hodId: selectedDepartment?.hodId,
+                  parentCategoryId: selectedDepartment?.categoryId
+                    ? String(selectedDepartment.categoryId)
+                    : undefined,
+                  hodId: selectedDepartment?.hodUserId
+                    ? String(selectedDepartment.hodUserId)
+                    : undefined,
                 }}
                 onBack={() => setDepartmentView('list')}
-                onSubmit={(data) => {
-                  if (formMode === 'create') {
-                    console.log('CREATE', data);
-                  } else {
-                    console.log('UPDATE', data);
-                  }
-                }}
+                // onSubmit={(data) => {
+                //   if (formMode === 'create') {
+                //     createDepartmentMutation.mutate({
+                //       name: data.name,
+                //       code: data.code,
+                //       categoryId: data.parentCategoryId ? Number(data.parentCategoryId) : undefined,
+                //       hodUserId: data.hodId ? Number(data.hodId) : undefined,
+                //     });
+                //   } else {
+                //     console.log('UPDATE', data);
+                //   }
+                // }}
+                onSubmit={handleDepartmentSubmit}
               />
             </>
           )}
         </>
       )}
+
+      {activeTab === 'Batches' && <Batches setBatchView={setBatchView} />}
 
       {activeTab === 'Categories' && <Categories setCategoryView={setCategoryView} />}
 

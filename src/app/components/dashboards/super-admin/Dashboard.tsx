@@ -29,6 +29,7 @@ const Dashboard = ({ onCreateInstitution, onEditInstitution }: Props) => {
   });
 
   const institutions: Institution[] = data ? mapInstitutions(data.data) : [];
+  console.log(institutions, 'ins');
 
   return (
     <main className=" h-full px-4 sm:px-6 lg:px-8 xl:px-10 py-5 flex flex-col gap-6 text-[13px] sm:text-sm lg:text-base overflow-y-auto [&::-webkit-scrollbar]:hidden scrollbar-none1">
@@ -115,20 +116,21 @@ const Dashboard = ({ onCreateInstitution, onEditInstitution }: Props) => {
         </div>
 
         {/* TanStack Table */}
-        {isLoading && (
+        {/* {isLoading && (
           <div className="flex items-center justify-center min-h-[60vh]">
             <Spin size="large" />
           </div>
-        )}
+        )} */}
         {isError && <p className="text-red-500">Failed to load institutions</p>}
 
-        {!isLoading && !isError && (
+        {!isError && (
           <DataTable
             columns={institutionColumns(onEditInstitution)}
             data={institutions}
             globalFilter={search}
             onGlobalFilterChange={setSearch}
             showColumnFilters={showColumnFilters}
+            isLoading={isLoading}
           />
         )}
       </div>
