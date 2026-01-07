@@ -1,16 +1,17 @@
 'use client';
 
 import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import ModuleSelector from '../selectors/ModuleSelector';
 import { SetPermissionsModal } from '@/app/ui/modals/SetPermissionsModal';
 import ModulesGrid from './ModulesGrid';
-import { moduleOptions, modules } from './module.config';
+import { fetchModules } from '@/app/lib/api/fetchModules';
+import type { Module } from '@/app/lib/api/fetchModules';
 
 type Props = {
   register: any;
   selectedModules: string[];
-  onNext?: () => void; // ✅ optional (parent doesn’t pass it)
-
+  onNext?: () => void;
   modulePermissions: Record<string, string[]>;
   setModulePermissions: React.Dispatch<React.SetStateAction<Record<string, string[]>>>;
 };
@@ -23,7 +24,42 @@ const ModulesSection = ({
   setModulePermissions,
 }: Props) => {
   const [openPermissions, setOpenPermissions] = useState(false);
-  const [activeModule, setActiveModule] = useState<string | null>(null);
+  const [activeModule, setActiveModule] = useState<Module | null>(null);
+
+  const { data, isLoading, isError, error } = useQuery({
+    queryKey: ['modules'],
+    queryFn: fetchModules,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const modules: Module[] = data?.data || [];
+
+  if (isLoading) {
+    return (
+      <div className="bg-white rounded-lg shadow-sm p-8">
+        <div className="flex items-center justify-center py-12 text-gray-500">Loading modules…</div>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="bg-white rounded-lg shadow-sm p-8">
+        <div className="flex flex-col items-center justify-center py-12 gap-4">
+          <div className="text-red-500">
+            Error: {error instanceof Error ? error.message : 'Failed to load modules'}
+          </div>
+
+          <button
+            onClick={() => window.location.reload()}
+            className="px-4 py-2 text-sm text-purple-600 hover:text-purple-700"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-white rounded-lg shadow-sm p-8">
@@ -36,22 +72,20 @@ const ModulesSection = ({
       {selectedModules.length > 0 && (
         <ModulesGrid
           selectedModules={selectedModules}
-          moduleOptions={moduleOptions}
-          onOpenPermissions={(m: string) => {
+          modules={modules}
+          onOpenPermissions={(m: Module) => {
             setActiveModule(m);
             setOpenPermissions(true);
           }}
         />
       )}
 
-      {/* GO NEXT */}
-
       <div className="mt-8 flex justify-center">
         <button
           type="button"
           onClick={onNext}
-          className="px-10 py-2.5 rounded-full text-sm font-medium 
-              bg-[linear-gradient(90deg,#904BFF_0%,#C053C2_100%)] text-white"
+          className="px-10 py-2.5 rounded-full text-sm font-medium
+            bg-[linear-gradient(90deg,#904BFF_0%,#C053C2_100%)] text-white"
         >
           Go Next
         </button>
@@ -59,8 +93,8 @@ const ModulesSection = ({
 
       <SetPermissionsModal
         open={openPermissions}
-        moduleName={activeModule}
-        existingPermissions={activeModule ? modulePermissions[activeModule] : []}
+        moduleName={activeModule?.name ?? ''}
+        existingPermissions={activeModule ? (modulePermissions[activeModule.id] ?? []) : []}
         onClose={() => {
           setOpenPermissions(false);
           setActiveModule(null);
@@ -68,7 +102,7 @@ const ModulesSection = ({
         onConfirm={(moduleName, permissions) => {
           setModulePermissions((prev) => ({
             ...prev,
-            [moduleName]: permissions,
+            [String(activeModule?.id)]: permissions,
           }));
           setOpenPermissions(false);
           setActiveModule(null);

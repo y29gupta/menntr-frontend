@@ -1,29 +1,107 @@
-'use client';
+"use client";
 
-const ModuleCard = ({ moduleName, options, onSetPermissions }: any) => {
+import { useQuery } from "@tanstack/react-query";
+import {
+  fetchModuleFeatures,
+  Feature,
+  Module,
+} from "@/app/lib/api/fetchModules";
+import { useState, useEffect } from "react";
+
+const ModuleCard = ({
+  module,
+  onSetPermissions,
+}: {
+  module: Module;
+  onSetPermissions: () => void;
+}) => {
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ["features", module.id],
+    queryFn: () => fetchModuleFeatures(module.id),
+  });
+
+  const features: Feature[] = data?.data || [];
+
+  // 🔹 Local state for checkboxes
+  const [selected, setSelected] = useState<number[]>([]);
+
+  // 🔹 Reset when features load
+  useEffect(() => {
+    if (features.length) {
+      setSelected([]); // nothing selected initially
+    }
+  }, [features]);
+
+  // 🔹 Select All Handler
+  const toggleSelectAll = () => {
+    if (selected.length === features.length) {
+      setSelected([]); // unselect all
+    } else {
+      setSelected(features.map((f) => f.id)); // select all
+    }
+  };
+
+  // 🔹 Toggle Single Feature
+  const toggleFeature = (id: number) => {
+    setSelected((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+    );
+  };
+
+  const isAllSelected =
+    features.length > 0 && selected.length === features.length;
+
   return (
     <div className="bg-white border-2 border-purple-300 rounded-3xl p-6 shadow-sm flex flex-col">
       <header className="font-semibold text-gray-700 text-base pb-4 border-b border-gray-200">
-        {moduleName}
+        {module.name}
       </header>
 
       <div className="space-y-4 mt-4 flex-grow">
-        {options.map((opt: string, index: number) => (
-          <label key={opt} className="flex items-center gap-3 cursor-pointer">
-            <input
-              type="checkbox"
-              defaultChecked={index === 0}
-              className="w-5 h-5 shrink-0 rounded border-2 border-gray-300"
-            />
-            <span className={index === 0 ? 'text-gray-700 font-medium' : 'text-gray-600'}>
-              {opt}
-            </span>
-          </label>
-        ))}
+        {isLoading && <div>Loading features…</div>}
+
+        {isError && (
+          <div className="text-red-500">Failed to load features.</div>
+        )}
+
+        {!isLoading && features.length > 0 && (
+          <>
+            {/* ✅ SELECT ALL */}
+            <label className="flex items-center gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={isAllSelected}
+                onChange={toggleSelectAll}
+                className="w-5 h-5 shrink-0 rounded border-2 border-gray-300"
+              />
+              <span className="text-gray-800 font-medium">All</span>
+            </label>
+
+            {/* ✅ INDIVIDUAL FEATURES */}
+            {features.map((f) => (
+              <label
+                key={f.id}
+                className="flex items-center gap-3 cursor-pointer"
+              >
+                <input
+                  type="checkbox"
+                  checked={selected.includes(f.id)}
+                  onChange={() => toggleFeature(f.id)}
+                  className="w-5 h-5 shrink-0 rounded border-2 border-gray-300"
+                />
+                <span className="text-gray-700">{f.name}</span>
+              </label>
+            ))}
+          </>
+        )}
       </div>
 
       <footer className="pt-4 mt-4 border-t border-gray-200 text-[#7B3AEC]">
-        <button type="button" onClick={onSetPermissions} className="w-full font-semibold text-base">
+        <button
+          type="button"
+          onClick={onSetPermissions}
+          className="w-full font-semibold text-base"
+        >
           Set Permissions
         </button>
       </footer>
