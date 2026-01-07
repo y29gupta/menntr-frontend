@@ -16,6 +16,31 @@ type Props = {
   setModulePermissions: React.Dispatch<React.SetStateAction<Record<string, string[]>>>;
 };
 
+const mapModuleToDummyKey = (name: string) => {
+  switch (name) {
+    case 'User Management':
+      return 'User role and management';
+
+    case 'Organization':
+    case 'Organization Structure':
+      return 'Organization structure';
+
+    case 'Student Management':
+    case 'Students':
+      return 'Student management';
+
+    case 'Assessment':
+      return 'Assessment management';
+
+    case 'Reports':
+    case 'Analytics':
+      return 'Report and analytics';
+
+    default:
+      return name;
+  }
+};
+
 const ModulesSection = ({
   register,
   selectedModules,
@@ -93,17 +118,21 @@ const ModulesSection = ({
 
       <SetPermissionsModal
         open={openPermissions}
-        moduleName={activeModule?.name ?? ''}
-        existingPermissions={activeModule ? (modulePermissions[activeModule.id] ?? []) : []}
+        moduleId={activeModule?.id ?? null}
+        moduleName={activeModule?.name ?? null}
+        existingPermissions={activeModule ? (modulePermissions[String(activeModule.id)] ?? []) : []}
         onClose={() => {
           setOpenPermissions(false);
           setActiveModule(null);
         }}
         onConfirm={(moduleName, permissions) => {
+          if (!activeModule) return;
+
           setModulePermissions((prev) => ({
             ...prev,
-            [String(activeModule?.id)]: permissions,
+            [String(activeModule.id)]: permissions,
           }));
+
           setOpenPermissions(false);
           setActiveModule(null);
         }}

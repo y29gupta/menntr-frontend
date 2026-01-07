@@ -21,27 +21,20 @@ const ModuleCard = ({
   });
 
   const features: Feature[] = data?.data || [];
-
-  // 🔹 Local state for checkboxes
   const [selected, setSelected] = useState<number[]>([]);
 
-  // 🔹 Reset when features load
   useEffect(() => {
-    if (features.length) {
-      setSelected([]); // nothing selected initially
-    }
+    setSelected([]);
   }, [features]);
 
-  // 🔹 Select All Handler
   const toggleSelectAll = () => {
     if (selected.length === features.length) {
-      setSelected([]); // unselect all
+      setSelected([]);
     } else {
-      setSelected(features.map((f) => f.id)); // select all
+      setSelected(features.map((f) => f.id));
     }
   };
 
-  // 🔹 Toggle Single Feature
   const toggleFeature = (id: number) => {
     setSelected((prev) =>
       prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
@@ -66,7 +59,6 @@ const ModuleCard = ({
 
         {!isLoading && features.length > 0 && (
           <>
-            {/* ✅ SELECT ALL */}
             <label className="flex items-center gap-3 cursor-pointer">
               <input
                 type="checkbox"
@@ -77,12 +69,8 @@ const ModuleCard = ({
               <span className="text-gray-800 font-medium">All</span>
             </label>
 
-            {/* ✅ INDIVIDUAL FEATURES */}
             {features.map((f) => (
-              <label
-                key={f.id}
-                className="flex items-center gap-3 cursor-pointer"
-              >
+              <label key={f.id} className="flex items-center gap-3 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={selected.includes(f.id)}

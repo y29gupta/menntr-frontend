@@ -12,7 +12,11 @@ const ModulesGrid = ({ selectedModules, modules, onOpenPermissions }: any) => {
       {modules
         .filter((m: Module) => selectedModules.includes(String(m.id)))
         .map((m: Module) => (
-          <ModuleCard key={m.id} module={m} onSetPermissions={() => onOpenPermissions(m)} />
+          <ModuleCard
+            key={m.id}
+            module={m}
+            onSetPermissions={() => onOpenPermissions(m)}
+          />
         ))}
     </div>
   );
