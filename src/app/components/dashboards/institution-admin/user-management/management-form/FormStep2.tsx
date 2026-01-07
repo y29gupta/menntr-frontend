@@ -116,10 +116,11 @@ const UserPermission = ({ mode, onBack, onFormSubmit, defaultValues, onNext }: P
   return (
     <form onSubmit={handleSubmit(onFormSubmit)} className="w-full flex flex-col gap-4">
       <FormHeader
-        onBack={() => {
-          (onBack(), router.back());
-        }}
         title={mode === 'edit' ? 'Edit User' : 'Add User'}
+        onBack={() => {
+          onBack();
+          router.push('/admin/user-management');
+        }}
       />
 
       <div className="bg-white rounded-lg shadow-sm p-8">

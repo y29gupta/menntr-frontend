@@ -69,7 +69,7 @@ const FormDropdown = ({
 
       {/* Dropdown panel */}
       {open && (
-        <div className="absolute z-50 mt-2 min-w-full w-full sm:w-[120%] md:w-[160%] lg:w-[200%] max-w-[90vw] rounded-2xl bg-white shadow-[0_4px_16px_0_#00000033]">
+        <div className="absolute z-50 mt-2 min-w-full w-full max-w-[90vw] rounded-2xl bg-white shadow-[0_4px_16px_0_#00000033]">
           {/* 🔍 Search (optional) */}
           {searchable && (
             <div className="p-3">
