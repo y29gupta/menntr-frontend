@@ -1,16 +1,13 @@
-"use client";
+'use client';
+import SuperAdminIcon from '@/app/components/icons/SuperAdminIcon';
+import Profile from '@/app/ui/Profile';
+import { useRouter } from 'next/navigation';
+import React from 'react';
 
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
-
-const Page = () => {
+const page = () => {
   const router = useRouter();
-
-  useEffect(() => {
-    router.replace("/admin/dashboard"); 
-  }, [router]);
-
-  return null; 
+  router.push('/admin/dashboard');
+  return <></>;
 };
 
-export default Page;
+export default page;

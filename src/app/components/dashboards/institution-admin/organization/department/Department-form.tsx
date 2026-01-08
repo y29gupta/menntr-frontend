@@ -6,6 +6,9 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import DropdownIcon from '../../../../icons/DropdownIcon';
 import FormDropdown from '@/app/ui/FormDropdown';
+import { getDepartmentMeta } from '@/app/lib/institutions.api';
+import { useQuery } from '@tanstack/react-query';
+import { meta } from 'zod/v4/core';
 
 export const departmentSchema = z.object({
   name: z.string().min(1, 'Department name is required'),
@@ -33,6 +36,17 @@ const DepartmentForm = ({ mode, defaultValues, onBack, onSubmit }: Props) => {
     resolver: zodResolver(departmentSchema),
     defaultValues,
   });
+
+  const { data: metaData, isLoading } = useQuery({
+    queryKey: ['department-meta'],
+    queryFn: getDepartmentMeta,
+  });
+
+  const Categoryoption = metaData?.categories.map((item) => ({ label: item.name, value: item.id }));
+  const AssignHODoption = metaData?.hodUsers.map((item) => ({
+    label: item.name,
+    value: item.id,
+  }));
 
   return (
     <div className="w-full">
@@ -106,10 +120,11 @@ const DepartmentForm = ({ mode, defaultValues, onBack, onSubmit }: Props) => {
                     placeholder="Select Parent Category"
                     value={field.value}
                     onChange={field.onChange}
-                    options={[
-                      { label: 'Engineering', value: 'engineering' },
-                      { label: 'Arts & Science', value: 'arts' },
-                    ]}
+                    // options={[
+                    //   { label: 'Engineering', value: 'engineering' },
+                    //   { label: 'Arts & Science', value: 'arts' },
+                    // ]}
+                    options={Categoryoption || []}
                   />
                 )}
               />
@@ -130,10 +145,11 @@ const DepartmentForm = ({ mode, defaultValues, onBack, onSubmit }: Props) => {
                     searchPlaceholder="Search for Users"
                     value={field.value}
                     onChange={field.onChange}
-                    options={[
-                      { label: 'Dr. Rajesh Kumar', value: '1' },
-                      { label: 'Dr. Anil Sharma', value: '2' },
-                    ]}
+                    // options={[
+                    //   { label: 'Dr. Rajesh Kumar', value: '1' },
+                    //   { label: 'Dr. Anil Sharma', value: '2' },
+                    // ]}
+                    options={AssignHODoption || []}
                   />
                 )}
               />

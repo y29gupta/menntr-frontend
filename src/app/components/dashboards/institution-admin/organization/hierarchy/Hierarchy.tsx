@@ -8,16 +8,31 @@ import {
   DragOverlay,
 } from '@dnd-kit/core';
 import { useState } from 'react';
+import { useMutation, useQuery } from '@tanstack/react-query';
+
 import DragAddButton from './DragAddButton';
 import HierarchyRow from './HierarchyRow';
 import DragOverlayUI from './DragOverlayUI';
-import { Category } from './hierarchy.types';
-// import { Category } from './types';
+
+import CategoryForm from '../category/CategoryForm';
+import DepartmentForm from '../department/Department-form';
+
+import { createDepartment, getHierarchy } from '@/app/lib/institutions.api';
+import { OrganizationTreeModal } from './OrganizationTreeModal';
 
 export default function Hierarchy() {
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [isDragging, setIsDragging] = useState(false);
+  const { data, refetch } = useQuery({
+    queryKey: ['organization-hierarchy'],
+    queryFn: getHierarchy,
+  });
 
+  const categories = data?.institution?.children ?? [];
+
+  const [isDragging, setIsDragging] = useState(false);
+  const [showCategoryForm, setShowCategoryForm] = useState(false);
+  const [showDepartmentForm, setShowDepartmentForm] = useState(false);
+  const [activeCategoryIndex, setActiveCategoryIndex] = useState<number | null>(null);
+  const [open, setOpen] = useState(false);
   const [activeDrag, setActiveDrag] = useState<{
     label: string;
     dragType: 'ADD_CATEGORY' | 'ADD_DEPARTMENT';
@@ -29,6 +44,10 @@ export default function Hierarchy() {
   } | null>(null);
 
   const [dropValid, setDropValid] = useState(false);
+
+  const createDepartmentMutation = useMutation({
+    mutationFn: createDepartment,
+  });
 
   /* ---------------- DRAG EVENTS ---------------- */
 
@@ -44,31 +63,20 @@ export default function Hierarchy() {
     const dragType = e.active.data.current?.dragType;
     const overType = e.over?.data.current?.type;
 
-    if (!dragType || !overType) return;
-
     if (dragType === 'ADD_CATEGORY' && overType === 'PRINCIPAL') {
       setDropValid(true);
-      setFeedback({
-        type: 'success',
-        message: 'Add category under principal',
-      });
+      setFeedback({ type: 'success', message: 'Add category' });
       return;
     }
 
     if (dragType === 'ADD_DEPARTMENT' && overType === 'CATEGORY') {
       setDropValid(true);
-      setFeedback({
-        type: 'success',
-        message: 'Add Department under Engineering category',
-      });
+      setFeedback({ type: 'success', message: 'Add department' });
       return;
     }
 
     setDropValid(false);
-    setFeedback({
-      type: 'error',
-      message: 'You can’t move here',
-    });
+    setFeedback({ type: 'error', message: 'Invalid drop' });
   };
 
   const handleDragEnd = (e: DragEndEvent) => {
@@ -77,35 +85,12 @@ export default function Hierarchy() {
     const overType = e.over?.data.current?.type;
 
     if (dragType === 'ADD_CATEGORY' && overType === 'PRINCIPAL') {
-      setCategories((prev) => [
-        ...prev,
-        {
-          id: crypto.randomUUID(),
-          name: 'Category',
-          isNew: true,
-          departments: [],
-        },
-      ]);
+      setShowCategoryForm(true);
     }
 
     if (dragType === 'ADD_DEPARTMENT' && overType === 'CATEGORY') {
-      setCategories((prev) =>
-        prev.map((cat) =>
-          cat.id === overId
-            ? {
-                ...cat,
-                departments: [
-                  ...cat.departments,
-                  {
-                    id: crypto.randomUUID(),
-                    name: 'New Department',
-                    isNew: true,
-                  },
-                ],
-              }
-            : cat
-        )
-      );
+      setActiveCategoryIndex(Number(overId));
+      setShowDepartmentForm(true);
     }
 
     setIsDragging(false);
@@ -115,80 +100,116 @@ export default function Hierarchy() {
   };
 
   return (
-    <DndContext onDragStart={handleDragStart} onDragOver={handleDragOver} onDragEnd={handleDragEnd}>
-      {/* HEADER */}
-      <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-4 mb-6">
-        {/* LEFT */}
-        <div>
-          <div className="flex items-center gap-2">
-            <h2 className="text-lg font-semibold text-gray-800">Organization Hierarchy</h2>
-            <a href="#" className="text-sm text-purple-600 flex items-center gap-1">
+    <>
+      <DndContext
+        onDragStart={handleDragStart}
+        onDragOver={handleDragOver}
+        onDragEnd={handleDragEnd}
+      >
+        {/* HEADER (UNCHANGED) */}
+        <div className="flex flex-col md:flex-row md:justify-between gap-4 mb-6">
+          <div className="flex  ">
+            <div>
+              <h2 className="text-lg font-semibold text-gray-800">Organization Hierarchy</h2>
+              <p className="text-sm text-gray-600">ABC Engineering College</p>
+            </div>
+            <a
+              onClick={() => setOpen(true)}
+              className="text-sm text-purple-600 flex   gap-1 ml-1 mt-1"
+            >
               View your organization tree ↗
             </a>
           </div>
-          <p className="mt-1 text-sm text-gray-600">ABC Engineering College</p>
-        </div>
+          <OrganizationTreeModal open={open} onClose={() => setOpen(false)} />
 
-        {/* RIGHT */}
-        <div className="flex flex-col md:items-end gap-2 w-full md:w-auto">
-          <p className="text-sm text-gray-500">Drag and drop to add</p>
-          <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
-            <DragAddButton id="add-category" label="Add Category" dragType="ADD_CATEGORY" />
-            <DragAddButton id="add-department" label="Add Department" dragType="ADD_DEPARTMENT" />
-          </div>
-        </div>
-      </div>
-
-      {/* PRINCIPAL */}
-      <HierarchyRow
-        id="principal"
-        type="PRINCIPAL"
-        label="Institutional admin (Principal)"
-        showDropLine
-        isDropAllowed={dropValid}
-      />
-
-      {/* CATEGORIES */}
-      <div className="mt-4 ml-2 sm:ml-4 md:ml-6 space-y-4">
-        {categories.map((cat) => (
-          <div key={cat.id}>
-            <HierarchyRow
-              id={cat.id}
-              type="CATEGORY"
-              label={cat.name}
-              isNew={cat.isNew}
-              showDropLine
-              isDropAllowed={dropValid}
-            />
-
-            <div className="ml-4 sm:ml-6 md:ml-10 mt-2 space-y-2">
-              {cat.departments.map((dept) => (
-                <HierarchyRow
-                  key={dept.id}
-                  id={dept.id}
-                  type="DEPARTMENT"
-                  label={dept.name}
-                  isNew={dept.isNew}
-                  showDropLine={false}
-                  isDropAllowed={false}
-                />
-              ))}
+          <div>
+            <p className="text-sm text-gray-500">Drag and drop to add</p>
+            <div className="flex gap-3">
+              <DragAddButton id="add-category" label="Add Category" dragType="ADD_CATEGORY" />
+              <DragAddButton id="add-department" label="Add Department" dragType="ADD_DEPARTMENT" />
             </div>
           </div>
-        ))}
-      </div>
+        </div>
 
-      {/* FULL WHITE OVERLAY */}
-      {isDragging && <div className="fixed inset-0 bg-white/80 z-40" />}
+        {/* PRINCIPAL */}
+        <HierarchyRow
+          id="principal"
+          type="PRINCIPAL"
+          label="Institutional admin (Principal)"
+          showDropLine
+          isDropAllowed={dropValid}
+        />
 
-      {/* DRAG OVERLAY */}
-      <DragOverlay>
-        {activeDrag && (
-          <div className="z-50">
-            <DragOverlayUI label={activeDrag.label} feedback={feedback} />
+        {/* CATEGORIES */}
+        <div className="mt-4 ml-6 space-y-4">
+          {categories.map((cat, index) => (
+            <div key={index}>
+              <HierarchyRow
+                id={String(index)}
+                type="CATEGORY"
+                label="Category"
+                showDropLine
+                isDropAllowed={dropValid}
+              />
+
+              <div className="ml-8 mt-2 space-y-2">
+                {cat.children?.map((_, deptIndex) => (
+                  <HierarchyRow
+                    key={deptIndex}
+                    id={`${index}-${deptIndex}`}
+                    type="DEPARTMENT"
+                    label="Department"
+                    showDropLine={false}
+                    isDropAllowed={false}
+                  />
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {isDragging && <div className="fixed inset-0 bg-white/80 z-40" />}
+
+        <DragOverlay>
+          {activeDrag && <DragOverlayUI label={activeDrag.label} feedback={feedback} />}
+        </DragOverlay>
+      </DndContext>
+
+      {/* CATEGORY FORM OVERLAY */}
+      {showCategoryForm && (
+        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center">
+          <div className="bg-white rounded-lg p-6 w-full max-w-xl">
+            <CategoryForm
+              mode="add"
+              onCancel={() => setShowCategoryForm(false)}
+              onSubmitSuccess={() => {
+                setShowCategoryForm(false);
+                refetch();
+              }}
+            />
           </div>
-        )}
-      </DragOverlay>
-    </DndContext>
+        </div>
+      )}
+
+      {/* DEPARTMENT FORM OVERLAY */}
+      {showDepartmentForm && (
+        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center">
+          <div className="bg-white rounded-lg p-6 w-full max-w-xl">
+            <DepartmentForm
+              mode="create"
+              onBack={() => setShowDepartmentForm(false)}
+              onSubmit={(data) => {
+                createDepartmentMutation.mutate(data, {
+                  onSuccess: () => {
+                    setShowDepartmentForm(false);
+                    refetch(); // hierarchy refetch
+                  },
+                });
+              }}
+            />
+          </div>
+        </div>
+      )}
+    </>
   );
 }

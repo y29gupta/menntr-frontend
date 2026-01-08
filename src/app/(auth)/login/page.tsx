@@ -7,7 +7,7 @@ import { Suspense } from 'react';
 function LoginPageContent() {
   const params = useSearchParams();
   const role = params.get('role') ?? '';
-  console.log(role, 'roles');
+  console.log(role, 'roless');
 
   return (
     <div className="max-w-full px-4 sm:px-6 md:px-8 lg:px-20 overflow-x-hidden max-h-[100vh]">

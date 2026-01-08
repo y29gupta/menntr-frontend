@@ -196,7 +196,7 @@ const Dashboard = ({ onCreateInstitution, onEditInstitution }: Props) => {
         )}
         {isError && <p className="text-red-500">Failed to load institutions</p>}
 
-        {!isLoading && !isError && (
+        {!isError && (
           <DataTable
             columns={institutionColumns(onEditInstitution)}
             data={institutions}

@@ -26,8 +26,9 @@ export default function OnboardingForm({ mode, defaultValues, onCancel, onSubmit
     defaultValues: defaultValues ?? {
       name: '',
       code: '',
-      contactEmail: '',
-      plan: 'PREMIUM',
+      subdomain: '',
+      contact_email: '',
+      plan_id: 'PREMIUM',
     },
   });
 
@@ -56,7 +57,7 @@ export default function OnboardingForm({ mode, defaultValues, onCancel, onSubmit
     },
   ];
 
-  const plan = watch('plan');
+  const plan = watch('plan_id');
 
   return (
     <div className="flex flex-col items-center justify-center gap-[24px] rounded-2xl bg-white p-9 pt-[10px] shadow-sm">
@@ -112,16 +113,27 @@ export default function OnboardingForm({ mode, defaultValues, onCancel, onSubmit
                 />
                 {errors.code && <p className="text-xs text-red-500">{errors.code.message}</p>}
               </div>
+              <div>
+                <label className="text-sm text-[#0F172A]">Sub Domain</label>
+                <input
+                  {...register('subdomain')}
+                  className="w-full border-b border-gray-300 py-2 focus:outline-none"
+                  placeholder="ABC-ENG-001"
+                />
+                {errors.subdomain && (
+                  <p className="text-xs text-red-500">{errors.subdomain.message}</p>
+                )}
+              </div>
 
               <div>
                 <label className="text-sm text-[#0F172A]">Contact Email</label>
                 <input
-                  {...register('contactEmail')}
+                  {...register('contact_email')}
                   className="w-full border-b border-gray-300 py-2 focus:outline-none"
                   placeholder="admin@abc.edu"
                 />
-                {errors.contactEmail && (
-                  <p className="text-xs text-red-500">{errors.contactEmail.message}</p>
+                {errors.contact_email && (
+                  <p className="text-xs text-red-500">{errors.contact_email.message}</p>
                 )}
               </div>
             </div>
@@ -133,12 +145,18 @@ export default function OnboardingForm({ mode, defaultValues, onCancel, onSubmit
             <div className="mb-6 flex justify-around gap-4">
               <button
                 type="button"
-                onClick={() => setValue('plan', 'BASIC')}
-                className={`flex cursor-pointer items-center gap-3 rounded-full border px-10 py-3 transition-all duration-300 ease-in-out hover:bg-[linear-gradient(90deg,#7F3FFF_0%,#A844B3_100%)] hover:!text-white ${
-                  plan === 'BASIC'
-                    ? 'border-purple-500 text-purple-600'
-                    : 'border-gray-300 text-gray-700'
-                }`}
+                onClick={() => setValue('plan_id', 'BASIC')}
+                className={`
+    px-10 py-3 rounded-full border
+    flex items-center gap-3
+    cursor-pointer
+    transition-all duration-300 ease-in-out
+
+    hover:!text-white
+    hover:bg-[linear-gradient(90deg,#7F3FFF_0%,#A844B3_100%)]
+
+    ${plan === 'BASIC' ? 'border-purple-500 text-purple-600' : 'border-gray-300 text-gray-700'}
+  `}
               >
                 {plan === 'BASIC' && (
                   <span className="group-hover:!text-white">
@@ -150,12 +168,19 @@ export default function OnboardingForm({ mode, defaultValues, onCancel, onSubmit
 
               <button
                 type="button"
-                onClick={() => setValue('plan', 'PREMIUM')}
-                className={`group flex cursor-pointer items-center gap-3 rounded-full border px-10 py-3 transition-all duration-300 ease-in-out hover:bg-[linear-gradient(90deg,#7F3FFF_0%,#A844B3_100%)] hover:!text-white ${
-                  plan === 'PREMIUM'
-                    ? 'border-purple-500 text-purple-600'
-                    : 'border-gray-300 text-gray-700'
-                }`}
+                onClick={() => setValue('plan_id', 'PREMIUM')}
+                className={`
+    group
+    px-10 py-3 rounded-full border
+    flex items-center gap-3
+    cursor-pointer
+    transition-all duration-300 ease-in-out
+
+    hover:!text-white
+    hover:bg-[linear-gradient(90deg,#7F3FFF_0%,#A844B3_100%)]
+
+    ${plan === 'PREMIUM' ? 'border-purple-500 text-purple-600' : 'border-gray-300 text-gray-700'}
+  `}
               >
                 {plan === 'PREMIUM' && (
                   <span className="">

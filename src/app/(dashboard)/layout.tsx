@@ -5,6 +5,8 @@ import { usePathname } from 'next/navigation';
 import Sidebar from '../components/layout/Sidebar';
 import { Role } from '../lib/roles';
 
+import 'reactflow/dist/style.css';
+
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const role = pathname.split('/')[1] as Role;
@@ -21,7 +23,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }, []);
 
   return (
-    <div className="flex w-full h-screen bg-[#F7F9FC] overflow-hidden">
+    <div className="flex  w-full max-h-screen bg-white ">
       {!collapsed && (
         <div
           className="fixed inset-0 bg-black/40 z-40 md:hidden"

@@ -101,21 +101,21 @@ export default function BulkUploadInterface({ onBack }: { onBack: () => void }) 
           <div className="flex flex-col sm:flex-row gap-3 mb-6">
             <FormDropdown
               value={selectedCategory}
-              onChange={setSelectedCategory}
+              onChange={(v) => setSelectedCategory(Array.isArray(v) ? (v[0] ?? '') : v)}
               options={categoryOptions}
               placeholder="Select Category"
             />
 
             <FormDropdown
               value={selectedRole}
-              onChange={setSelectedRole}
+              onChange={(v) => setSelectedRole(Array.isArray(v) ? (v[0] ?? '') : v)}
               options={roleOptions}
               placeholder="Select Role"
             />
 
             <FormDropdown
               value={selectedBatch}
-              onChange={setSelectedBatch}
+              onChange={(v) => setSelectedBatch(Array.isArray(v) ? (v[0] ?? '') : v)}
               options={batchOptions}
               placeholder="Select Batch"
               searchable

@@ -1,15 +1,15 @@
 import OrganizationIcon from '../../icons/OrganizationIcon';
 
 type Props = {
-  activeTab: 'Categories' | 'Departments' | 'Hierarchy';
+  activeTab: 'Categories' | 'Departments' | 'Batches' | 'Hierarchy';
   onTabChange: (tab: Props['activeTab']) => void;
 };
 
-const tabs: Props['activeTab'][] = ['Categories', 'Departments', 'Hierarchy'];
+const tabs: Props['activeTab'][] = ['Categories', 'Departments', 'Batches', 'Hierarchy'];
 
 export default function OrganizationHeader({ activeTab, onTabChange }: Props) {
   return (
-    <div className="w-full  flex flex-col gap-6  ">
+    <div className="w-full   flex flex-col gap-6  ">
       {/* <div className="flex justify-between items-center ">
             <div className="">
               <div className="flex space-x-2 text-xl items-center">
