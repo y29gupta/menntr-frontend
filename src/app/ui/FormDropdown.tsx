@@ -20,6 +20,7 @@ interface Props {
   searchPlaceholder?: string;
   multiple?: boolean;
   renderChips?: boolean;
+  containerClassName?: string;
 }
 
 const FormDropdown = ({
@@ -31,6 +32,8 @@ const FormDropdown = ({
   searchPlaceholder = 'Search',
   multiple = false,
   renderChips = false,
+
+  containerClassName,
 }: Props) => {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState('');
@@ -83,16 +86,25 @@ const FormDropdown = ({
          text-sm text-gray-700"
               >
                 {opt.label}
-                <button
-                  type="button"
-                  className="text-gray-500 hover:text-gray-700"
+                <span
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`Remove ${opt.label}`}
+                  className="cursor-pointer text-gray-500 hover:text-gray-700"
                   onClick={(e) => {
                     e.stopPropagation();
                     onChange(selectedValues.filter((v) => v !== opt.value));
                   }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      onChange(selectedValues.filter((v) => v !== opt.value));
+                    }
+                  }}
                 >
                   ×
-                </button>
+                </span>
               </span>
             ))}
           </div>
@@ -167,9 +179,9 @@ const FormDropdown = ({
                   hover:bg-purple-50
                 "
               >
-                <p className="text-sm font-medium text-gray-800">{opt.label}</p>
+                <p className="text-sm font-light  !text-[#0F172A]">{opt.label}</p>
 
-                {opt.subLabel && <p className="text-xs text-gray-500">{opt.subLabel}</p>}
+                {opt.subLabel && <p className="text-xs !text-[#0F172A]">{opt.subLabel}</p>}
               </button>
             ))}
           </div>

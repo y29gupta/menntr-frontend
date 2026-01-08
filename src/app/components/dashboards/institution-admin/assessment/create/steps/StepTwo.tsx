@@ -1,5 +1,6 @@
-import { UseFormReturn } from 'react-hook-form';
+import { Controller, UseFormReturn } from 'react-hook-form';
 import { CreateAssessmentForm } from '../schema';
+import FormDropdown from '@/app/ui/FormDropdown';
 
 type Props = {
   form: UseFormReturn<CreateAssessmentForm>;
@@ -7,6 +8,17 @@ type Props = {
   onNext: () => void;
   onCancel: () => void;
 };
+
+const batchOptions = [
+  {
+    label: 'CSE - 2022–2026 (A)',
+    value: 'cse-2022-2026-a',
+  },
+  {
+    label: 'ECE - 2022–2026 (E)',
+    value: 'ece-2022-2026-e',
+  },
+];
 
 export default function StepTwo({ form, onBack, onNext, onCancel }: Props) {
   const { setValue, watch, register } = form;
@@ -53,17 +65,26 @@ export default function StepTwo({ form, onBack, onNext, onCancel }: Props) {
       </div>
 
       <label className="text-sm font-medium mt-4 block">Select Batch</label>
-      <input
-        {...register('batch')}
-        placeholder="Choose Batch"
-        className="w-full border-b outline-none py-2"
-      />
 
+      <Controller
+        name="batches"
+        control={form.control}
+        render={({ field }) => (
+          <FormDropdown
+            placeholder="Select Batch"
+            options={batchOptions}
+            value={field.value}
+            onChange={field.onChange}
+            multiple
+            renderChips
+          />
+        )}
+      />
       <div className="flex justify-between mt-8">
         <button
           type="button"
           onClick={onBack}
-          className="px-6 py-2 rounded-full border text-[#7C3AED]"
+          className="px-6 py-2 rounded-full border broder-[#7C3AED] !text-[#7C3AED]"
         >
           Go Back
         </button>
@@ -72,11 +93,15 @@ export default function StepTwo({ form, onBack, onNext, onCancel }: Props) {
           <button
             type="button"
             onClick={onNext}
-            className="px-6 py-2 rounded-full text-white bg-[linear-gradient(90deg,#904BFF_0%,#C053C2_100%)]"
+            className="px-6 py-2 rounded-full !text-white bg-[linear-gradient(90deg,#904BFF_0%,#C053C2_100%)]"
           >
             Continue
           </button>
-          <button type="button" onClick={onCancel} className="px-6 py-2 rounded-full border">
+          <button
+            type="button"
+            onClick={onCancel}
+            className="px-6 py-2 broder-[#7C3AED] !text-[#7C3AED] rounded-full border"
+          >
             Cancel
           </button>
         </div>
