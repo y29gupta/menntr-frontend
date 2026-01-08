@@ -23,12 +23,12 @@ export type BatchFormValues = z.infer<typeof batchSchema>;
 
 type Props = {
   mode: 'create' | 'edit';
-  defaultValues?: Partial<BatchFormValues>;
-  batchId?: number; // ✅ ADD
+  batchId?: number;
+  editRow?: any; // raw table row
   onBack: () => void;
 };
 
-export default function BatchForm({ mode, defaultValues, batchId, onBack }: Props) {
+export default function BatchForm({ mode, batchId, onBack, editRow }: Props) {
   const {
     control,
     watch,
@@ -44,23 +44,48 @@ export default function BatchForm({ mode, defaultValues, batchId, onBack }: Prop
     },
   });
 
-  // ✅ EDIT PREFILL (CRITICAL FIX)
-  useEffect(() => {
-    if (mode === 'edit' && defaultValues) {
-      reset({
-        status: 'Active',
-        facultyIds: [],
-        ...defaultValues,
-      });
-    }
-  }, [mode, defaultValues, reset]);
-
   const { data: metaRes } = useQuery({
     queryKey: ['batch-meta'],
     queryFn: getBatchMeta,
   });
 
   const meta = metaRes?.data;
+
+  useEffect(() => {
+    if (mode === 'edit' && editRow && meta) {
+      // 🔥 RESOLVE DEPARTMENT ID (REAL FIX)
+      const resolvedDepartmentId =
+        editRow.department?.id !== 0
+          ? editRow.department?.id
+          : meta.departments.find(
+              (d: any) =>
+                d.name.trim().toLowerCase() === editRow.department?.name?.trim().toLowerCase()
+            )?.id;
+
+      reset({
+        name: editRow.name,
+
+        // ✅ CATEGORY (already OK in your case)
+        category: String(
+          typeof editRow.category === 'object'
+            ? editRow.category.id
+            : meta.categories.find(
+                (c: any) => c.name.toLowerCase() === String(editRow.category).toLowerCase()
+              )?.id
+        ),
+
+        // ✅ DEPARTMENT (THIS IS THE FIX)
+        departmentId: String(resolvedDepartmentId ?? ''),
+
+        facultyIds: editRow.coordinator ? [String(editRow.coordinator.id)] : [],
+
+        startYear: String(editRow.academic_year).split('-')[0],
+        endYear: String(editRow.academic_year).split('-')[1],
+
+        status: editRow.status,
+      });
+    }
+  }, [mode, editRow, meta, reset]);
 
   const createMutation = useMutation({
     mutationFn: createBatch,
@@ -304,11 +329,16 @@ export default function BatchForm({ mode, defaultValues, batchId, onBack }: Prop
               isActive: data.status === 'Active',
             };
 
-            if (mode === 'edit' && batchId) {
-              await updateMutation.mutateAsync({ id: batchId, payload });
+            if (mode === 'edit' && editRow?.id) {
+              await updateMutation.mutateAsync({
+                id: editRow.id,
+                payload,
+              });
             } else {
               await createMutation.mutateAsync(payload);
             }
+
+            console.log('MODE:', mode, 'EDIT ID:', editRow?.id);
 
             onBack();
           })}

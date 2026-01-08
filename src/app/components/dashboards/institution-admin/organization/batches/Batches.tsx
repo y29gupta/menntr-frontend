@@ -77,6 +77,7 @@ const Batches = ({ setBatchView }: Props) => {
             showColumnFilters={showColumnFilters}
             onTotalChange={setTotalBatches}
             onEdit={(batch) => {
+              console.log('ON EDIT ROW:', batch);
               setSelectedBatch(batch); // ✅ REQUIRED
               setView('form');
             }}
@@ -89,25 +90,7 @@ const Batches = ({ setBatchView }: Props) => {
         <BatchForm
           mode={selectedBatch ? 'edit' : 'create'}
           batchId={selectedBatch?.id} // ✅ REQUIRED
-          defaultValues={
-            selectedBatch
-              ? {
-                  name: selectedBatch.name,
-
-                  departmentId: String(selectedBatch.departmentId),
-
-                  category: String(selectedBatch.categoryId),
-
-                  facultyIds: selectedBatch.faculties.map((f: any) => String(f.id)),
-
-                  startYear: String(selectedBatch.startYear),
-                  endYear: String(selectedBatch.endYear),
-
-                  // ✅ FIXED
-                  status: selectedBatch.status,
-                }
-              : undefined
-          }
+          editRow={selectedBatch}
           onBack={() => {
             setView('list');
             setSelectedBatch(null);
