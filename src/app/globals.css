@@ -47,3 +47,39 @@ body {
   color: var(--foreground);
   font-family: var(--font-geist-sans);
 }
+
+/* Set Expiry Toggle – AntD Switch override */
+.expiry-switch.ant-switch {
+  width: 36px; /* w-9 */
+  height: 20px; /* h-5 */
+  background-color: #e4e7ec;
+   border:1px solid #BE83DF
+}
+
+.expiry-switch.ant-switch.ant-switch-checked {
+  background-color: #7f56d9;
+   border:1px solid #BE83DF
+}
+
+.expiry-switch.ant-switch .ant-switch-handle {
+  width: 16px;
+  height: 16px;
+  top: 2px;
+  left: 2px;
+  
+}
+
+.expiry-switch.ant-switch.ant-switch-checked .ant-switch-handle {
+  left: calc(100% - 18px);
+}
+
+.ant-picker {
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.ant-picker-focused {
+  border: none !important;
+  box-shadow: none !important;
+}
+

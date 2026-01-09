@@ -1,6 +1,7 @@
 import { GripVertical, Trash2, Plus } from 'lucide-react';
 import { useState } from 'react';
 import CreateMCQModal from '../components/CreateMCQModal';
+import { PublishAssessmentModal } from '@/app/ui/modals/PublishAssessmentModal/PublishAssessmentModal';
 
 type Props = {
   onBack: () => void;
@@ -59,6 +60,20 @@ const DIFFICULTY_STYLES: Record<Question['difficulty'], string> = {
 export default function StepFour({ onBack, onCancel }: Props) {
   const [isMCQOpen, setIsMCQOpen] = useState(false);
   const [questions, setQuestions] = useState<Question[]>(QUESTIONS);
+  const [open, setOpen] = useState(false);
+
+  const assessmentData = {
+    id: 'temp-id',
+    title: 'Aptitude Mock - Jan 2025',
+    description: 'Aptitude • Practice',
+    duration: 30,
+    totalMarks: questions.reduce((sum, q) => sum + q.marks, 0),
+    questions: questions.map((q) => ({
+      id: q.id,
+      title: q.question, // ✅ mapping happens here
+      type: q.type,
+    })),
+  };
 
   return (
     <>
@@ -144,7 +159,10 @@ export default function StepFour({ onBack, onCancel }: Props) {
           </button>
 
           <div className="flex flex-col gap-3 sm:flex-row">
-            <button className="rounded-full  bg-[linear-gradient(90deg,#904BFF_0%,#C053C2_100%)] px-6 py-2 text-sm font-medium !text-white">
+            <button
+              onClick={() => setOpen(true)}
+              className="rounded-full  bg-[linear-gradient(90deg,#904BFF_0%,#C053C2_100%)] px-6 py-2 text-sm font-medium !text-white"
+            >
               Publish
             </button>
             <button
@@ -162,6 +180,12 @@ export default function StepFour({ onBack, onCancel }: Props) {
             onSaveAndNext={(q) => setQuestions((prev) => [...prev, q])}
           />
         )}
+
+        <PublishAssessmentModal
+          isOpen={open}
+          onClose={() => setOpen(false)}
+          assessmentData={assessmentData}
+        />
       </div>
     </>
   );
