@@ -2,17 +2,19 @@
 
 import FormHeader from './FormHeader';
 import React, { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useFormContext } from 'react-hook-form';
 import { useRouter } from 'next/navigation';
 import { ROLE_CONFIG } from '@/app/constants/roleConfig';
 import RoleSelector from './selectors/RoleSelector';
 import CategorySelector from './selectors/CategorySelector';
 import ScopeSelectors from './selectors/ScopeSelectors';
 import ModulesSection from './module/ModulesSection';
+import ModuleSelector from './selectors/ModuleSelector';
+import { fetchModules, Module } from '@/app/lib/api/fetchModules';
 
 type CategoryKey = keyof typeof ROLE_CONFIG.categories;
 
-interface FormData {
+export interface FormData {
   roleHierarchy?: string;
   roleCategory?: CategoryKey;
   roleDepartment?: string;
@@ -29,37 +31,20 @@ interface FormData {
 type Props = {
   mode: 'create' | 'edit';
   onBack: () => void;
-  onFormSubmit: (data: FormData) => void;
-  defaultValues?: FormData;
   onNext: () => void;
 };
 
-const UserPermission = ({ mode, onBack, onFormSubmit, defaultValues, onNext }: Props) => {
-  const router = useRouter();
+const UserPermission = ({ mode, onBack, onNext }: Props) => {
+  const { register, watch, handleSubmit, setValue } = useFormContext<FormData>();
 
+  const router = useRouter();
   const [modulePermissions, setModulePermissions] = useState<Record<string, string[]>>({});
+  const [modules, setModules] = useState<Module[]>([]); // Add this
   const [roleMeta, setRoleMeta] = useState<{
     roleHierarchyId: number;
     roleType: string;
     categories: string[];
   } | null>(null);
-
-  const { register, watch, handleSubmit, setValue, reset } = useForm<FormData>({
-    defaultValues: defaultValues ?? {
-      selectedModules: [],
-      userRoleAndManagement: [],
-      organizationStructure: [],
-      studentManagement: [],
-      assessmentManagement: [],
-      reportAndAnalytics: [],
-    },
-  });
-
-  useEffect(() => {
-    if (mode === 'edit' && defaultValues) {
-      reset(defaultValues);
-    }
-  }, [mode, defaultValues, reset]);
 
   const selectedRole = watch('roleHierarchy');
   const selectedCategory = watch('roleCategory');
@@ -83,6 +68,20 @@ const UserPermission = ({ mode, onBack, onFormSubmit, defaultValues, onNext }: P
     label: b,
     value: b,
   }));
+
+  // Fetch modules on mount
+  useEffect(() => {
+    const loadModules = async () => {
+      try {
+        const response = await fetchModules();
+        setModules(response.data);
+      } catch (error) {
+        console.error('Error fetching modules:', error);
+      }
+    };
+
+    loadModules();
+  }, []);
 
   const handleRoleSelect = async (roleHierarchyId: number) => {
     const res = await fetch(
@@ -114,7 +113,7 @@ const UserPermission = ({ mode, onBack, onFormSubmit, defaultValues, onNext }: P
   const categories = roleMeta?.categories?.filter(Boolean) ?? [];
 
   return (
-    <form onSubmit={handleSubmit(onFormSubmit)} className="w-full flex flex-col gap-4">
+    <form onSubmit={handleSubmit(() => onNext())} className="w-full flex flex-col gap-4">
       <FormHeader
         title={mode === 'edit' ? 'Edit User' : 'Add User'}
         onBack={() => {
@@ -123,8 +122,10 @@ const UserPermission = ({ mode, onBack, onFormSubmit, defaultValues, onNext }: P
         }}
       />
 
-      <div className="bg-white rounded-lg shadow-sm p-8">
+      {/* Select Role & Scope Card */}
+      <div className="bg-white border-2 border-gray-200 rounded-[24px] shadow-sm p-8">
         <h2 className="text-xl font-semibold mb-6">Select Role & Scope</h2>
+        <div className="w-full h-px bg-gray-200 mb-6" />
 
         <RoleSelector
           selectedRole={selectedRole}
@@ -132,7 +133,7 @@ const UserPermission = ({ mode, onBack, onFormSubmit, defaultValues, onNext }: P
           onRoleSelect={handleRoleSelect}
         />
 
-        {categories && categories.length > 0 && (
+        {categories.length > 0 && (
           <CategorySelector
             selectedCategory={selectedCategory}
             register={register}
@@ -150,13 +151,21 @@ const UserPermission = ({ mode, onBack, onFormSubmit, defaultValues, onNext }: P
         />
       </div>
 
-      <ModulesSection
-        register={register}
-        selectedModules={selectedModules}
-        modulePermissions={modulePermissions}
-        setModulePermissions={setModulePermissions}
-        onNext={onNext}
-      />
+      {/* Select Modules/Features Card */}
+      <div className="bg-white border-2 border-gray-200 rounded-[24px] shadow-sm p-8">
+        <h2 className="text-xl font-semibold mb-6">Select Modules/Features</h2>
+        <div className="w-full h-px bg-gray-200 mb-6" />
+
+        <ModuleSelector modules={modules} selectedModules={selectedModules} register={register} />
+
+        <ModulesSection
+          register={register}
+          selectedModules={selectedModules}
+          modulePermissions={modulePermissions}
+          setModulePermissions={setModulePermissions}
+          onNext={onNext}
+        />
+      </div>
     </form>
   );
 };

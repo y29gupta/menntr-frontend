@@ -1,206 +1,135 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { z } from 'zod';
+import { useState } from 'react';
+import { useFormContext } from 'react-hook-form';
 import FormHeader from './FormHeader';
 
-type FormValues = {
-  firstName: string;
-  lastName: string;
-  email: string;
-  mobile: string;
-};
-
-const STORAGE_KEY = 'profile-form-step-1';
-
-/* ---------------- ZOD SCHEMA ---------------- */
-const profileSchema = z.object({
+/* ---------------- SCHEMA ---------------- */
+export const profileSchema = z.object({
   firstName: z.string().min(1, 'First name is required'),
   lastName: z.string().min(1, 'Last name is required'),
   email: z.string().email('Invalid email format'),
   mobile: z.string().min(10, 'Phone must be at least 10 characters'),
 });
 
-type ProfileFormProps = {
-  mode: 'create' | 'edit';
-  defaultValues?: Partial<FormValues>;
+export type ProfileFormValues = z.infer<typeof profileSchema>;
+
+type Props = {
   onBack: () => void;
-  onSubmit: (data: FormValues) => void;
+  onNext: () => void;
+  mode: 'create' | 'edit';
 };
 
-const ProfileForm = ({ mode, defaultValues, onBack, onSubmit }: ProfileFormProps) => {
+const ProfileForm = ({ onBack, onNext, mode }: Props) => {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useFormContext<ProfileFormValues>();
+
   const [preview, setPreview] = useState<string | null>(null);
-
-  const [formData, setFormData] = useState<FormValues>({
-    firstName: '',
-    lastName: '',
-    email: '',
-    mobile: '',
-  });
-
-  const [errors, setErrors] = useState<Partial<Record<keyof FormValues, string>>>({});
-
-  useEffect(() => {
-    if (mode === 'edit' && defaultValues) {
-      setFormData({
-        firstName: defaultValues.firstName || '',
-        lastName: defaultValues.lastName || '',
-        email: defaultValues.email || '',
-        mobile: defaultValues.mobile || '',
-      });
-      return;
-    }
-
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) {
-      setFormData(JSON.parse(saved));
-    }
-  }, [mode, defaultValues]);
-
-  useEffect(() => {
-    if (mode === 'create') {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(formData));
-    }
-  }, [formData, mode]);
-
-  const handleChange = (field: keyof FormValues) => (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData((prev) => ({ ...prev, [field]: e.target.value }));
-    if (errors[field]) {
-      setErrors((prev) => ({ ...prev, [field]: '' }));
-    }
-  };
-
-  /* ---------------- SUBMIT (ZOD VALIDATION) ---------------- */
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-
-    const result = profileSchema.safeParse(formData);
-
-    if (!result.success) {
-      const fieldErrors: Partial<Record<keyof FormValues, string>> = {};
-
-      result.error.issues.forEach((err) => {
-        const field = err.path[0] as keyof FormValues;
-        fieldErrors[field] = err.message;
-      });
-
-      setErrors(fieldErrors);
-      return;
-    }
-
-    setErrors({});
-    onSubmit(result.data);
-  };
 
   return (
     <div className="w-full h-full flex flex-col">
       <FormHeader onBack={onBack} title={mode === 'edit' ? 'Edit User' : 'Add User'} />
 
-      <div className="flex justify-center mb-6 sm:mb-8 flex-shrink-0">
+      {/* Avatar */}
+      <div className="flex justify-center mb-4 flex-shrink-0">
         <div className="relative">
-          <div
-            className="w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 rounded-full overflow-hidden flex items-center justify-center"
-            style={{
-              background: preview
-                ? undefined
-                : 'radial-gradient(circle at top, #F1F3F7 0%, #E6E9F0 100%)',
-            }}
-          >
-            {preview && (
+          <div className="w-40 h-40 rounded-full overflow-hidden flex items-center justify-center bg-[#E8EBF0]">
+            {preview ? (
               <img src={preview} alt="Profile preview" className="h-full w-full object-cover" />
+            ) : (
+              <svg width="80" height="80" viewBox="0 0 80 80" fill="none">
+                <circle cx="40" cy="28" r="16" fill="#B8BCC8" />
+                <path d="M12 70C12 55 24 44 40 44C56 44 68 55 68 70" fill="#B8BCC8" />
+              </svg>
             )}
           </div>
 
-          <label className="absolute bottom-0 right-0 bg-white w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-full flex items-center justify-center shadow-md cursor-pointer border border-gray-200">
-            <svg
-              width="14"
-              height="14"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="#6B7280"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M12 20h9" />
-              <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" />
-            </svg>
-
+          <label className="absolute bottom-1 right-1 bg-white w-9 h-9 rounded-full flex items-center justify-center shadow-sm cursor-pointer border border-gray-200">
             <input
               type="file"
               hidden
               accept="image/*"
               onChange={(e) => e.target.files && setPreview(URL.createObjectURL(e.target.files[0]))}
             />
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 16 16"
+              fill="none"
+              stroke="#666"
+              strokeWidth="1.5"
+            >
+              <path d="M12 2L14 4L6 12H4V10L12 2Z" />
+              <path d="M10.5 3.5L12.5 5.5" />
+            </svg>
           </label>
         </div>
       </div>
 
-      <div className="flex-1 bg-white rounded-[24px] shadow-sm px-6 py-8 sm:px-10 sm:py-10 flex flex-col">
-        <form onSubmit={handleSubmit} className="flex flex-col h-full">
+      {/* Form */}
+      <div className="flex-1 bg-white border-2 border-gray-200 rounded-[24px] shadow-sm px-6 py-8 sm:px-10 sm:py-10 flex flex-col">
+        <form onSubmit={handleSubmit(() => onNext())} className="flex flex-col h-full">
           <div className="relative flex-1 grid grid-cols-1 sm:grid-cols-2 gap-y-8 sm:gap-y-10">
-            <span className="hidden sm:block absolute left-1/2 top-0 h-full w-px bg-gray-200" />
-
             {/* First Name */}
             <div className="sm:pr-10">
-              <label className="block text-sm font-medium text-gray-800 mb-2">First Name</label>
+              <label className="block text-sm font-medium mb-2">First Name</label>
               <input
-                value={formData.firstName}
-                onChange={handleChange('firstName')}
+                {...register('firstName')}
                 placeholder="John"
-                className="w-full bg-transparent border-b border-gray-300 pb-2 text-sm text-gray-700
-                     focus:outline-none focus:border-purple-500"
+                className="w-full border-b border-gray-300 pb-2 focus:outline-none"
               />
-              {errors.firstName && <p className="mt-1 text-xs text-red-500">{errors.firstName}</p>}
+              {errors.firstName && (
+                <p className="text-xs text-red-500">{errors.firstName.message}</p>
+              )}
             </div>
 
             {/* Email */}
             <div className="sm:pl-10">
-              <label className="block text-sm font-medium text-gray-800 mb-2">Email Id</label>
+              <label className="block text-sm font-medium mb-2">Email Id</label>
               <input
-                value={formData.email}
-                onChange={handleChange('email')}
+                {...register('email')}
                 placeholder="admin@abc.edu"
-                className="w-full bg-transparent border-b border-gray-300 pb-2 text-sm text-gray-700
-                     focus:outline-none focus:border-purple-500"
+                className="w-full border-b border-gray-300 pb-2 focus:outline-none"
               />
-              {errors.email && <p className="mt-1 text-xs text-red-500">{errors.email}</p>}
+              {errors.email && <p className="text-xs text-red-500">{errors.email.message}</p>}
             </div>
+
+            <span className="hidden sm:block absolute left-1/2 inset-y-0 w-[2px] bg-gray-300" />
 
             {/* Last Name */}
             <div className="sm:pr-10">
-              <label className="block text-sm font-medium text-gray-800 mb-2">Last Name</label>
+              <label className="block text-sm font-medium mb-2">Last Name</label>
               <input
-                value={formData.lastName}
-                onChange={handleChange('lastName')}
+                {...register('lastName')}
                 placeholder="Doe"
-                className="w-full bg-transparent border-b border-gray-300 pb-2 text-sm text-gray-700
-                     focus:outline-none focus:border-purple-500"
+                className="w-full border-b border-gray-300 pb-2 focus:outline-none"
               />
-              {errors.lastName && <p className="mt-1 text-xs text-red-500">{errors.lastName}</p>}
+              {errors.lastName && <p className="text-xs text-red-500">{errors.lastName.message}</p>}
             </div>
 
             {/* Phone */}
             <div className="sm:pl-10">
-              <label className="block text-sm font-medium text-gray-800 mb-2">Phone</label>
+              <label className="block text-sm font-medium mb-2">Phone</label>
               <input
-                value={formData.mobile}
-                onChange={handleChange('mobile')}
+                {...register('mobile')}
                 placeholder="+91 73854 XXXXX"
-                className="w-full bg-transparent border-b border-gray-300 pb-2 text-sm text-gray-700
-                     focus:outline-none focus:border-purple-500"
+                className="w-full border-b border-gray-300 pb-2 focus:outline-none"
               />
-              {errors.mobile && <p className="mt-1 text-xs text-red-500">{errors.mobile}</p>}
+              {errors.mobile && <p className="text-xs text-red-500">{errors.mobile.message}</p>}
             </div>
           </div>
 
           {/* CTA */}
-          <div className="mt-10 flex justify-center text-white">
+          <div className="mt-10 flex justify-center">
             <button
               type="submit"
               className="px-10 py-2.5 rounded-full text-sm font-medium 
-                   bg-[linear-gradient(90deg,#904BFF_0%,#C053C2_100%)]
-                   shadow-md hover:shadow-lg transition-shadow "
+              bg-[linear-gradient(90deg,#904BFF_0%,#C053C2_100%)]
+              text-white"
             >
               {mode === 'edit' ? 'Save & Go Next' : 'Go Next'}
             </button>

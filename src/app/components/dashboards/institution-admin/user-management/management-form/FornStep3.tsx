@@ -1,15 +1,25 @@
 'use client';
 
-import { useState } from 'react';
 import FormHeader from './FormHeader';
+import { useFormContext } from 'react-hook-form';
 
-export default function UserCredentials({ onBack, mode, onSubmit }: any) {
-  const [sendCredentials, setSendCredentials] = useState(true);
+type Props = {
+  onBack: () => void;
+  mode: 'create' | 'edit';
+  onSubmit: () => void;
+};
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+type CredentialsForm = {
+  sendCredentials: boolean;
+};
+
+export default function UserCredentials({ onBack, mode, onSubmit }: Props) {
+  const { register, handleSubmit, watch } = useFormContext<CredentialsForm>();
+
+  const sendCredentials = watch('sendCredentials', true);
+
+  const submitHandler = () => {
     if (!sendCredentials) return;
-    console.log('FORM SUBMITTED');
     onSubmit();
   };
 
@@ -18,7 +28,7 @@ export default function UserCredentials({ onBack, mode, onSubmit }: any) {
       <FormHeader onBack={onBack} title={mode === 'edit' ? 'Edit User' : 'Add User'} />
 
       <form
-        onSubmit={handleSubmit}
+        onSubmit={handleSubmit(submitHandler)}
         className="relative flex-1 w-full rounded-2xl border border-gray-200
                bg-gradient-to-b from-[#f8f9ff] to-white
                p-6 sm:p-8 flex flex-col"
@@ -32,9 +42,8 @@ export default function UserCredentials({ onBack, mode, onSubmit }: any) {
         <label className="flex items-start gap-3 text-sm text-gray-800">
           <input
             type="checkbox"
-            checked={sendCredentials}
-            onChange={(e) => setSendCredentials(e.target.checked)}
-            className="mt-1 h-4 w-4 rounded accent-[#636771]  cursor-pointer"
+            {...register('sendCredentials')}
+            className="mt-1 h-4 w-4 rounded accent-[#636771] cursor-pointer"
           />
 
           <span>
@@ -52,10 +61,14 @@ export default function UserCredentials({ onBack, mode, onSubmit }: any) {
             type="submit"
             disabled={!sendCredentials}
             className={`flex items-center gap-2 rounded-full px-6 py-2.5 text-sm font-medium 
-          bg-[linear-gradient(90deg,#904BFF_0%,#C053C2_100%)]
-          transition
-          ${!sendCredentials ? 'opacity-80 cursor-not-allowed' : 'shadow-md hover:shadow-lg cursor-pointer'}
-        `}
+              bg-[linear-gradient(90deg,#904BFF_0%,#C053C2_100%)]
+              transition
+              ${
+                !sendCredentials
+                  ? 'opacity-80 cursor-not-allowed'
+                  : 'shadow-md hover:shadow-lg cursor-pointer'
+              }
+            `}
           >
             {mode === 'edit' ? 'Save all changes' : '+ Add User'}
           </button>
