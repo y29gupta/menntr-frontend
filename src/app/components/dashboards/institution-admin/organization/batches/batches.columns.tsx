@@ -9,7 +9,7 @@ export type Batch = {
   department: {
     id: number;
     name: string;
-    code: string;
+    // code: string;
   };
   category: string;
   faculties: string[];
@@ -21,7 +21,15 @@ export type BatchApiData = {
   id: number;
   name: string;
   category: string | null;
-  department: string;
+  department: {
+    id: number;
+    name: string;
+  };
+  coordinator?: {
+    id: string;
+    name: string;
+  } | null;
+
   academic_year: string;
   students: number;
   status: 'Active' | 'Inactive';
@@ -35,9 +43,8 @@ export const mapApiBatchToBatch = (apiData: BatchApiData): Batch => ({
   name: apiData.name,
 
   department: {
-    id: 0,
-    name: apiData.department,
-    code: apiData.department,
+    id: apiData.department.id,
+    name: apiData.department.name,
   },
 
   category: apiData.category ?? '',
@@ -68,9 +75,9 @@ export const batchesColumns = (
     cell: ({ row }) => (
       <div className="max-w-[220px]">
         <p className="font-medium text-gray-900 truncate">{row.original.department.name}</p>
-        <p className="text-[11px] sm:text-xs text-gray-500 truncate">
+        {/* <p className="text-[11px] sm:text-xs text-gray-500 truncate">
           {row.original.department.code}
-        </p>
+        </p> */}
       </div>
     ),
   },

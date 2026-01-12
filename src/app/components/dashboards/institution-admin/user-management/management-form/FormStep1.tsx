@@ -1,4 +1,8 @@
-import { useState } from 'react';
+'use client';
+
+import { useEffect, useState } from 'react';
+import { z } from 'zod';
+import FormHeader from './FormHeader';
 
 type FormValues = {
   firstName: string;
@@ -6,6 +10,16 @@ type FormValues = {
   email: string;
   mobile: string;
 };
+
+const STORAGE_KEY = 'profile-form-step-1';
+
+/* ---------------- ZOD SCHEMA ---------------- */
+const profileSchema = z.object({
+  firstName: z.string().min(1, 'First name is required'),
+  lastName: z.string().min(1, 'Last name is required'),
+  email: z.string().email('Invalid email format'),
+  mobile: z.string().min(10, 'Phone must be at least 10 characters'),
+});
 
 type ProfileFormProps = {
   mode: 'create' | 'edit';
@@ -16,13 +30,38 @@ type ProfileFormProps = {
 
 const ProfileForm = ({ mode, defaultValues, onBack, onSubmit }: ProfileFormProps) => {
   const [preview, setPreview] = useState<string | null>(null);
+
   const [formData, setFormData] = useState<FormValues>({
-    firstName: defaultValues?.firstName || '',
-    lastName: defaultValues?.lastName || '',
-    email: defaultValues?.email || '',
-    mobile: defaultValues?.mobile || '',
+    firstName: '',
+    lastName: '',
+    email: '',
+    mobile: '',
   });
+
   const [errors, setErrors] = useState<Partial<Record<keyof FormValues, string>>>({});
+
+  useEffect(() => {
+    if (mode === 'edit' && defaultValues) {
+      setFormData({
+        firstName: defaultValues.firstName || '',
+        lastName: defaultValues.lastName || '',
+        email: defaultValues.email || '',
+        mobile: defaultValues.mobile || '',
+      });
+      return;
+    }
+
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      setFormData(JSON.parse(saved));
+    }
+  }, [mode, defaultValues]);
+
+  useEffect(() => {
+    if (mode === 'create') {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(formData));
+    }
+  }, [formData, mode]);
 
   const handleChange = (field: keyof FormValues) => (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData((prev) => ({ ...prev, [field]: e.target.value }));
@@ -31,62 +70,46 @@ const ProfileForm = ({ mode, defaultValues, onBack, onSubmit }: ProfileFormProps
     }
   };
 
-  const validate = (): boolean => {
-    const newErrors: Partial<Record<keyof FormValues, string>> = {};
-
-    if (!formData.firstName.trim()) {
-      newErrors.firstName = 'First name is required';
-    }
-    if (!formData.lastName.trim()) {
-      newErrors.lastName = 'Last name is required';
-    }
-    if (!formData.email.trim()) {
-      newErrors.email = 'Email is required';
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = 'Invalid email format';
-    }
-    if (!formData.mobile.trim()) {
-      newErrors.mobile = 'Phone is required';
-    } else if (formData.mobile.length < 10) {
-      newErrors.mobile = 'Phone must be at least 10 characters';
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
+  /* ---------------- SUBMIT (ZOD VALIDATION) ---------------- */
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (validate()) {
-      onSubmit(formData);
+
+    const result = profileSchema.safeParse(formData);
+
+    if (!result.success) {
+      const fieldErrors: Partial<Record<keyof FormValues, string>> = {};
+
+      result.error.issues.forEach((err) => {
+        const field = err.path[0] as keyof FormValues;
+        fieldErrors[field] = err.message;
+      });
+
+      setErrors(fieldErrors);
+      return;
     }
+
+    setErrors({});
+    onSubmit(result.data);
   };
 
   return (
     <div className="w-full h-full flex flex-col">
-      <div className="flex flex-col flex-shrink-0 mb-3 sm:mb-4 gap-2">
-        <button
-          onClick={onBack}
-          className="text-sm flex  items-center gap-2 font-medium text-gray-600 hover:text-gray-900"
-        >
-          <span>
-            <img src="/Go-back.svg" alt="goback" />
-          </span>
-          Go back
-        </button>
-        <h2 className="text-base sm:text-lg font-bold text-[#1A2C50]">
-          {mode === 'edit' ? 'Edit User' : 'Add User'}
-        </h2>
-      </div>
+      <FormHeader onBack={onBack} title={mode === 'edit' ? 'Edit User' : 'Add User'} />
 
       <div className="flex justify-center mb-6 sm:mb-8 flex-shrink-0">
         <div className="relative">
           <div
-            className="w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 rounded-full flex items-center justify-center"
+            className="w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 rounded-full overflow-hidden flex items-center justify-center"
             style={{
-              background: 'radial-gradient(circle at top, #F1F3F7 0%, #E6E9F0 100%)',
+              background: preview
+                ? undefined
+                : 'radial-gradient(circle at top, #F1F3F7 0%, #E6E9F0 100%)',
             }}
-          ></div>
+          >
+            {preview && (
+              <img src={preview} alt="Profile preview" className="h-full w-full object-cover" />
+            )}
+          </div>
 
           <label className="absolute bottom-0 right-0 bg-white w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-full flex items-center justify-center shadow-md cursor-pointer border border-gray-200">
             <svg
@@ -113,12 +136,9 @@ const ProfileForm = ({ mode, defaultValues, onBack, onSubmit }: ProfileFormProps
         </div>
       </div>
 
-      {/* Form - scrollable if needed */}
       <div className="flex-1 bg-white rounded-[24px] shadow-sm px-6 py-8 sm:px-10 sm:py-10 flex flex-col">
         <form onSubmit={handleSubmit} className="flex flex-col h-full">
-          {/* Fields */}
           <div className="relative flex-1 grid grid-cols-1 sm:grid-cols-2 gap-y-8 sm:gap-y-10">
-            {/* Vertical Divider */}
             <span className="hidden sm:block absolute left-1/2 top-0 h-full w-px bg-gray-200" />
 
             {/* First Name */}
@@ -131,6 +151,7 @@ const ProfileForm = ({ mode, defaultValues, onBack, onSubmit }: ProfileFormProps
                 className="w-full bg-transparent border-b border-gray-300 pb-2 text-sm text-gray-700
                      focus:outline-none focus:border-purple-500"
               />
+              {errors.firstName && <p className="mt-1 text-xs text-red-500">{errors.firstName}</p>}
             </div>
 
             {/* Email */}
@@ -143,6 +164,7 @@ const ProfileForm = ({ mode, defaultValues, onBack, onSubmit }: ProfileFormProps
                 className="w-full bg-transparent border-b border-gray-300 pb-2 text-sm text-gray-700
                      focus:outline-none focus:border-purple-500"
               />
+              {errors.email && <p className="mt-1 text-xs text-red-500">{errors.email}</p>}
             </div>
 
             {/* Last Name */}
@@ -155,6 +177,7 @@ const ProfileForm = ({ mode, defaultValues, onBack, onSubmit }: ProfileFormProps
                 className="w-full bg-transparent border-b border-gray-300 pb-2 text-sm text-gray-700
                      focus:outline-none focus:border-purple-500"
               />
+              {errors.lastName && <p className="mt-1 text-xs text-red-500">{errors.lastName}</p>}
             </div>
 
             {/* Phone */}
@@ -167,6 +190,7 @@ const ProfileForm = ({ mode, defaultValues, onBack, onSubmit }: ProfileFormProps
                 className="w-full bg-transparent border-b border-gray-300 pb-2 text-sm text-gray-700
                      focus:outline-none focus:border-purple-500"
               />
+              {errors.mobile && <p className="mt-1 text-xs text-red-500">{errors.mobile}</p>}
             </div>
           </div>
 
@@ -178,7 +202,7 @@ const ProfileForm = ({ mode, defaultValues, onBack, onSubmit }: ProfileFormProps
                    bg-[linear-gradient(90deg,#904BFF_0%,#C053C2_100%)]
                    shadow-md hover:shadow-lg transition-shadow "
             >
-              Go Next
+              {mode === 'edit' ? 'Save & Go Next' : 'Go Next'}
             </button>
           </div>
         </form>

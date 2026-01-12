@@ -9,6 +9,7 @@ import MinimumScoreRequirementCard from '@/app/components/dashboards/institution
 import PlacementReadinessCard from '@/app/components/dashboards/institution-admin/dashboard/PlacementReadinessCard';
 import DepartmentSummaryStrip from '@/app/components/dashboards/institution-admin/dashboard/DepartmentSummaryStrip';
 import HighestAvgDepartmentCard from '@/app/components/dashboards/institution-admin/dashboard/HighestAvgDepartmentCard';
+import DashboardWelcomeHeader from '@/app/components/dashboards/institution-admin/dashboard/DashboardWelcomeHeader';
 
 const Page = () => {
   const departmentData: DepartmentMetric[] = [
@@ -20,6 +21,8 @@ const Page = () => {
   ];
   return (
     <div className=" flex flex-col gap-4 w-full">
+      <DashboardWelcomeHeader userName="Javed" showAlert />
+
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 w-full">
         {studentMetric.map((item, i) => (
           <DashboardCard key={i} {...item} />

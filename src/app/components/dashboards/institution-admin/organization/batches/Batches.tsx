@@ -21,7 +21,6 @@ const Batches = ({ setBatchView }: Props) => {
 
   useEffect(() => {
     setBatchView(view === 'list' ? 'list' : 'form');
-
     return () => setBatchView('list');
   }, [view, setBatchView]);
 
@@ -29,13 +28,18 @@ const Batches = ({ setBatchView }: Props) => {
     <>
       {view === 'list' && (
         <>
+          {/* HEADER */}
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-semibold text-gray-800 text-sm sm:text-base lg:text-lg">
               Batches <span>({totalBatches})</span>
             </h2>
 
+            {/* ADD BATCH */}
             <button
-              onClick={() => setView('form')}
+              onClick={() => {
+                setSelectedBatch(null); // ✅ IMPORTANT
+                setView('form');
+              }}
               className="px-6 py-2.5 rounded-full text-sm font-medium !text-white
               bg-[linear-gradient(90deg,#904BFF_0%,#C053C2_100%)]"
             >
@@ -43,6 +47,7 @@ const Batches = ({ setBatchView }: Props) => {
             </button>
           </div>
 
+          {/* SEARCH + FILTER */}
           <div className="flex gap-3 mb-4">
             <div className="relative max-w-[400px] w-full">
               <Search className="absolute left-3 top-2.5 w-4 h-4 text-gray-400" />
@@ -65,13 +70,15 @@ const Batches = ({ setBatchView }: Props) => {
             </button>
           </div>
 
+          {/* TABLE */}
           <BatchesTable
             globalFilter={search}
             onGlobalFilterChange={setSearch}
             showColumnFilters={showColumnFilters}
             onTotalChange={setTotalBatches}
             onEdit={(batch) => {
-              setSelectedBatch(batch);
+              console.log('ON EDIT ROW:', batch);
+              setSelectedBatch(batch); // ✅ REQUIRED
               setView('form');
             }}
             onDelete={(batch) => setDeleteBatch(batch)}
@@ -82,37 +89,16 @@ const Batches = ({ setBatchView }: Props) => {
       {view === 'form' && (
         <BatchForm
           mode={selectedBatch ? 'edit' : 'create'}
-          defaultValues={
-            selectedBatch
-              ? {
-                  name: selectedBatch.name,
-                  category: selectedBatch.category,
-                  status: selectedBatch.status,
-                  facultyIds: selectedBatch.faculties?.map((f: any) => f.value),
-                }
-              : undefined
-          }
+          batchId={selectedBatch?.id} // ✅ REQUIRED
+          editRow={selectedBatch}
           onBack={() => {
             setView('list');
             setSelectedBatch(null);
           }}
-          onSubmit={(data) => {
-            const payload = {
-              name: data.name,
-              departmentId: Number(data.departmentId),
-              category: data.category,
-              facultyIds: data.facultyIds.map(Number),
-              academicYear: `${data.startYear}-${data.endYear}`,
-              status: data.status,
-            };
-
-            console.log('BATCH CREATE PAYLOAD:', payload);
-
-            setView('list');
-          }}
         />
       )}
 
+      {/* DELETE MODAL */}
       <ConfirmModal
         open={!!deleteBatch}
         title="Delete Batch"

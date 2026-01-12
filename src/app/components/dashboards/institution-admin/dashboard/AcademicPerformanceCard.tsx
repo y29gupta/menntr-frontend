@@ -1,4 +1,5 @@
 'use client';
+import { BarChart3 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 const academicPerformanceData = {
@@ -36,9 +37,12 @@ export default function AcademicPerformanceCard() {
       style={{ boxShadow: '0px 0px 8px 0px #0F172A1F' }}
     >
       <div className="flex flex-col sm:flex-row items-start justify-between mb-4 sm:mb-2">
-        <div>
-          <h3 className="text-sm sm:text-[16px] font-semibold text-gray-900">{title}</h3>
-          <p className="text-xs text-gray-500">Minimum requirement: {minimum}%</p>
+        <div className="flex gap-2">
+          <BarChart3 className="text-gray-500" />
+          <div>
+            <h3 className="text-sm sm:text-[16px] font-semibold text-gray-900">{title}</h3>
+            <p className="text-xs text-gray-500">Minimum requirement: {minimum}%</p>
+          </div>
         </div>
       </div>
 

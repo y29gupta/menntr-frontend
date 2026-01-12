@@ -503,19 +503,34 @@ export default function DepartmentsTable({
   });
   const tableData: Department[] = departmentResponse?.data.map(mapApiDepartmentToDepartment) ?? [];
 
-  console.log(departmentResponse, 'department list');
+  if (isLoading) {
+    return <div className="p-4 text-sm text-gray-500">Loading departments...</div>;
+  }
+
+  if (isError) {
+    return <div className="p-4 text-sm text-red-500">Failed to load departments</div>;
+  }
 
   return (
-    <DataTable
+    <DataTable<Department>
       data={tableData}
       columns={departmentColumns(
         (row) => onEdit(row),
         (row) => console.log('Delete', row)
       )}
-      isLoading={isLoading}
-      globalFilter={globalFilter}
-      onGlobalFilterChange={onGlobalFilterChange}
+      // // isLoading={isLoading}
+      // globalFilter={globalFilter}
+      // onGlobalFilterChange={onGlobalFilterChange}
+      // showColumnFilters={showColumnFilters}
+      columnFilters={{}}
+      onColumnFilterChange={() => {}}
       showColumnFilters={showColumnFilters}
+      currentPage={1}
+      pageCount={1}
+      onPreviousPage={() => {}}
+      onNextPage={() => {}}
+      canPreviousPage={false}
+      canNextPage={false}
     />
   );
 }

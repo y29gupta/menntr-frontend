@@ -33,7 +33,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
       <Sidebar role={role} collapsed={collapsed} onToggle={() => setCollapsed(!collapsed)} />
 
-      <main className="flex-1 min-w-0 overflow-y-scroll p-6">{children}</main>
+      <main className="flex-1 min-w-0 h-screen overflow-y-auto scrollbar-hide p-6">{children}</main>
     </div>
   );
 }

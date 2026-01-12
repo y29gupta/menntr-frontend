@@ -38,6 +38,8 @@ const FormDropdown = ({
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState('');
   const ref = useRef<HTMLDivElement>(null);
+
+  console.log(options, value, 'drop');
   // close on outside click
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -119,16 +121,10 @@ const FormDropdown = ({
 
       {/* Dropdown panel */}
       {open && (
-        <div
-          className="
-            absolute z-50 mt-2 w-full
-            rounded-lg bg-white
-            shadow-[0_4px_16px_0_#00000033]
-          "
-        >
+        <div className="absolute z-50 mt-2 min-w-full w-full max-w-[90vw] rounded-2xl bg-white shadow-[0_4px_16px_0_#00000033]">
           {/* 🔍 Search (optional) */}
           {searchable && (
-            <div className="p-3 border-b">
+            <div className="p-3">
               <div className="relative">
                 <Search className="absolute left-3 top-2.5 w-4 h-4 text-gray-400" />
                 <input
@@ -138,8 +134,8 @@ const FormDropdown = ({
                   placeholder={searchPlaceholder}
                   className="
                     w-full pl-9 pr-3 py-2 text-sm
-                    border rounded-md
-                    focus:outline-none focus:ring-2 focus:ring-purple-500
+                    rounded-md
+                    focus:outline-none focus:ring-2 focus:ring-gray-500
                   "
                 />
               </div>
@@ -147,9 +143,9 @@ const FormDropdown = ({
           )}
 
           {/* Options */}
-          <div className="max-h-60 overflow-y-auto">
+          <div className="max-h-60 overflow-y-hidden">
             {filteredOptions.length === 0 && (
-              <p className="px-4 py-2 text-sm text-gray-500">No results found</p>
+              <p className="px-4 py-2 text-[16px] text-gray-500">No results found</p>
             )}
 
             {filteredOptions.map((opt) => (

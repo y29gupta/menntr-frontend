@@ -9,6 +9,7 @@ export type Management = {
   status: 'Active' | 'Inactive';
   lastLogin: string;
   avatar?: string;
+
 };
 
 export const ManagementColumn = (

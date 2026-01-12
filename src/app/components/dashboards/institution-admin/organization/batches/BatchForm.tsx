@@ -3,7 +3,11 @@
 import { Controller, useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useEffect } from 'react';
 import FormDropdown from '@/app/ui/FormDropdown';
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { createBatch, updateBatch, getBatchMeta } from './batches.service';
+import { CreateBatchPayload } from './batches.types';
 
 const batchSchema = z.object({
   name: z.string().min(1, 'Batch name is required'),
@@ -19,52 +23,101 @@ export type BatchFormValues = z.infer<typeof batchSchema>;
 
 type Props = {
   mode: 'create' | 'edit';
-  defaultValues?: Partial<BatchFormValues>;
+  batchId?: number;
+  editRow?: any; // raw table row
   onBack: () => void;
-  onSubmit: (data: BatchFormValues) => void;
 };
 
-export default function BatchForm({ mode, defaultValues, onBack, onSubmit }: Props) {
+export default function BatchForm({ mode, batchId, onBack, editRow }: Props) {
   const {
     control,
     watch,
-    setValue,
     register,
     handleSubmit,
+    reset, // ✅ ADD
     formState: { errors },
   } = useForm<BatchFormValues>({
     resolver: zodResolver(batchSchema),
     defaultValues: {
       status: 'Active',
       facultyIds: [],
-      ...defaultValues,
     },
   });
 
-  const facultyOptions = [
-    { label: 'Dr. Anand', value: 'anand' },
-    { label: 'Mr. Karthick', value: 'karthick' },
-    { label: 'Ms. Neha', value: 'neha' },
-    { label: 'Ms. Neha', value: 'neha' },
-    { label: 'Ms. Neha', value: 'neha' },
-  ];
+  const { data: metaRes } = useQuery({
+    queryKey: ['batch-meta'],
+    queryFn: getBatchMeta,
+  });
+
+  const meta = metaRes?.data;
+
+  useEffect(() => {
+    if (mode === 'edit' && editRow && meta) {
+      // 🔥 RESOLVE DEPARTMENT ID (REAL FIX)
+      const resolvedDepartmentId =
+        editRow.department?.id !== 0
+          ? editRow.department?.id
+          : meta.departments.find(
+              (d: any) =>
+                d.name.trim().toLowerCase() === editRow.department?.name?.trim().toLowerCase()
+            )?.id;
+
+      reset({
+        name: editRow.name,
+
+        // ✅ CATEGORY (already OK in your case)
+        category: String(
+          typeof editRow.category === 'object'
+            ? editRow.category.id
+            : meta.categories.find(
+                (c: any) => c.name.toLowerCase() === String(editRow.category).toLowerCase()
+              )?.id
+        ),
+
+        // ✅ DEPARTMENT (THIS IS THE FIX)
+        departmentId: String(resolvedDepartmentId ?? ''),
+
+        facultyIds: editRow.coordinator ? [String(editRow.coordinator.id)] : [],
+
+        startYear: String(editRow.academic_year).split('-')[0],
+        endYear: String(editRow.academic_year).split('-')[1],
+
+        status: editRow.status,
+      });
+    }
+  }, [mode, editRow, meta, reset]);
+
+  const createMutation = useMutation({
+    mutationFn: createBatch,
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: updateBatch,
+  });
+
+  const facultyOptions =
+    meta?.faculties?.map((f: any) => ({
+      label: f.name,
+      value: String(f.id),
+    })) ?? [];
+
+  const categoryOptions =
+    meta?.categories?.map((c: any) => ({
+      label: c.name,
+      value: String(c.id),
+    })) ?? [];
 
   const yearOptions = Array.from({ length: 10 }).map((_, i) => {
     const y = `${2017 + i}`;
     return { label: y, value: y };
   });
-  const facultyIdsValue = watch('facultyIds');
-  const facultyIdsArray = Array.isArray(facultyIdsValue) ? facultyIdsValue : [];
 
   return (
     <div className="w-full">
       {/* HEADER */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex flex-col gap-3">
-          <button
-            onClick={onBack}
-            className="flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-gray-900"
-          >
+          <button onClick={onBack} className="flex items-center gap-2 text-sm font-medium">
             <img src="/Go-back.svg" alt="back" />
             Go back
           </button>
@@ -105,11 +158,12 @@ export default function BatchForm({ mode, defaultValues, onBack, onSubmit }: Pro
                     placeholder="Select department"
                     value={field.value}
                     onChange={field.onChange}
-                    options={[
-                      { label: 'Computer Science', value: '1' },
-                      { label: 'Information Technology', value: '2' },
-                      { label: 'Mechanical Engineering', value: '3' },
-                    ]}
+                    options={
+                      meta?.departments?.map((d: any) => ({
+                        label: d.name,
+                        value: String(d.id),
+                      })) ?? []
+                    }
                   />
                 )}
               />
@@ -201,21 +255,21 @@ export default function BatchForm({ mode, defaultValues, onBack, onSubmit }: Pro
                 name="category"
                 control={control}
                 render={({ field }) => (
-                  <div className="flex gap-3 mt-3">
-                    {['Engineering', 'Agriculture'].map((item) => (
+                  <div className="flex gap-3 mt-3 flex-wrap">
+                    {categoryOptions.map((item: any) => (
                       <button
                         type="button"
-                        key={item}
-                        onClick={() => field.onChange(item)}
+                        key={item.value}
+                        onClick={() => field.onChange(item.value)}
                         className={`px-4 py-1.5 rounded-full border text-sm font-medium ${
-                          field.value === item
+                          field.value === item.value
                             ? 'border-purple-500 !text-purple-600 bg-purple-50'
                             : 'border-gray-300 text-gray-500'
                         }`}
                       >
                         <span className="flex items-center gap-2">
-                          {field.value === item && <span>✓</span>}
-                          {item}
+                          {field.value === item.value && <span>✓</span>}
+                          {item.label}
                         </span>
                       </button>
                     ))}
@@ -261,16 +315,43 @@ export default function BatchForm({ mode, defaultValues, onBack, onSubmit }: Pro
       {/* FOOTER */}
       <div className="flex justify-center gap-4 mt-8">
         <button
-          onClick={handleSubmit(onSubmit)}
-          className="px-6 py-2.5 rounded-full text-sm font-medium !text-white
+          type="button"
+          onClick={handleSubmit(async (data) => {
+            const payload: CreateBatchPayload = {
+              name: data.name.trim(),
+              code: data.name.trim().replace(/\s+/g, '_').toUpperCase(),
+              categoryRoleId: Number(data.category),
+              departmentRoleId: Number(data.departmentId),
+              coordinatorId: Number(data.facultyIds[0]),
+              academicYear: Number(data.startYear),
+              startDate: `${data.startYear}-01-01`,
+              endDate: `${data.endYear}-01-01`,
+              isActive: data.status === 'Active',
+            };
+
+            if (mode === 'edit' && editRow?.id) {
+              await updateMutation.mutateAsync({
+                id: editRow.id,
+                payload,
+              });
+            } else {
+              await createMutation.mutateAsync(payload);
+            }
+
+            console.log('MODE:', mode, 'EDIT ID:', editRow?.id);
+
+            onBack();
+          })}
+          className="px-6 py-2.5 rounded-full text-sm font-medium text-white
           bg-[linear-gradient(90deg,#904BFF_0%,#C053C2_100%)]"
         >
-          + {mode === 'edit' ? 'Update Batch' : 'Add Batch'}
+          {mode === 'edit' ? 'Update Batch' : 'Add Batch'}
         </button>
 
         <button
+          type="button"
           onClick={onBack}
-          className="px-6 py-2.5 rounded-full text-sm font-medium border border-purple-500 text-purple-600"
+          className="px-6 py-2.5 rounded-full text-sm font-medium border border-purple-500"
         >
           Cancel
         </button>

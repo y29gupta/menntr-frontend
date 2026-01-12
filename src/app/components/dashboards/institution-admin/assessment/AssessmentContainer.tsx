@@ -4,7 +4,6 @@ import { useState } from 'react';
 import AssessmentHeader from './AssessmentHeader';
 import AssessmentFilters from './AssessmentFilters';
 import ActiveAssessments from './active/ActiveAssessments';
-import { assessmentDummyData } from './active/assessment.dummy';
 import CreateAssessment from './create/CreateAssessment';
 
 export default function AssessmentContainer() {
@@ -12,11 +11,17 @@ export default function AssessmentContainer() {
 
   const [globalFilter, setGlobalFilter] = useState('');
   const [isCreating, setIsCreating] = useState(false);
-  const tabCounts = {
-    Active: assessmentDummyData.length,
+  const [tabsCount, setTabsCount] = useState({
+    Active: 0,
     Drafts: 0,
     Completed: 0,
-  };
+  });
+
+  // const tabCounts = {
+  //   Active: assessmentDummyData.length,
+  //   Drafts: 0,
+  //   Completed: 0,
+  // };
 
   return (
     <div
@@ -31,12 +36,12 @@ export default function AssessmentContainer() {
             activeTab={activeTab}
             onTabChange={setActiveTab}
             onCreate={() => setIsCreating(true)}
-            tabCounts={tabCounts}
+            tabCounts={tabsCount}
           />
 
           <AssessmentFilters value={globalFilter} onChange={setGlobalFilter} />
 
-          {activeTab === 'Active' && <ActiveAssessments />}
+          {activeTab === 'Active' && <ActiveAssessments setTabsCount={setTabsCount} />}
         </>
       )}
     </div>

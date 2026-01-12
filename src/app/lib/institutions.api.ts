@@ -115,7 +115,6 @@
 //   return res.json();
 // }
 
-
 // // institution admin api
 
 // export const getCategories = async (
@@ -148,9 +147,7 @@
 // };
 // // -----------------------------------------------------------------------------------
 
-
 // // -----------------------------department api--------------------------------
-
 
 // export const getDepartments = async (
 
@@ -165,13 +162,10 @@
 //   return res.data;
 // };
 
-
-
 // export const createDepartment = async (payload: CreateDepartmentPayload) => {
 //   const { data } = await api.post('/organization/departments', payload);
 //   return data;
 // };
-
 
 // export const updateDepartment = async (
 //   id: number,
@@ -180,8 +174,6 @@
 //   const { data } = await api.put(`/organization/departments/${id}`, payload);
 //   return data;
 // };
-
-
 
 // // --------------------------------hierarchy api------------------------
 
@@ -200,10 +192,6 @@
 //   const res = await api.get('/organization/hierarchy');
 //   return res.data;
 // };
-
-
-
-
 
 import { InstitutionFormValues } from '@/app/lib/institution';
 import { api } from './api';
@@ -239,7 +227,7 @@ export type InstitutionApi = {
   code: string;
   contactEmail: string;
   status: string;
-  planId: number;
+  planId?: number;
   createdAt?: string;
   plan: {
     id: number;
@@ -249,8 +237,17 @@ export type InstitutionApi = {
 };
 
 export type InstitutionApiResponse = {
-  count: number;
   data: InstitutionApi[];
+  meta: {
+    isFirstPage: boolean;
+    isLastPage: boolean;
+    currentPage: number;
+    previousPage: number | null;
+    nextPage: number | null;
+    pageCount: number;
+    totalCount: number;
+    currentPageCount: number;
+  };
 };
 
 export type Institution = {
@@ -264,19 +261,41 @@ export type Institution = {
   planId: number;
 };
 
-export async function fetchInstitutions(): Promise<InstitutionApiResponse> {
-  try {
-    const res = await api.get(`/institutions`);
+export type FilterParams = {
+  page?: number;
+  limit?: number;
+  search?: string;
+  status?: string;
+  code?: string;
+  contactEmail?: string;
+  planCode?: string;
+  name?: string;
+};
 
-    if (!res.data) {
-      throw new Error('Failed to fetch institutions');
-    }
+export async function fetchInstitutions(
+  filters: FilterParams = {}
+): Promise<InstitutionApiResponse> {
+  const queryParams = new URLSearchParams();
 
-    return res.data;
-  } catch (error) {
-    showApiError(error);
-    throw error;
-  }
+  if (filters.page) queryParams.append('page', String(filters.page));
+  if (filters.limit) queryParams.append('limit', String(filters.limit));
+  if (filters.search) queryParams.append('search', filters.search);
+  if (filters.status) queryParams.append('status', filters.status);
+  if (filters.code) queryParams.append('code', filters.code);
+  if (filters.contactEmail) queryParams.append('contactEmail', filters.contactEmail);
+  if (filters.planCode) queryParams.append('planCode', filters.planCode);
+  if (filters.name) queryParams.append('name', filters.name);
+
+  const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/institutions${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+
+  const res = await fetch(url, {
+    method: 'GET',
+    credentials: 'include',
+  });
+
+  if (!res.ok) throw new Error('Failed to fetch institutions');
+
+  return res.json();
 }
 
 export function mapInstitutions(apiData: InstitutionApi[]): Institution[] {
@@ -288,14 +307,11 @@ export function mapInstitutions(apiData: InstitutionApi[]): Institution[] {
     contactEmail: item.contactEmail,
     students: '—',
     status: item.status,
-    planId: item.planId,
+    planId: item.plan?.id || 1,
   }));
 }
 
-export async function updateInstitution(
-  id: number | string,
-  payload: InstitutionFormValues
-) {
+export async function updateInstitution(id: number | string, payload: InstitutionFormValues) {
   try {
     return await toastApiPromise(
       fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/institutions/${id}`, {
@@ -329,9 +345,7 @@ export async function updateInstitution(
 
 // ----------------------- categories api ----------------------------------------
 
-export const getCategories = async (
-  institutionId: string
-): Promise<CategoryApiItem[]> => {
+export const getCategories = async (institutionId: string): Promise<CategoryApiItem[]> => {
   const res = await api.get(`/organization/categories`);
   return res.data;
 };
@@ -343,13 +357,10 @@ export const getCategoryMeta = async (): Promise<CategoryMetaResponse> => {
 
 export const createCategory = async (payload: CreateCategoryPayload) => {
   try {
-    const res = await toastApiPromise(
-      api.post('/organization/categories', payload),
-      {
-        pending: 'Creating category...',
-        success: 'Category created successfully',
-      }
-    );
+    const res = await toastApiPromise(api.post('/organization/categories', payload), {
+      pending: 'Creating category...',
+      success: 'Category created successfully',
+    });
     return res.data;
   } catch (error) {
     showApiError(error);
@@ -357,18 +368,12 @@ export const createCategory = async (payload: CreateCategoryPayload) => {
   }
 };
 
-export const updateCategory = async (
-  categoryId: string,
-  payload: CreateCategoryPayload
-) => {
+export const updateCategory = async (categoryId: string, payload: CreateCategoryPayload) => {
   try {
-    const res = await toastApiPromise(
-      api.put(`/organization/categories/${categoryId}`, payload),
-      {
-        pending: 'Updating category...',
-        success: 'Category updated successfully',
-      }
-    );
+    const res = await toastApiPromise(api.put(`/organization/categories/${categoryId}`, payload), {
+      pending: 'Updating category...',
+      success: 'Category updated successfully',
+    });
     return res.data;
   } catch (error) {
     showApiError(error);
@@ -380,6 +385,7 @@ export const updateCategory = async (
 
 export const getDepartments = async (): Promise<DepartmentApiResponse> => {
   const res = await api.get(`/organization/departments`);
+  console.log(res,"department list")
   return res.data;
 };
 
@@ -388,17 +394,12 @@ export const getDepartmentMeta = async (): Promise<DepartmentMetaResponse> => {
   return res.data;
 };
 
-export const createDepartment = async (
-  payload: CreateDepartmentPayload
-) => {
+export const createDepartment = async (payload: CreateDepartmentPayload) => {
   try {
-    const res = await toastApiPromise(
-      api.post('/organization/departments', payload),
-      {
-        pending: 'Creating department...',
-        success: 'Department created successfully',
-      }
-    );
+    const res = await toastApiPromise(api.post('/organization/departments', payload), {
+      pending: 'Creating department...',
+      success: 'Department created successfully',
+    });
     return res.data;
   } catch (error) {
     showApiError(error);
@@ -406,18 +407,12 @@ export const createDepartment = async (
   }
 };
 
-export const updateDepartment = async (
-  id: number,
-  payload: UpdateDepartmentPayload
-) => {
+export const updateDepartment = async (id: number, payload: UpdateDepartmentPayload) => {
   try {
-    const res = await toastApiPromise(
-      api.put(`/organization/departments/${id}`, payload),
-      {
-        pending: 'Updating department...',
-        success: 'Department updated successfully',
-      }
-    );
+    const res = await toastApiPromise(api.put(`/organization/departments/${id}`, payload), {
+      pending: 'Updating department...',
+      success: 'Department updated successfully',
+    });
     return res.data;
   } catch (error) {
     showApiError(error);
