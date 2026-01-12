@@ -5,7 +5,7 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect } from 'react';
 import FormDropdown from '@/app/ui/FormDropdown';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { createBatch, updateBatch, getBatchMeta } from './batches.service';
 import { CreateBatchPayload } from './batches.types';
 
@@ -87,12 +87,20 @@ export default function BatchForm({ mode, batchId, onBack, editRow }: Props) {
     }
   }, [mode, editRow, meta, reset]);
 
+  const queryClient = useQueryClient();
+
   const createMutation = useMutation({
     mutationFn: createBatch,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['batches'] });
+    },
   });
 
   const updateMutation = useMutation({
     mutationFn: updateBatch,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['batches'] });
+    },
   });
 
   const facultyOptions =
@@ -209,6 +217,9 @@ export default function BatchForm({ mode, batchId, onBack, editRow }: Props) {
                   />
                 )}
               />
+              {errors.facultyIds && (
+                <p className="text-xs text-red-500 mt-1">{errors.facultyIds.message}</p>
+              )}
             </div>
 
             {/* Academic Year */}

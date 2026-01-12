@@ -2,6 +2,7 @@ import { GripVertical, Trash2, Plus } from 'lucide-react';
 import { useState } from 'react';
 import CreateMCQModal from '../components/CreateMCQModal';
 import { PublishAssessmentModal } from '@/app/ui/modals/PublishAssessmentModal/PublishAssessmentModal';
+import CreateCodingModal from '../components/CreateCodingModal';
 
 type Props = {
   onBack: () => void;
@@ -174,11 +175,12 @@ export default function StepFour({ onBack, onCancel }: Props) {
           </div>
         </div>
         {isMCQOpen && (
-          <CreateMCQModal
-            onClose={() => setIsMCQOpen(false)}
-            onSave={(q) => setQuestions((prev) => [...prev, q])}
-            onSaveAndNext={(q) => setQuestions((prev) => [...prev, q])}
-          />
+          // <CreateMCQModal
+          //   onClose={() => setIsMCQOpen(false)}
+          //   onSave={(q) => setQuestions((prev) => [...prev, q])}
+          //   onSaveAndNext={(q) => setQuestions((prev) => [...prev, q])}
+          // />
+          <CreateCodingModal onClose={() => setIsMCQOpen(false)} />
         )}
 
         <PublishAssessmentModal

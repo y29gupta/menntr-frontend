@@ -9,7 +9,7 @@ import {
 interface DataTableProps<T extends RowData> {
   columns: ColumnDef<T, any>[];
   data: T[];
-  isLoading: boolean;
+  // isLoading: boolean;
   columnFilters: Record<string, string>;
   onColumnFilterChange: (columnName: string, value: string) => void;
   showColumnFilters: boolean;
