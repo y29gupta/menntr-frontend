@@ -40,16 +40,21 @@ export default function BatchesTable({
   const tableData: Batch[] = batchResponse ? batchResponse.map(mapApiBatchToBatch) : [];
 
   return (
-    <DataTable
+    <DataTable<Batch>
       data={tableData}
       columns={batchesColumns(
         (row) => onEdit(row),
         (row) => onDelete(row)
       )}
-      isLoading={isLoading}
-      globalFilter={globalFilter}
-      onGlobalFilterChange={onGlobalFilterChange}
+      columnFilters={{}}
+      onColumnFilterChange={() => {}}
       showColumnFilters={showColumnFilters}
+      currentPage={1}
+      pageCount={1}
+      onPreviousPage={() => {}}
+      onNextPage={() => {}}
+      canPreviousPage={false}
+      canNextPage={false}
     />
   );
 }

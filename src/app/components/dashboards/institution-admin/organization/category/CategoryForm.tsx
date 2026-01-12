@@ -171,22 +171,25 @@ export default function CategoryForm({ mode, defaultValues, onCancel, onSubmitSu
           <Controller
             name="assignedUserId"
             control={form.control}
-            render={({ field }) => (
-              <FormDropdown
-                placeholder="Select the user"
-                value={field.value}
-                onChange={field.onChange}
-                searchable
-                searchPlaceholder="Search for Users"
-                options={
-                  metaData?.users.map((user: any) => ({
-                    label: user.name,
-                    value: user.id,
-                    subLabel: user.email,
-                  })) ?? []
-                }
-              />
-            )}
+            render={({ field }) => {
+              console.log(field, 'field');
+              return (
+                <FormDropdown
+                  placeholder="Select the user"
+                  value={field.value}
+                  onChange={field.onChange}
+                  searchable
+                  searchPlaceholder="Search for Users"
+                  options={
+                    metaData?.users.map((user: any) => ({
+                      label: user.name,
+                      value: user.id,
+                      subLabel: user.email,
+                    })) ?? []
+                  }
+                />
+              );
+            }}
           />
 
           {formState.errors.assignedUserId && (

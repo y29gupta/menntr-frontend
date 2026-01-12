@@ -385,6 +385,7 @@ export const updateCategory = async (categoryId: string, payload: CreateCategory
 
 export const getDepartments = async (): Promise<DepartmentApiResponse> => {
   const res = await api.get(`/organization/departments`);
+  console.log(res,"department list")
   return res.data;
 };
 

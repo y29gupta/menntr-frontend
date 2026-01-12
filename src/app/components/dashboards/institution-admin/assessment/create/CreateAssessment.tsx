@@ -7,6 +7,8 @@ import Stepper from './Stepper';
 import StepOne from './steps/StepOne';
 import StepTwo from './steps/StepTwo';
 import { createAssessmentSchema, CreateAssessmentForm, stepOneSchema } from './schema';
+import StepThree from './steps/StepThree';
+import StepFour from './steps/StepFour';
 
 type CreateAssessmentProps = {
   onCancel: () => void;
@@ -39,9 +41,13 @@ export default function CreateAssessment({ onCancel }: CreateAssessmentProps) {
   };
 
   const handleStepTwoNext = async () => {
-    const isValid = await form.trigger(['institutionCategory', 'department', 'batch']);
+    const isValid = await form.trigger(['institutionCategory', 'department', 'batches']);
 
     if (isValid) setStep(3);
+  };
+
+  const handleStepThreeNext = () => {
+    setStep(4);
   };
 
   return (
@@ -64,6 +70,15 @@ export default function CreateAssessment({ onCancel }: CreateAssessmentProps) {
           onCancel={onCancel}
         />
       )}
+      {step === 3 && (
+        <StepThree
+          onBack={() => setStep(2)}
+          onNext={handleStepThreeNext}
+          onCancel={onCancel}
+          onAddMCQ={() => setStep(4)}
+        />
+      )}
+      {step === 4 && <StepFour onBack={() => setStep(3)} onCancel={onCancel} />}
     </div>
   );
 }

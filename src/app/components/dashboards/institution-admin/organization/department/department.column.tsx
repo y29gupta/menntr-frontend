@@ -5,12 +5,12 @@ export type Department = {
   id: number;
   name: string;
   code: string;
-  categoryId?: number;
-  hodUserId?: number;
-  category: string;
-  hod: string;
-  students: number;
-  faculty: number;
+  // categoryId?: number;
+  // hodUserId?: number;
+  category: {};
+  hod: string | null;
+  students?: number;
+  faculty?: number;
 };
 
 export type DepartmentApiData = {
@@ -21,12 +21,12 @@ export type DepartmentApiData = {
     id: number;
     name: string;
   } | null;
-  hod: {
-    id: number;
-    name: string;
-    email: string;
-  } | null;
-  // hod: string | null;
+  // hod: {
+  //   id: number;
+  //   name: string;
+  //   email: string;
+  // } | null;
+  hod: string | null;
   createdAt: string;
   updatedAt: string;
 };
@@ -65,10 +65,10 @@ export const mapApiDepartmentToDepartment = (apiData: DepartmentApiData): Depart
   id: apiData.id,
   name: apiData.name ?? '—',
   code: apiData.code ?? '—',
-  categoryId: apiData.category?.id,
-  hodUserId: apiData.hod?.id,
-  category: apiData.category?.name ?? '—',
-  hod: apiData.hod?.name ?? '—',
+  // categoryId: apiData.category?.id,
+  // hodUserId: apiData.hod?.id,
+  category: apiData.category ?? '—',
+  hod: apiData.hod ?? '—',
   students: 0,
   faculty: 0,
 });
@@ -90,7 +90,9 @@ export const departmentColumns = (
   {
     accessorKey: 'category',
     header: 'Category',
-    cell: ({ getValue }) => <span className="text-gray-600">{getValue() as string}</span>,
+    cell: ({ row }) => {
+      return <span className="text-gray-600">{row.original.name as string}</span>;
+    },
   },
   {
     accessorKey: 'hod',
@@ -113,7 +115,9 @@ export const departmentColumns = (
     cell: ({ row }) => (
       <div className="flex items-center gap-3">
         <button
-          onClick={() => onEditDepartment(row.original)}
+          onClick={() => {
+            onEditDepartment(row.original);
+          }}
           className="p-2 rounded-md text-gray-400 hover:text-indigo-500 hover:bg-indigo-50"
         >
           <Pencil className="w-4 h-4" />

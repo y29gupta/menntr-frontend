@@ -24,7 +24,7 @@ interface DataTableProps<T extends RowData> {
 function DataTable<T extends RowData>({
   columns,
   data,
-  columnFilters,
+  columnFilters = {},
   onColumnFilterChange,
   showColumnFilters,
   currentPage,
@@ -54,7 +54,7 @@ function DataTable<T extends RowData>({
             </tr>
           ))}
 
-          {showColumnFilters && (
+          {showColumnFilters && typeof onColumnFilterChange === 'function' && (
             <tr
               className={`transition-all duration-500 ease-in-out ${
                 showColumnFilters ? 'max-h-12 opacity-100' : 'max-h-0 opacity-0'
@@ -70,7 +70,12 @@ function DataTable<T extends RowData>({
                       className="w-full px-3 py-2 text-[11px] sm:text-xs rounded-md border border-gray-300 bg-gray-50 focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-300 outline-none transition-all duration-300 placeholder:text-gray-400 shadow-sm"
                       placeholder={colName}
                       value={columnFilters[columnId] ?? ''}
-                      onChange={(e) => onColumnFilterChange(columnId, e.target.value)}
+                      // onChange={(e) => onColumnFilterChange(columnId, e.target.value)}
+                      onChange={(e) => {
+                        if (typeof onColumnFilterChange === 'function') {
+                          onColumnFilterChange(columnId, e.target.value);
+                        }
+                      }}
                     />
                   </th>
                 );
@@ -84,7 +89,21 @@ function DataTable<T extends RowData>({
             <tr key={row.id} className="border-b border-gray-200 last:border-none">
               {row.getVisibleCells().map((cell) => (
                 <td key={cell.id} className="px-4 py-3 whitespace-nowrap">
-                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  {/* {flexRender(cell.column.columnDef.cell, cell.getContext())} */}
+                  {(() => {
+                    const rendered = flexRender(cell.column.columnDef.cell, cell.getContext());
+
+                    if (
+                      typeof rendered === 'object' &&
+                      rendered !== null &&
+                      !Array.isArray(rendered) &&
+                      !('$$typeof' in rendered)
+                    ) {
+                      return (rendered as any)?.name ?? '';
+                    }
+
+                    return rendered;
+                  })()}
                 </td>
               ))}
             </tr>

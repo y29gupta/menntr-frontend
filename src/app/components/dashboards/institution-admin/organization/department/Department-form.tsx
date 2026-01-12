@@ -13,7 +13,7 @@ import { meta } from 'zod/v4/core';
 export const departmentSchema = z.object({
   name: z.string().min(1, 'Department name is required'),
   code: z.string().min(1, 'Department code is required'),
-  parentCategoryId: z.string().optional(),
+  category_id: z.string().optional(),
   hodId: z.string().optional(),
 });
 
@@ -41,13 +41,17 @@ const DepartmentForm = ({ mode, defaultValues, onBack, onSubmit }: Props) => {
     queryKey: ['department-meta'],
     queryFn: getDepartmentMeta,
   });
-
-  const Categoryoption = metaData?.categories.map((item) => ({ label: item.name, value: item.id }));
-  const AssignHODoption = metaData?.hodUsers.map((item) => ({
+  const Categoryoption = metaData?.categories.map((item) => ({
     label: item.name,
-    value: item.id,
+    value: String(item.id), // ✅ FIX
   }));
 
+  const AssignHODoption = metaData?.hodUsers.map((item) => ({
+    label: item.name,
+    value: String(item.id), // ✅ FIX
+  }));
+
+  console.log(Categoryoption, 'categoryopt');
   return (
     <div className="w-full">
       <div className="flex items-center  justify-between mb-4">
@@ -113,20 +117,19 @@ const DepartmentForm = ({ mode, defaultValues, onBack, onSubmit }: Props) => {
               <label className="text-sm text-gray-700 font-medium">Parent Category</label>
 
               <Controller
-                name="parentCategoryId"
+                name="category_id"
                 control={control}
-                render={({ field }) => (
-                  <FormDropdown
-                    placeholder="Select Parent Category"
-                    value={field.value}
-                    onChange={field.onChange}
-                    // options={[
-                    //   { label: 'Engineering', value: 'engineering' },
-                    //   { label: 'Arts & Science', value: 'arts' },
-                    // ]}
-                    options={Categoryoption || []}
-                  />
-                )}
+                render={({ field }) => {
+                  console.log(field, 'field');
+                  return (
+                    <FormDropdown
+                      placeholder="Select Parent Category"
+                      value={field.value}
+                      onChange={field.onChange}
+                      options={Categoryoption || []}
+                    />
+                  );
+                }}
               />
             </div>
 

@@ -1,18 +1,43 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import ActiveAssessmentsTable from './ActiveAssessmentsTable';
-import { assessmentDummyData } from './assessment.dummy';
+import { useQuery } from '@tanstack/react-query';
+import { assessmentApi } from '../assessment.service';
+import { AssessmentRow } from './active.columns';
 
-export default function ActiveAssessments() {
+type TabsCount = {
+  Active: number;
+  Drafts: number;
+  Completed: number;
+};
+
+type props = {
+  setTabsCount: React.Dispatch<React.SetStateAction<TabsCount>>;
+};
+export default function ActiveAssessments({ setTabsCount }: props) {
   const [globalFilter, setGlobalFilter] = useState('');
+  const [showColumnFilters, setShowColumnFilters] = useState(false);
+
+  const { data = [], isLoading } = useQuery<AssessmentRow[]>({
+    queryKey: ['getAssessment'],
+    queryFn: assessmentApi.getAssessmentList,
+  });
+
+  useEffect(() => {
+    setTabsCount((prev) => ({
+      ...prev,
+      Active: data.length,
+    }));
+  }, [data.length, setTabsCount]);
 
   return (
     <ActiveAssessmentsTable
-      data={assessmentDummyData}
+      data={data}
       isLoading={false}
       globalFilter={globalFilter}
       onGlobalFilterChange={setGlobalFilter}
+      showColumnFilters={showColumnFilters}
     />
   );
 }

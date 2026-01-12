@@ -2,17 +2,19 @@ import { ColumnDef } from '@tanstack/react-table';
 import { EyeOutlined, BarChartOutlined, EditOutlined } from '@ant-design/icons';
 
 export type AssessmentRow = {
-  name: string;
-  category: 'Aptitude' | 'Domain';
-  department: string;
+  id: string;
+  assessmentName: string;
+  category: string;
+  departmentBatch: string;
   questions: number;
   publishedOn: string;
   expiryOn: string;
   lastEdited: string;
+  status: string;
 };
 
 export const assessmentColumns: ColumnDef<AssessmentRow>[] = [
-  { accessorKey: 'name', header: 'Assessment name' },
+  { accessorKey: 'assessmentName', header: 'Assessment name' },
   {
     accessorKey: 'category',
     header: 'Category',
@@ -26,11 +28,12 @@ export const assessmentColumns: ColumnDef<AssessmentRow>[] = [
       </span>
     ),
   },
-  { accessorKey: 'department', header: 'Department / Batch' },
+  { accessorKey: 'departmentBatch', header: 'Department / Batch' },
   { accessorKey: 'questions', header: 'Questions' },
   { accessorKey: 'publishedOn', header: 'Published On' },
   { accessorKey: 'expiryOn', header: 'Expiry On' },
   { accessorKey: 'lastEdited', header: 'Last Edited' },
+  { accessorKey: 'status', header: 'Status' },
   {
     id: 'actions',
     header: 'Actions',

@@ -58,7 +58,7 @@ const Page = () => {
     const payload = {
       name: data.name,
       code: data.code,
-      categoryId: data.parentCategoryId ? Number(data.parentCategoryId) : undefined,
+      category_id: data.category_id ? Number(data.category_id) : undefined,
       hodUserId: data.hodId ? Number(data.hodId) : undefined,
     };
 
@@ -139,6 +139,7 @@ const Page = () => {
                   onGlobalFilterChange={setSearch}
                   showColumnFilters={showColumnFilters}
                   onEdit={(department) => {
+                    console.log(department, 'del');
                     setFormMode('edit');
                     setSelectedDepartment(department);
                     setDepartmentView('form');
@@ -153,8 +154,8 @@ const Page = () => {
                 defaultValues={{
                   name: selectedDepartment?.name,
                   code: selectedDepartment?.code,
-                  parentCategoryId: selectedDepartment?.categoryId
-                    ? String(selectedDepartment.categoryId)
+                  category_id: selectedDepartment?.category.id
+                    ? String(selectedDepartment.category.id)
                     : undefined,
                   hodId: selectedDepartment?.hodUserId
                     ? String(selectedDepartment.hodUserId)
