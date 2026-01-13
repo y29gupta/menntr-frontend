@@ -1,5 +1,7 @@
 import { ColumnDef } from '@tanstack/react-table';
 import { EyeOutlined, BarChartOutlined, EditOutlined } from '@ant-design/icons';
+import { Tooltip } from 'antd';
+import { Trash2 } from 'lucide-react';
 
 export type AssessmentRow = {
   id: string;
@@ -13,7 +15,7 @@ export type AssessmentRow = {
   status: string;
 };
 
-export const assessmentColumns: ColumnDef<AssessmentRow>[] = [
+export const DraftColumns: ColumnDef<AssessmentRow>[] = [
   { accessorKey: 'assessmentName', header: 'Assessment name' },
   {
     accessorKey: 'category',
@@ -39,9 +41,20 @@ export const assessmentColumns: ColumnDef<AssessmentRow>[] = [
     header: 'Actions',
     cell: () => (
       <div className="flex gap-4 text-gray-600">
-        <EyeOutlined className="cursor-pointer hover:text-purple-600" />
-        <BarChartOutlined className="cursor-pointer hover:text-purple-600" />
-        <EditOutlined className="cursor-pointer hover:text-purple-600" />
+        {/* <EyeOutlined className="cursor-pointer hover:text-purple-600" /> */}
+        <button className="cursor-pointer rounded-4xl bg-[#F5F0FF] !text-[#904BFF] py-1 px-4">
+          Publish
+        </button>
+
+        <Tooltip title="Edit" placement="bottom" color="purple">
+          <EditOutlined className="cursor-pointer hover:!text-purple-600 hover:bg-[#F5F0FF] px-3 rounded-xl" />
+        </Tooltip>
+        <Tooltip title="Delete" placement="bottom" color="black" className="text-blue-200">
+          {/* <BarChartOutlined className="cursor-pointer hover:!text-purple-600 hover:bg-[#F5F0FF] px-3 rounded-xl" /> */}
+          <span className="cursor-pointer  hover:!text-purple-600 hover:bg-[#F5F0FF] px-3 rounded-xl">
+            <Trash2 />
+          </span>
+        </Tooltip>
       </div>
     ),
   },

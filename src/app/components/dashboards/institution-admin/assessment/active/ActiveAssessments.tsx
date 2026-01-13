@@ -6,30 +6,31 @@ import { useQuery } from '@tanstack/react-query';
 import { assessmentApi } from '../assessment.service';
 import { AssessmentRow } from './active.columns';
 
-type TabsCount = {
-  Active: number;
-  Drafts: number;
-  Completed: number;
-};
+// type TabsCount = {
+//   Active: number;
+//   Drafts: number;
+//   Completed: number;
+// };
 
 type props = {
-  setTabsCount: React.Dispatch<React.SetStateAction<TabsCount>>;
+  // setTabsCount: React.Dispatch<React.SetStateAction<TabsCount>>;
+  data: AssessmentRow[];
 };
-export default function ActiveAssessments({ setTabsCount }: props) {
+export default function ActiveAssessments({ data }: props) {
   const [globalFilter, setGlobalFilter] = useState('');
   const [showColumnFilters, setShowColumnFilters] = useState(false);
 
-  const { data = [], isLoading } = useQuery<AssessmentRow[]>({
-    queryKey: ['getAssessment'],
-    queryFn: assessmentApi.getAssessmentList,
-  });
+  // const { data = [], isLoading } = useQuery<AssessmentRow[]>({
+  //   queryKey: ['getAssessment'],
+  //   queryFn: () => assessmentApi.getAssessmentList('active'),
+  // });
 
-  useEffect(() => {
-    setTabsCount((prev) => ({
-      ...prev,
-      Active: data.length,
-    }));
-  }, [data.length, setTabsCount]);
+  // useEffect(() => {
+  //   setTabsCount((prev) => ({
+  //     ...prev,
+  //     Active: data.length,
+  //   }));
+  // }, [data.length, setTabsCount]);
 
   return (
     <ActiveAssessmentsTable

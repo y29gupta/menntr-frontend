@@ -9,6 +9,8 @@ import StepTwo from './steps/StepTwo';
 import { createAssessmentSchema, CreateAssessmentForm, stepOneSchema } from './schema';
 import StepThree from './steps/StepThree';
 import StepFour from './steps/StepFour';
+import { useMutation } from '@tanstack/react-query';
+import { assessmentApi } from '../assessment.service';
 
 type CreateAssessmentProps = {
   onCancel: () => void;
@@ -19,25 +21,46 @@ export default function CreateAssessment({ onCancel }: CreateAssessmentProps) {
 
   const form = useForm<CreateAssessmentForm>({
     resolver: zodResolver(createAssessmentSchema),
+    mode: 'onChange',
+    reValidateMode: 'onChange',
     defaultValues: {
-      category: 'Aptitude',
-      AssessmentType: 'Graded',
-      questionType: 'MCQ',
-      institutionCategory: 'Engineering',
-      department: 'CSE',
+      // category: 'Aptitude',
+      // AssessmentType: 'Graded',
+      // questionType: 'MCQ',
+      // institutionCategory: 'Engineering',
+      // department: 'CSE',
     },
+  });
+
+  const createAssessmentMutation = useMutation({
+    mutationFn: assessmentApi.createAssessment,
   });
 
   const handleStepOneNext = async () => {
     const isValid = await form.trigger([
-      'AssessmentName',
-      'description',
+      'title',
+      // 'description',
       'category',
       'AssessmentType',
       'questionType',
     ]);
 
-    if (isValid) setStep(2);
+    if (!isValid) return;
+    const values = form.getValues();
+    console.log(values, 'values');
+
+    // await createAssessmentMutation.mutateAsync({
+    //   feature_id: 5,
+    //   duration_minutes: 30,
+    //   tags: ['verbal', 'english'],
+
+    //   title: values.title,
+    //   description: values.description,
+    //   category: values.category,
+    //   assessment_type: values.AssessmentType,
+    //   question_type: values.questionType,
+    // });
+    setStep(2);
   };
 
   const handleStepTwoNext = async () => {
