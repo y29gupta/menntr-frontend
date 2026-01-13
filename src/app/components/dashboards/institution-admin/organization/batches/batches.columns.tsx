@@ -63,14 +63,15 @@ export const mapApiBatchToBatch = (apiData: BatchApiData): Batch => ({
 export const batchesColumns = (
   onEditBatch: (row: Batch) => void,
   onDeleteBatch: (row: Batch) => void
-): ColumnDef<Batch>[] => [
+): ColumnDef<Batch, any>[] => [
   {
     accessorKey: 'name',
     header: 'Batch Name',
     cell: ({ row }) => <p className="font-medium text-gray-900 truncate">{row.original.name}</p>,
   },
   {
-    accessorKey: 'department',
+    id: 'department',
+    accessorFn: (row: Batch) => row.department.name,
     header: 'Department',
     cell: ({ row }) => (
       <div className="max-w-[220px]">
@@ -81,6 +82,7 @@ export const batchesColumns = (
       </div>
     ),
   },
+
   {
     accessorKey: 'category',
     header: 'Category',
