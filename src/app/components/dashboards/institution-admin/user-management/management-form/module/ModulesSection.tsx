@@ -62,7 +62,7 @@ const ModulesSection = ({
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-sm p-8">
+    <div className="bg-white border-2 border-gray-200 rounded-[24px] shadow-sm p-8">
       <h2 className="text-xl font-semibold mb-6 text-gray-800">Select Modules / Features</h2>
 
       <div className="border-t border-gray-300 mb-5" />

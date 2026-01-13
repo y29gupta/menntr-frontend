@@ -152,20 +152,13 @@ const UserPermission = ({ mode, onBack, onNext }: Props) => {
       </div>
 
       {/* Select Modules/Features Card */}
-      <div className="bg-white border-2 border-gray-200 rounded-[24px] shadow-sm p-8">
-        <h2 className="text-xl font-semibold mb-6">Select Modules/Features</h2>
-        <div className="w-full h-px bg-gray-200 mb-6" />
-
-        <ModuleSelector modules={modules} selectedModules={selectedModules} register={register} />
-
-        <ModulesSection
-          register={register}
-          selectedModules={selectedModules}
-          modulePermissions={modulePermissions}
-          setModulePermissions={setModulePermissions}
-          onNext={onNext}
-        />
-      </div>
+      <ModulesSection
+        register={register}
+        selectedModules={selectedModules}
+        modulePermissions={modulePermissions}
+        setModulePermissions={setModulePermissions}
+        onNext={onNext}
+      />
     </form>
   );
 };
