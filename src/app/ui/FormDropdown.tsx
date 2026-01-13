@@ -39,7 +39,6 @@ const FormDropdown = ({
   const [search, setSearch] = useState('');
   const ref = useRef<HTMLDivElement>(null);
 
-  console.log(options, value, 'drop');
   // close on outside click
   useEffect(() => {
     const handler = (e: MouseEvent) => {

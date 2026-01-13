@@ -55,7 +55,7 @@ export default function AssessmentHeader({ activeTab, onTabChange, onCreate, tab
           >
             {tab} <span className="pl-1">({tabCounts[tab]}) </span>
             {activeTab === tab && (
-              <span className="absolute left-0 -bottom-[1px] h-[2px] w-full  rounded-full" />
+              <span className="absolute left-0 border -bottom-[1px] h-[2px] w-full  rounded-full" />
             )}
           </button>
         ))}

@@ -1,5 +1,8 @@
 import { UseFormReturn } from 'react-hook-form';
 import { CreateAssessmentForm } from '../schema';
+import { useQuery } from '@tanstack/react-query';
+import { assessmentApi } from '../../assessment.service';
+import { useEffect } from 'react';
 
 type Props = {
   form: UseFormReturn<CreateAssessmentForm>;
@@ -8,11 +11,55 @@ type Props = {
 };
 
 export default function StepOne({ form, onNext, onCancel }: Props) {
-  const { register, setValue, watch } = form;
+  const {
+    register,
+    setValue,
+    watch,
+    formState: { errors },
+  } = form;
 
   const category = watch('category');
   const type = watch('AssessmentType');
   const questionType = watch('questionType');
+
+  const { data: metaData } = useQuery({
+    queryKey: ['assessment-meta'],
+    queryFn: assessmentApi.getAssessmentMeta,
+  });
+  const assessmentCategories = metaData?.assessmentCategories ?? [];
+  const assessmentTypes = metaData?.assessmentTypes ?? [];
+  const questionTypes = metaData?.questionTypes ?? [];
+
+  useEffect(() => {
+    if (assessmentCategories.length && !category) {
+      setValue('category', assessmentCategories[0] as any, {
+        shouldValidate: true,
+        shouldDirty: true,
+      });
+    }
+
+    if (assessmentTypes.length && !type) {
+      setValue('AssessmentType', assessmentTypes[0] as any, {
+        shouldValidate: true,
+        shouldDirty: true,
+      });
+    }
+
+    if (questionTypes.length && !questionType) {
+      setValue('questionType', questionTypes[0] as any, {
+        shouldValidate: true,
+        shouldDirty: true,
+      });
+    }
+  }, [
+    assessmentCategories,
+    assessmentTypes,
+    questionTypes,
+    category,
+    type,
+    questionType,
+    setValue,
+  ]);
 
   return (
     <div className="bg-white  rounded-2xl px-6 shadow">
@@ -28,10 +75,11 @@ export default function StepOne({ form, onNext, onCancel }: Props) {
           <div className="">
             <label className="text-[16px] font-medium ">Assessment Name</label>
             <input
-              {...register('AssessmentName')}
+              {...register('title', { shouldUnregister: false })}
               placeholder="e.g. DSA Assessment – Week 3"
               className="w-full pt-2 border-b border-[#C3CAD9] outline-none py-2"
             />
+            {errors.title && <p className="text-xs text-red-500 mt-1">{errors.title.message}</p>}
 
             <label className="text-sm font-medium mt-4 block">Description (Optional)</label>
             <input
@@ -42,47 +90,86 @@ export default function StepOne({ form, onNext, onCancel }: Props) {
           </div>
           <label className="text-sm font-medium block mt-6">Assessment Question Type</label>
           <div className="flex gap-3 mt-2">
-            {['MCQ', 'Coding'].map((v) => (
+            {questionTypes.map((v) => (
               <button
                 key={v}
                 type="button"
-                onClick={() => setValue('questionType', v as any)}
-                className={`px-4 py-1.5 rounded-full border text-sm
-              ${questionType === v ? 'border-[#7C3AED] text-[#7C3AED]' : 'border-[#D0D5DD]'}`}
+                onClick={() =>
+                  setValue('questionType', v as any, {
+                    shouldValidate: true,
+                    shouldDirty: true,
+                  })
+                }
+                className={`px-4 py-1.5 rounded-full border text-[16px] !text-[#3D465C] font-light
+        ${
+          questionType === v
+            ? 'border-[#7C3AED] !text-[#7C3AED] bg-[#F6F0FF]'
+            : 'border-gray-300 text-gray-500'
+        }`}
               >
-                {v}
+                <span className="flex items-center gap-2">
+                  {questionType === v && <span>✓</span>}
+                  {v}
+                </span>
               </button>
             ))}
           </div>
+          {errors.questionType && (
+            <p className="text-xs text-red-500 mt-1">{errors.questionType.message}</p>
+          )}
         </div>
         <div className="border-r border-[#C3CAD9] "></div>
         <div className="w-full max-w-2/4 ">
           <label className="text-sm font-medium">Assessment Category</label>
           <div className="flex gap-3 mt-4">
-            {['Aptitude', 'Domain'].map((v) => (
+            {assessmentCategories.map((v) => (
               <button
                 type="button"
                 key={v}
-                onClick={() => setValue('category', v as any)}
-                className={`px-4 py-1.5 rounded-full border text-sm
-                  ${category === v ? 'border-[#7C3AED] text-[#7C3AED]' : 'border-[#D0D5DD]'}`}
+                onClick={() =>
+                  setValue('category', v as any, {
+                    shouldValidate: true,
+                    shouldDirty: true,
+                  })
+                }
+                className={`px-4 py-1.5 rounded-full border text-[16px] !text-[#3D465C] font-light
+        ${
+          category === v
+            ? 'border-[#7C3AED] !text-[#7C3AED] bg-[#F6F0FF]'
+            : 'border-[#C3CAD9] !text-[#3D465C] '
+        }`}
               >
-                {v}
+                <span className="flex items-center gap-2">
+                  {category === v && <span>✓</span>}
+                  {v}
+                </span>
               </button>
             ))}
           </div>
 
           <label className="text-sm font-medium mt-4 block">Assessment Type</label>
           <div className="flex gap-3 mt-4">
-            {['Practice', 'Assignment', 'Mock Test'].map((v) => (
+            {assessmentTypes.map((v) => (
               <button
                 type="button"
                 key={v}
-                onClick={() => setValue('AssessmentType', v as any)}
-                className={`px-4 py-1.5 rounded-full border text-sm
-                  ${type === v ? 'border-[#7C3AED] text-[#7C3AED]' : 'border-[#D0D5DD]'}`}
+                onClick={() =>
+                  setValue('AssessmentType', v as any, {
+                    shouldValidate: true,
+                    shouldDirty: true,
+                  })
+                }
+                className={`px-4 py-1.5 rounded-full border text-[16px] !text-[#3D465C] font-light
+        ${
+          type === v
+            ? 'border-purple-500 !text-purple-600 bg-purple-50'
+            : 'border-gray-300 text-gray-500'
+        }`}
               >
-                {v === 'Graded' ? 'Graded Assessment' : v}
+                <span className="flex items-center gap-2">
+                  {type === v && <span>✓</span>}
+                  {v}
+                </span>
               </button>
             ))}
           </div>
@@ -94,7 +181,7 @@ export default function StepOne({ form, onNext, onCancel }: Props) {
         <button
           type="button"
           onClick={onNext}
-          className="px-8 py-2 rounded-full text-white bg-[linear-gradient(90deg,#904BFF_0%,#C053C2_100%)]"
+          className="px-8 py-2 rounded-full !text-white bg-[linear-gradient(90deg,#904BFF_0%,#C053C2_100%)]"
         >
           Continue
         </button>
