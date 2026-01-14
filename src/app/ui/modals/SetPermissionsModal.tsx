@@ -27,7 +27,7 @@ export const SetPermissionsModal = ({
     enabled: open && !!moduleId,
     queryKey: ['features-by-module', moduleId],
     queryFn: async () => {
-      const res = await fetch(`${BASE_URL}/institutionsadmin/modules/features/${moduleId}`, {
+      const res = await fetch(`/api/institutionsadmin/modules/features/${moduleId}`, {
         credentials: 'include',
       });
 

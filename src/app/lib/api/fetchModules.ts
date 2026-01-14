@@ -29,7 +29,7 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
  * Fetch all modules for the institution
  */
 export const fetchModules = async (): Promise<ModulesResponse> => {
-  const response = await fetch(`${API_BASE_URL}/institutionsadmin/modules`, {
+  const response = await fetch(`/api/institutionsadmin/modules`, {
     credentials: 'include', // Send cookies with the request
   });
 
@@ -44,7 +44,7 @@ export const fetchModules = async (): Promise<ModulesResponse> => {
  * Fetch features for a specific module
  */
 export const fetchModuleFeatures = async (moduleId: number): Promise<FeaturesResponse> => {
-  const response = await fetch(`${API_BASE_URL}/institutionsadmin/modules/features/${moduleId}`, {
+  const response = await fetch(`/api/institutionsadmin/modules/features/${moduleId}`, {
     credentials: 'include',
   });
 

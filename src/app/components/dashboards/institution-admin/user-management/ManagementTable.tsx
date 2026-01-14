@@ -15,12 +15,12 @@ async function fetchUsers(): Promise<Management[]> {
   const token = localStorage.getItem('auth_token');
 
   const res = await fetch(
-    `${process.env.NEXT_PUBLIC_API_BASE_URL}/institutionsadmin/user-management/users`,
+    `/api/institutionsadmin/user-management/users`,
     {
       method: 'GET',
       credentials: 'include',
       headers: {
-        Authorization: `Bearer ${token ?? ''}`,
+        // Authorization: `Bearer ${token ?? ''}`,
         'Content-Type': 'application/json',
       },
     }
