@@ -13,18 +13,19 @@ export default function Page() {
   return (
     <div
       className="
-        min-h-full
-        w-full
-        max-w-[1366px]
-        mx-auto
-        bg-white
-        px-4
-        sm:px-6
-        md:px-
-        lg:px-20
-        flex
-        flex-col
-        relative
+       
+        min-h-screen
+    w-full
+    max-w-[1366px]
+    mx-auto
+    bg-white
+    px-4
+    sm:px-6
+    lg:px-20
+    flex
+    flex-col
+    relative
+    overflow-y-auto
       "
     >
       {/* CONTENT CONTAINER */}

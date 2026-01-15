@@ -11,13 +11,26 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const pathname = usePathname();
   const role = pathname.split('/')[1] as Role;
 
-  const [collapsed, setCollapsed] = useState(false);
+  // const [collapsed, setCollapsed] = useState(true);
+  const [collapsed, setCollapsed] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return true; // SSR safe
+    return true; // collapsed on initial mount (your requirement)
+  });
+
+  // useEffect(() => {
+  //   const resize = () => {
+  //     setCollapsed(window.innerWidth < 768);
+  //   };
+  //   resize();
+  //   window.addEventListener('resize', resize);
+  //   return () => window.removeEventListener('resize', resize);
+  // }, []);
 
   useEffect(() => {
     const resize = () => {
       setCollapsed(window.innerWidth < 768);
     };
-    resize();
+
     window.addEventListener('resize', resize);
     return () => window.removeEventListener('resize', resize);
   }, []);

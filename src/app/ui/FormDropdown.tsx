@@ -20,7 +20,10 @@ interface Props {
   searchPlaceholder?: string;
   multiple?: boolean;
   renderChips?: boolean;
-  containerClassName?: string;
+
+  dropdownPosition?: 'auto' | 'top' | 'bottom';
+  triggerClassName?: string;
+  dropdownClassName?: string;
 }
 
 const FormDropdown = ({
@@ -33,10 +36,14 @@ const FormDropdown = ({
   multiple = false,
   renderChips = false,
 
-  containerClassName,
+  dropdownPosition = 'bottom',
+  triggerClassName,
+  dropdownClassName,
 }: Props) => {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState('');
+
+  const [position, setPosition] = useState<'top' | 'bottom'>('bottom');
   const ref = useRef<HTMLDivElement>(null);
 
   // close on outside click
@@ -50,7 +57,19 @@ const FormDropdown = ({
     return () => document.removeEventListener('mousedown', handler);
   }, []);
 
-  // const selected = options.find((o) => o.value === value);
+  useEffect(() => {
+    if (!open || dropdownPosition !== 'auto' || !ref.current) return;
+
+    const rect = ref.current.getBoundingClientRect();
+    const spaceBelow = window.innerHeight - rect.bottom;
+    const spaceAbove = rect.top;
+
+    if (spaceBelow < 240 && spaceAbove > spaceBelow) {
+      setPosition('top');
+    } else {
+      setPosition('bottom');
+    }
+  }, [open, dropdownPosition]);
 
   const selectedValues = Array.isArray(value) ? value : value ? [value] : [];
   const selected = options.filter((o) => selectedValues.includes(o.value));
@@ -65,19 +84,9 @@ const FormDropdown = ({
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="
-          w-full cursor-pointer flex gap-2 items-center border-b border-[#C3CAD9] justify-between
-         bg-white px-1 py-2 text-sm text-gray-700
-        
-        "
+        className={`  w-full cursor-pointer flex gap-2 items-center border-b ${triggerClassName ? triggerClassName : ' px-1 py-2'} border-[#C3CAD9] justify-between
+         bg-white text-sm text-gray-700`}
       >
-        {/* <span className={value ? 'text-gray-800' : 'text-gray-400'}>
-          {selected?.label || placeholder}
-        </span> */}
-
-        {/* <span className={selected.length ? 'text-sm text-gray-800 ' : 'text-gray-400  text-sm'}>
-          {selected.length ? selected.map((o) => o.label).join(', ') : placeholder}
-        </span> */}
         {renderChips && multiple && selected.length > 0 ? (
           <div className="flex flex-wrap gap-2">
             {selected.map((opt) => (
@@ -120,7 +129,23 @@ const FormDropdown = ({
 
       {/* Dropdown panel */}
       {open && (
-        <div className="absolute z-50 mt-2 min-w-full w-full max-w-[90vw] rounded-2xl bg-white shadow-[0_4px_16px_0_#00000033]">
+        <div
+          className={`
+            absolute z-50 min-w-full w-full max-w-[90vw]
+            rounded-2xl bg-white shadow-[0_4px_16px_0_#00000033]
+            ${
+              dropdownPosition === 'top'
+                ? 'bottom-full mb-2'
+                : dropdownPosition === 'auto'
+                  ? position === 'top'
+                    ? 'bottom-full mb-2'
+                    : 'top-full mt-2'
+                  : 'top-full mt-2'
+            }
+            ${dropdownClassName ?? ''}
+          `}
+          // className="absolute z-50 mt-2 min-w-full w-full max-w-[90vw] rounded-2xl bg-white shadow-[0_4px_16px_0_#00000033]"
+        >
           {/* 🔍 Search (optional) */}
           {searchable && (
             <div className="p-3">

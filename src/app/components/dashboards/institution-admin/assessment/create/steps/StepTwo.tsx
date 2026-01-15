@@ -175,13 +175,13 @@ export default function StepTwo({ form, onBack, onNext, onCancel }: Props) {
               placeholder="Select Batch"
               options={batches.map((b: AssessmentBatch) => ({
                 label: b.name,
-                value: b.id,
+                value: String(b.id),
               }))}
               value={field.value}
               onChange={field.onChange}
               multiple
               renderChips
-              disabled={!selectedDepartment}
+              // disabled={!selectedDepartment}
             />
           </div>
         )}

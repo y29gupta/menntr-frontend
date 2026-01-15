@@ -9,3 +9,14 @@ export interface getAssessmentListResponse {
   lastEdited: string;
   status: "published" | "draft" | "completed";
 }
+
+export interface AssessmentQuestionResponse {
+  id: string;
+  questionNo: number;
+  questionText: string;
+  marks: number;
+  isMandatory: boolean;
+  topic: string;
+  questionTypeLabel: string;
+  difficulty: 'Easy' | 'Medium' | 'Hard';
+}

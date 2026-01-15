@@ -1,16 +1,10 @@
 import { z } from 'zod';
 
-// export const stepOneSchema = z.object({
-//   title: z.string().min(1,"Assessment name is required"),
-//   description: z.string().optional(),
-//   // category: z.enum(['Aptitude', 'Domain']),
-//   // AssessmentType: z.enum(['Practice', 'Graded']),
-//   // questionType: z.enum(['MCQ', 'Coding', 'Theory']),
 
-//    category: z.string().min(1,"category selection is required"),
-//   AssessmentType: z.string().min(1,'Please select the Assessment Type'),
-//   questionType: z.string().min(1,"Please select the Question Type"),
-// });
+export const mcqOptionSchema = z.object({
+  text: z.string().min(1, 'Option text is required'),
+  correct: z.boolean(),
+});
 
 export const stepOneSchema = z.object({
   title: z.string().min(1, 'Assessment name is required'),
@@ -36,10 +30,23 @@ export const stepTwoSchema = z.object({
 
 
 
+// export const createMCQSchema = z.object({
+//   topic: z.string().min(1, 'Topic is required'),
+//   questionType: z.string().min(1, 'Question type is required'),
+//   difficulty: z.enum(['easy', 'medium', 'hard']),
+// });
+
 export const createMCQSchema = z.object({
   topic: z.string().min(1, 'Topic is required'),
   questionType: z.string().min(1, 'Question type is required'),
-  difficulty: z.enum(['easy', 'medium', 'hard']),
+  difficulty: z.string().min(1, 'Difficulty is required'),
+  options: z
+    .array(mcqOptionSchema)
+    .min(2, 'At least two options are required')
+    .refine(
+      (opts) => opts.some((o) => o.correct),
+      'At least one correct option is required'
+    ),
 });
 
 export type CreateMCQFormValues = z.infer<typeof createMCQSchema>;

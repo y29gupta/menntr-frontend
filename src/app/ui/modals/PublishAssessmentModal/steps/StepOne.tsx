@@ -1,24 +1,28 @@
-import { AssessmentData } from '../types';
 import { CARD } from '../constants';
 
-export default function StepOne({ data }: { data: AssessmentData }) {
+export default function StepOne({ data }: { data: any }) {
+  if (!data) return null;
+
   return (
     <div className="">
       <h3 className="mb-3 text-[14px] font-medium text-[#101828]">Assessment Summary</h3>
 
       <div className="grid grid-cols-2 gap-4">
         <div className={CARD}>
-          <Item label="Assessment Name" value={data.title} />
-          <Item label="Category" value="Aptitude" />
-          <Item label="Assessment Type" value="Practice" />
-          <Item label="Question Type" value="MCQ" />
+          <Item label="Assessment Name" value={data.assessmentName} />
+          <Item label="Category" value={data.category} />
+          <Item label="Assessment Type" value={data.assessmentType} />
+          <Item label="Question Type" value={data.questionType} />
         </div>
 
         <div className={CARD}>
-          <Item label="Total Questions" value={data.questions.length} />
+          <Item label="Total Questions" value={data.totalQuestions} />
           <Item label="Total Marks" value={data.totalMarks} />
-          <Item label="Difficulty Mix" value="Easy (10) • Medium (12) • Hard (8)" />
-          <Item label="Mandatory" value="Yes" />
+          <Item
+            label="Difficulty Mix"
+            value={`Easy (${data.difficultyMix.easy}) • Medium (${data.difficultyMix.medium}) • Hard (${data.difficultyMix.hard})`}
+          />
+          <Item label="Mandatory" value={data.mandatory ? 'Yes' : 'No'} />
         </div>
       </div>
     </div>
@@ -28,8 +32,8 @@ export default function StepOne({ data }: { data: AssessmentData }) {
 function Item({ label, value }: { label: string; value: any }) {
   return (
     <div className="mb-3 last:mb-0 border-b border-[#C3CAD9]">
-      <p className="text-[12px] text-[#667085]">{label}</p>
-      <p className="mt-1 text-[14px] font-medium text-[#101828]">{value}</p>
+      <p className="text-[12px]  text-[#636771]">{label}</p>
+      <p className="mt-1 text-[14px] font-medium text-[#0F172A]">{value}</p>
     </div>
   );
 }

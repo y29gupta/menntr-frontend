@@ -34,3 +34,12 @@ export type CreateAssessmentPayload = {
   assessment_type: string;
   question_type: string;
 };
+
+
+export type AssessmentAccessPayload = {
+  shuffleQuestions: boolean;
+  shuffleOptions: boolean;
+  allowReattempts: boolean;
+  showCorrectAnswers: boolean;
+  showScoreImmediately: boolean;
+};

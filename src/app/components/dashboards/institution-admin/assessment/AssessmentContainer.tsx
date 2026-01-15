@@ -54,7 +54,7 @@ export default function AssessmentContainer() {
 
   return (
     <div
-      className="flex w-full rounded-2xl p-4  backdrop-blur-[100px] shadow-[0_0_8px_0_rgba(15,23,42,0.12)]
+      className="flex w-full rounded-2xl p-4   shadow-[0_0_8px_0_rgba(15,23,42,0.12)]
  flex-col"
     >
       {isCreating ? (

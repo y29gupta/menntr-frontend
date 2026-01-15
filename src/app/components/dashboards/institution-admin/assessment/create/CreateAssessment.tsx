@@ -18,6 +18,7 @@ type CreateAssessmentProps = {
 
 export default function CreateAssessment({ onCancel }: CreateAssessmentProps) {
   const [step, setStep] = useState(1);
+  const [assessmentId, setAssessmentId] = useState<string | null>(null);
 
   const form = useForm<CreateAssessmentForm>({
     resolver: zodResolver(createAssessmentSchema),
@@ -36,6 +37,13 @@ export default function CreateAssessment({ onCancel }: CreateAssessmentProps) {
     mutationFn: assessmentApi.createAssessment,
   });
 
+  const updateAudienceMutation = useMutation({
+    mutationFn: ({ assessmentId, batchIds }: { assessmentId: string; batchIds: number[] }) =>
+      assessmentApi.updateAssessmentAudience(assessmentId, {
+        batch_ids: batchIds,
+      }),
+  });
+
   const handleStepOneNext = async () => {
     const isValid = await form.trigger([
       'title',
@@ -47,26 +55,37 @@ export default function CreateAssessment({ onCancel }: CreateAssessmentProps) {
 
     if (!isValid) return;
     const values = form.getValues();
-    console.log(values, 'values');
+    console.log(values, 'stepone');
 
-    // await createAssessmentMutation.mutateAsync({
-    //   feature_id: 5,
-    //   duration_minutes: 30,
-    //   tags: ['verbal', 'english'],
+    const res = await createAssessmentMutation.mutateAsync({
+      feature_id: 5,
+      duration_minutes: 30,
+      tags: ['verbal', 'english'],
 
-    //   title: values.title,
-    //   description: values.description,
-    //   category: values.category,
-    //   assessment_type: values.AssessmentType,
-    //   question_type: values.questionType,
-    // });
+      title: values.title,
+      description: values.description,
+      category: values.category,
+      assessment_type: values.AssessmentType,
+      question_type: values.questionType,
+    });
+
+    setAssessmentId(res.id);
     setStep(2);
   };
-
   const handleStepTwoNext = async () => {
     const isValid = await form.trigger(['institutionCategory', 'department', 'batches']);
 
-    if (isValid) setStep(3);
+    if (!isValid || !assessmentId) return;
+    // if (!isValid) return;
+
+    const { batches } = form.getValues();
+
+    await updateAudienceMutation.mutateAsync({
+      assessmentId,
+      batchIds: batches.map((id) => Number(id)),
+    });
+
+    setStep(3);
   };
 
   const handleStepThreeNext = () => {
@@ -101,7 +120,9 @@ export default function CreateAssessment({ onCancel }: CreateAssessmentProps) {
           onAddMCQ={() => setStep(4)}
         />
       )}
-      {step === 4 && <StepFour onBack={() => setStep(3)} onCancel={onCancel} />}
+      {step === 4 && (
+        <StepFour onBack={() => setStep(3)} onCancel={onCancel} assessmentId={assessmentId!} />
+      )}
     </div>
   );
 }
