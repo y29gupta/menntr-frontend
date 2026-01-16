@@ -3,7 +3,12 @@
 import { useState } from 'react';
 import { Search, Filter, Upload } from 'lucide-react';
 import ManagementTable from '@/app/components/dashboards/institution-admin/user-management/ManagementTable';
-import ProfileForm from '@/app/components/dashboards/institution-admin/user-management/management-form/FormStep1';
+import { useForm, FormProvider } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import ProfileForm, {
+  profileSchema,
+  ProfileFormValues,
+} from '@/app/components/dashboards/institution-admin/user-management/management-form/FormStep1';
 import UserPermission from '@/app/components/dashboards/institution-admin/user-management/management-form/FormStep2';
 import UserCredentials from '@/app/components/dashboards/institution-admin/user-management/management-form/FornStep3';
 import { CategoryKey } from '@/app/constants/roleConfig';
@@ -57,6 +62,33 @@ const Page = () => {
   const [search, setSearch] = useState('');
   const [showColumnFilters, setShowColumnFilters] = useState(false);
   const [step, setStep] = useState<1 | 2 | 3>(1);
+
+  const profileForm = useForm<ProfileFormValues>({
+    resolver: zodResolver(profileSchema),
+    defaultValues: {
+      firstName: '',
+      lastName: '',
+      email: '',
+      mobile: '',
+    },
+  });
+
+  const permissionForm = useForm({
+    defaultValues: {
+      selectedModules: [],
+      userRoleAndManagement: [],
+      organizationStructure: [],
+      studentManagement: [],
+      assessmentManagement: [],
+      reportAndAnalytics: [],
+    },
+  });
+
+  const credentialsForm = useForm({
+    defaultValues: {
+      sendCredentials: true,
+    },
+  });
 
   return (
     <div className="flex flex-col h-full min-h-0 rounded-2xl p-4 gap-4 shadow-[0_0_16px_0_#0F172A26] w-full">
@@ -144,6 +176,10 @@ const Page = () => {
                     reportAndAnalytics: [],
                   },
                 });
+                profileForm.reset({
+                  firstName,
+                  lastName,
+                });
 
                 setStep(1);
                 setView('form');
@@ -155,44 +191,51 @@ const Page = () => {
         /* FORM */
         <div className="flex-1 min-h-0 overflow-y-auto">
           {step === 1 && (
-            <ProfileForm
-              mode={formMode}
-              defaultValues={{
-                firstName: formData.firstName,
-                lastName: formData.lastName,
-                email: formData.email,
-                mobile: formData.mobile,
-              }}
-              onBack={() => setView('list')}
-              onSubmit={(data) => {
-                setFormData((prev) => ({ ...prev, ...data }));
-                setStep(2);
-              }}
-            />
+            <FormProvider {...profileForm}>
+              <ProfileForm
+                mode={formMode}
+                onBack={() => setView('list')}
+                onNext={() => {
+                  setFormData((prev) => ({
+                    ...prev,
+                    ...profileForm.getValues(),
+                  }));
+                  setStep(2);
+                }}
+              />
+            </FormProvider>
           )}
 
           {step === 2 && (
-            <UserPermission
-              mode={formMode}
-              defaultValues={formData.permissions}
-              onBack={() => setStep(1)}
-              onFormSubmit={(permissions: any) => {
-                setFormData((prev) => ({ ...prev, permissions }));
-                setStep(3);
-              }}
-              onNext={() => setStep(3)}
-            />
+            <FormProvider {...permissionForm}>
+              <UserPermission
+                mode={formMode}
+                onBack={() => setStep(1)}
+                onNext={() => {
+                  setFormData((prev) => ({
+                    ...prev,
+                    permissions: permissionForm.getValues(),
+                  }));
+                  setStep(3);
+                }}
+              />
+            </FormProvider>
           )}
 
           {step === 3 && (
-            <UserCredentials
-              mode={formMode}
-              onBack={() => setStep(2)}
-              onSubmit={() => {
-                console.log('FINAL PAYLOAD:', formData);
-                setView('list');
-              }}
-            />
+            <FormProvider {...credentialsForm}>
+              <UserCredentials
+                mode={formMode}
+                onBack={() => setStep(2)}
+                onSubmit={() => {
+                  console.log('FINAL PAYLOAD:', {
+                    ...formData,
+                    sendCredentials: credentialsForm.getValues('sendCredentials'),
+                  });
+                  setView('list');
+                }}
+              />
+            </FormProvider>
           )}
         </div>
       )}

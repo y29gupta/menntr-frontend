@@ -1,5 +1,6 @@
 import { ColumnDef } from '@tanstack/react-table';
 import { EyeOutlined, BarChartOutlined, EditOutlined } from '@ant-design/icons';
+import { useRouter } from 'next/navigation';
 
 export type AssessmentRow = {
   id: string;
@@ -37,12 +38,19 @@ export const assessmentColumns: ColumnDef<AssessmentRow>[] = [
   {
     id: 'actions',
     header: 'Actions',
-    cell: () => (
-      <div className="flex gap-4 text-gray-600">
-        <EyeOutlined className="cursor-pointer hover:text-purple-600" />
-        <BarChartOutlined className="cursor-pointer hover:text-purple-600" />
-        <EditOutlined className="cursor-pointer hover:text-purple-600" />
-      </div>
-    ),
+    cell: ({ row }) => {
+      const router = useRouter();
+
+      return (
+        <div className="flex gap-4 text-gray-600">
+          <EyeOutlined
+            className="cursor-pointer hover:text-purple-600"
+            onClick={() => router.push(`/admin/assessment/${row.original.id}/performance`)}
+          />
+          <BarChartOutlined className="cursor-pointer hover:text-purple-600" />
+          <EditOutlined className="cursor-pointer hover:text-purple-600" />
+        </div>
+      );
+    },
   },
 ];

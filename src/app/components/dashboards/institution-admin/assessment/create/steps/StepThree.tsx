@@ -1,4 +1,5 @@
 import TextFileIcon from '@/app/components/icons/TextFile';
+import { normalizeTypes } from '@/app/utils/questionType';
 import { PencilLine, FileText, PencilIcon } from 'lucide-react';
 
 type Props = {
@@ -6,9 +7,14 @@ type Props = {
   onNext: () => void;
   onCancel: () => void;
   onAddMCQ: () => void;
+  questionTypes: string | string[];
 };
 
-export default function StepThree({ onBack, onNext, onCancel, onAddMCQ }: Props) {
+export default function StepThree({ onBack, onNext, onCancel, onAddMCQ, questionTypes }: Props) {
+  const types = normalizeTypes(questionTypes);
+
+  const buttonLabel = types.length === 1 ? `Add ${types[0]} Question` : 'Add Questions';
+
   return (
     <div className="bg-white flex flex-col gap-6  rounded-2xl border border-[#C3CAD9] px-6 pt-6 pb-4">
       {/* <div className="flex border flex-col"> */}
@@ -40,10 +46,11 @@ export default function StepThree({ onBack, onNext, onCancel, onAddMCQ }: Props)
               </div>
               <button
                 type="button"
-                onClick={onAddMCQ}
+                onClick={onNext}
                 className="mt-6 rounded-full border border-[#904BFF] px-5 py-2 text-sm font-medium !text-[#7F56D9]"
               >
-                Add MCQ Questions
+                {/* Add MCQ Questions */}
+                {buttonLabel}
               </button>
             </div>
           </div>

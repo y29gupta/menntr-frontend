@@ -7,7 +7,7 @@ const AreaSparkline = ({ data }: { data: number[] }) => {
   const isDown = data[data.length - 1] < data[data.length - 2];
 
   return (
-    <div className="w-[140px] h-[90px]">
+    <div className="w-full h-full min-h-[80px]">
       <ResponsiveContainer width="100%" height="100%">
         <AreaChart data={chartData}>
           <defs>

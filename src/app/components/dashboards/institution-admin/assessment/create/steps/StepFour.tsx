@@ -4,11 +4,18 @@ import CreateMCQModal from '../components/CreateMCQModal';
 import { PublishAssessmentModal } from '@/app/ui/modals/PublishAssessmentModal/PublishAssessmentModal';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { assessmentApi } from '../../assessment.service';
+import CreateCodingModal from '../components/CreateCodingModal';
+import { isMultiType, normalizeTypes, QuestionType } from '@/app/utils/questionType';
+import { questionModalRegistry } from '../questionModalRegistry';
 
 type Props = {
   onBack: () => void;
   onCancel: () => void;
   assessmentId: string;
+  questionTypes: string | string[];
+  activeQuestionType: QuestionType | null;
+  onSelectQuestionType: (type: QuestionType) => void;
+  onCloseModal: () => void;
 };
 
 type Question = {
@@ -27,9 +34,20 @@ const DIFFICULTY_STYLES: Record<Question['difficulty'], string> = {
   Hard: 'bg-[#FFE6E6] text-[#8E0000]',
 };
 
-export default function StepFour({ onBack, onCancel, assessmentId }: Props) {
+export default function StepFour({
+  onBack,
+  onCancel,
+  assessmentId,
+  questionTypes,
+  activeQuestionType,
+  onSelectQuestionType,
+  onCloseModal,
+}: Props) {
   const [isMCQOpen, setIsMCQOpen] = useState(false);
   const [open, setOpen] = useState(false);
+
+  const types = normalizeTypes(questionTypes);
+  const multiType = isMultiType(questionTypes);
 
   const queryClient = useQueryClient();
 
@@ -46,7 +64,23 @@ export default function StepFour({ onBack, onCancel, assessmentId }: Props) {
   const assessmentData = {
     id: '14',
   };
-  console.log(assessmentId, 'stepfour');
+
+  const ActiveModal = activeQuestionType && questionModalRegistry[activeQuestionType];
+
+  const handleSaveQuestion = (q: any) => {
+    queryClient.invalidateQueries({
+      queryKey: ['assessment-questions', assessmentId],
+    });
+
+    onCloseModal(); // close modal after save
+  };
+
+  const handleSaveAndNextQuestion = (q: any) => {
+    queryClient.invalidateQueries({
+      queryKey: ['assessment-questions', assessmentId],
+    });
+    // DO NOT close modal → modal already resets itself
+  };
 
   return (
     <>
@@ -60,13 +94,33 @@ export default function StepFour({ onBack, onCancel, assessmentId }: Props) {
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
-            <button
+            {!multiType && types.length === 1 && (
+              <button
+                onClick={() => onSelectQuestionType(types[0])}
+                className="flex items-center gap-2 rounded-full border border-[#904BFF] px-4 py-2 text-sm font-medium !text-[#904BFF]"
+              >
+                Create {types[0]} Question
+              </button>
+            )}
+
+            {/* {multiType && (
+              <Select
+                placeholder="Create Question"
+                onChange={(value) => onSelectQuestionType(value)}
+                options={types.map((type) => ({
+                  label: type,
+                  value: type,
+                }))}
+              />
+            )} */}
+
+            {/* <button
               onClick={() => setIsMCQOpen(true)}
               className="flex items-center gap-2 rounded-full border border-[#904BFF] px-4 py-2 text-sm font-medium !text-[#904BFF]"
             >
               <Plus size={16} />
               Create MCQ question
-            </button>
+            </button> */}
 
             <span className="cursor-pointer text-sm text-[#667085]">Preview</span>
           </div>
@@ -139,22 +193,34 @@ export default function StepFour({ onBack, onCancel, assessmentId }: Props) {
           </div>
         </div>
 
-        {isMCQOpen && (
-          <CreateMCQModal
-            assessmentId={assessmentId}
-            onClose={() => setIsMCQOpen(false)}
-            onSave={() => {
-              queryClient.invalidateQueries({
-                queryKey: ['assessment-questions', assessmentId],
-              });
-            }}
-            onSaveAndNext={() => {
-              queryClient.invalidateQueries({
-                queryKey: ['assessment-questions', assessmentId],
-              });
-            }}
-          />
-        )}
+        {/* {isMCQOpen && (
+          <>
+            <CreateMCQModal
+              assessmentId={assessmentId}
+              onClose={() => setIsMCQOpen(false)}
+              onSave={() => {
+                queryClient.invalidateQueries({
+                  queryKey: ['assessment-questions', assessmentId],
+                });
+              }}
+              onSaveAndNext={() => {
+                queryClient.invalidateQueries({
+                  queryKey: ['assessment-questions', assessmentId],
+                });
+              }}
+            />
+
+            <CreateCodingModal onClose={() => setIsMCQOpen(false)} />
+          </>
+        )} */}
+
+        {ActiveModal &&
+          ActiveModal({
+            assessmentId,
+            onClose: onCloseModal,
+            onSave: handleSaveQuestion,
+            onSaveAndNext: handleSaveAndNextQuestion,
+          })}
 
         <PublishAssessmentModal
           isOpen={open}

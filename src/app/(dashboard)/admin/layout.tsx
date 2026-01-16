@@ -5,7 +5,7 @@ import React from 'react';
 
 const layout = ({ children }: { children: React.ReactNode }) => {
   return (
-    <div className="flex h-full  flex-col   gap-4  ">
+    <div className="flex min-h-screen  flex-col   gap-4  ">
       {/* header */}
       <TopProfileBar userRole="Institution Admin Portal" RoleIcon={<SuperAdminIcon />} />
 

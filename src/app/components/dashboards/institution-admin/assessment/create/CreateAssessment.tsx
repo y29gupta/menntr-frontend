@@ -11,6 +11,7 @@ import StepThree from './steps/StepThree';
 import StepFour from './steps/StepFour';
 import { useMutation } from '@tanstack/react-query';
 import { assessmentApi } from '../assessment.service';
+import { QuestionType } from '@/app/utils/questionType';
 
 type CreateAssessmentProps = {
   onCancel: () => void;
@@ -18,7 +19,10 @@ type CreateAssessmentProps = {
 
 export default function CreateAssessment({ onCancel }: CreateAssessmentProps) {
   const [step, setStep] = useState(1);
-  const [assessmentId, setAssessmentId] = useState<string | null>(null);
+
+  const closeQuestionModal = () => {
+    setActiveQuestionType(null);
+  };
 
   const form = useForm<CreateAssessmentForm>({
     resolver: zodResolver(createAssessmentSchema),
@@ -32,6 +36,16 @@ export default function CreateAssessment({ onCancel }: CreateAssessmentProps) {
       // department: 'CSE',
     },
   });
+
+  const [assessmentId, setAssessmentId] = useState<string | null>(null);
+
+  const questionTypes = form.watch('questionType'); // comes from Step One meta API
+
+  const [activeQuestionType, setActiveQuestionType] = useState<QuestionType | null>(null);
+
+  const openQuestionModal = (type: QuestionType) => {
+    setActiveQuestionType(type);
+  };
 
   const createAssessmentMutation = useMutation({
     mutationFn: assessmentApi.createAssessment,
@@ -55,35 +69,35 @@ export default function CreateAssessment({ onCancel }: CreateAssessmentProps) {
 
     if (!isValid) return;
     const values = form.getValues();
-    console.log(values, 'stepone');
 
-    const res = await createAssessmentMutation.mutateAsync({
-      feature_id: 5,
-      duration_minutes: 30,
-      tags: ['verbal', 'english'],
+    // const res = await createAssessmentMutation.mutateAsync({
+    //   // feature_id: 5,
+    //   duration_minutes: 30,
+    //   tags: ['verbal', 'english'],
 
-      title: values.title,
-      description: values.description,
-      category: values.category,
-      assessment_type: values.AssessmentType,
-      question_type: values.questionType,
-    });
+    //   title: values.title,
+    //   description: values.description,
+    //   category: values.category,
+    //   assessment_type: values.AssessmentType.toLowerCase(),
+    //   question_type: values.questionType.toLowerCase(),
+    // });
 
-    setAssessmentId(res.id);
+    // setAssessmentId(res.id);
+    setAssessmentId('14');
     setStep(2);
   };
   const handleStepTwoNext = async () => {
     const isValid = await form.trigger(['institutionCategory', 'department', 'batches']);
 
-    if (!isValid || !assessmentId) return;
-    // if (!isValid) return;
+    // if (!isValid || !assessmentId) return;
+    if (!isValid) return;
 
     const { batches } = form.getValues();
 
-    await updateAudienceMutation.mutateAsync({
-      assessmentId,
-      batchIds: batches.map((id) => Number(id)),
-    });
+    // await updateAudienceMutation.mutateAsync({
+    //   assessmentId,
+    //   batchIds: batches.map((id) => Number(id)),
+    // });
 
     setStep(3);
   };
@@ -118,10 +132,19 @@ export default function CreateAssessment({ onCancel }: CreateAssessmentProps) {
           onNext={handleStepThreeNext}
           onCancel={onCancel}
           onAddMCQ={() => setStep(4)}
+          questionTypes={questionTypes}
         />
       )}
       {step === 4 && (
-        <StepFour onBack={() => setStep(3)} onCancel={onCancel} assessmentId={assessmentId!} />
+        <StepFour
+          onBack={() => setStep(3)}
+          onCancel={onCancel}
+          assessmentId={assessmentId!}
+          questionTypes={questionTypes}
+          activeQuestionType={activeQuestionType}
+          onSelectQuestionType={openQuestionModal}
+          onCloseModal={closeQuestionModal}
+        />
       )}
     </div>
   );

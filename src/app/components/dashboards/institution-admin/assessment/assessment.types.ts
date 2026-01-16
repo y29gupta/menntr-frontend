@@ -24,7 +24,7 @@ export type AssessmentMetaResponse = {
 
 
 export type CreateAssessmentPayload = {
-  feature_id: number;
+  // feature_id: number;
   title: string;
   description?: string;
   duration_minutes: number;
