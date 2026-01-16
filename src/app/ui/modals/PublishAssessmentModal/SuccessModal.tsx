@@ -10,10 +10,10 @@ export function SuccessModal({
   const router = useRouter();
 
   const handleRedirect = () => {
-    // router.replace('/admin/assessment');
+    // router.replace('/admin/assessment?tab=active');
     // router.refresh();
     // onClose();
-    window.location.href = '/admin/assessment';
+    window.location.href = '/admin/assessment?tab=active';
   };
 
   return (

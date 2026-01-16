@@ -1,25 +1,50 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useQueries } from '@tanstack/react-query';
+
 import AssessmentHeader from './AssessmentHeader';
 import AssessmentFilters from './AssessmentFilters';
 import ActiveAssessments from './active/ActiveAssessments';
-import CreateAssessment from './create/CreateAssessment';
 import DraftAssessments from './drafts/DraftAssessments';
-import { useQueries } from '@tanstack/react-query';
+
 import { assessmentApi } from './assessment.service';
 import { AssessmentRow } from './active/active.columns';
 
+type UrlTab = 'active' | 'drafts' | 'completed';
+type UiTab = 'Active' | 'Drafts' | 'Completed';
+
+const urlToUiTab: Record<UrlTab, UiTab> = {
+  active: 'Active',
+  drafts: 'Drafts',
+  completed: 'Completed',
+};
+
+const uiToUrlTab: Record<UiTab, UrlTab> = {
+  Active: 'active',
+  Drafts: 'drafts',
+  Completed: 'completed',
+};
+
 export default function AssessmentContainer() {
-  const [activeTab, setActiveTab] = useState<'Active' | 'Drafts' | 'Completed'>('Active');
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    if (!searchParams.get('tab')) {
+      router.replace('/admin/assessment?tab=active');
+    }
+  }, [searchParams, router]);
+
+  const tabFromUrl: UrlTab =
+    searchParams.get('tab') === 'drafts' || searchParams.get('tab') === 'completed'
+      ? (searchParams.get('tab') as UrlTab)
+      : 'active';
+
+  const activeTab: UiTab = urlToUiTab[tabFromUrl];
 
   const [globalFilter, setGlobalFilter] = useState('');
-  const [isCreating, setIsCreating] = useState(false);
-  const [tabsCount, setTabsCount] = useState({
-    Active: 0,
-    Drafts: 0,
-    Completed: 0,
-  });
 
   const results = useQueries({
     queries: [
@@ -28,59 +53,60 @@ export default function AssessmentContainer() {
         queryFn: (): Promise<AssessmentRow[]> => assessmentApi.getAssessmentList('active'),
       },
       {
-        queryKey: ['assessments', 'draft'],
-        queryFn: () => assessmentApi.getAssessmentList('draft'),
+        queryKey: ['assessments', 'drafts'],
+        queryFn: (): Promise<AssessmentRow[]> => assessmentApi.getAssessmentList('draft'),
       },
       {
         queryKey: ['assessments', 'completed'],
-        queryFn: () => assessmentApi.getAssessmentList('closed'),
+        queryFn: (): Promise<AssessmentRow[]> => assessmentApi.getAssessmentList('closed'),
       },
     ],
   });
 
   const [activeQuery, draftQuery, completedQuery] = results;
 
-  const activeData: AssessmentRow[] = activeQuery.data ?? [];
-  const draftData: AssessmentRow[] = draftQuery.data ?? [];
+  const activeData = activeQuery.data ?? [];
+  const draftData = draftQuery.data ?? [];
   const completedData = completedQuery.data ?? [];
 
-  useEffect(() => {
-    setTabsCount({
+  const tabsCount = useMemo(
+    () => ({
       Active: activeData.length,
       Drafts: draftData.length,
       Completed: completedData.length,
-    });
-  }, [activeData.length, draftData.length, completedData.length]);
+    }),
+    [activeData.length, draftData.length, completedData.length]
+  );
+
+  // 🔁 URL → state sync
+  // useEffect(() => {
+  //   setActiveTab(urlToUiTab[tabFromUrl]);
+  // }, [tabFromUrl]);
+
+  // 🔁 Tab click → URL sync
+  const handleTabChange = (tab: UiTab) => {
+    router.replace(`/admin/assessment?tab=${uiToUrlTab[tab]}`);
+  };
+
+  // ✅ Create uses route (not local state)
+  const handleCreate = () => {
+    router.push('/admin/assessment/create');
+  };
 
   return (
-    <div
-      className="flex w-full rounded-2xl p-4   shadow-[0_0_8px_0_rgba(15,23,42,0.12)]
- flex-col"
-    >
-      {isCreating ? (
-        <CreateAssessment onCancel={() => setIsCreating(false)} />
-      ) : (
-        <>
-          <AssessmentHeader
-            activeTab={activeTab}
-            onTabChange={setActiveTab}
-            onCreate={() => setIsCreating(true)}
-            tabCounts={tabsCount}
-          />
+    <div className="flex w-full rounded-2xl p-4 shadow-[0_0_8px_0_rgba(15,23,42,0.12)] flex-col">
+      <AssessmentHeader
+        activeTab={activeTab}
+        onTabChange={handleTabChange}
+        onCreate={handleCreate}
+        tabCounts={tabsCount}
+      />
 
-          <AssessmentFilters value={globalFilter} onChange={setGlobalFilter} />
+      <AssessmentFilters value={globalFilter} onChange={setGlobalFilter} />
 
-          {/* {activeTab === 'Active' && <ActiveAssessments setTabsCount={setTabsCount} />}
-
-          {activeTab === 'Drafts' && <DraftAssessments setTabsCount={setTabsCount} />} */}
-
-          {activeTab === 'Active' && <ActiveAssessments data={activeData} />}
-
-          {activeTab === 'Drafts' && <DraftAssessments data={draftData} />}
-
-          {/* {activeTab === 'Completed' && <CompletedAssessments setTabsCount={setTabsCount} />} */}
-        </>
-      )}
+      {activeTab === 'Active' && <ActiveAssessments data={activeData} />}
+      {activeTab === 'Drafts' && <DraftAssessments data={draftData} />}
+      {activeTab === 'Completed' && <ActiveAssessments data={completedData} />}
     </div>
   );
 }
