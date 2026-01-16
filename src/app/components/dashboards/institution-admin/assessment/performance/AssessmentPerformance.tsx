@@ -9,6 +9,8 @@ import { assessmentMetricsUI } from './assessmentMetricsUI';
 import ScoreDistributionCard from './ScoreDistributionCard';
 import PerformanceTabs from './PerformanceTabs';
 import PerformanceSection from './PerformanceSection';
+import QuestionsSection from './QuestionsSection';
+import SettingConfigForm from './settings/SettingConfigForm';
 
 type AssessmentPerformanceProps = {
   assessmentId: string;
@@ -79,9 +81,11 @@ const AssessmentPerformance = ({ assessmentId }: AssessmentPerformanceProps) => 
         ]}
       />
 
-      <div>
+      <div className="flex flex-col gap-4">
         <PerformanceTabs activeTab={activeTab} onChange={setActiveTab} questionCount={25} />
         {activeTab === 'performance' && <PerformanceSection />}
+        {activeTab === 'questions' && <QuestionsSection />}
+        {activeTab === 'settings' && <SettingConfigForm />}
       </div>
     </div>
   );

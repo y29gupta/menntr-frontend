@@ -16,16 +16,16 @@ const PerformanceTabs = ({ activeTab, onChange, questionCount }: Props) => {
   ] as const;
 
   return (
-    <div className="border-b mb-4 border-gray-200">
-      <div className="flex gap-6">
+    <div className="border-b border-gray-200">
+      <div className="flex gap-4 overflow-x-auto scrollbar-hide px-1">
         {tabs.map((tab) => (
           <button
             key={tab.key}
             onClick={() => onChange(tab.key)}
-            className={`pb-2 text-sm font-medium transition
+            className={`whitespace-nowrap px-1 pb-3 text-sm font-medium transition
               ${
                 activeTab === tab.key
-                  ? 'text-purple-600! border-b-2 border-purple-600'
+                  ? 'text-purple-600 border-b-2 border-purple-600'
                   : 'text-gray-500 hover:text-gray-700'
               }
             `}
