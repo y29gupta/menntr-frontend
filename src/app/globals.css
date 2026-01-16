@@ -53,12 +53,12 @@ body {
   width: 36px; /* w-9 */
   height: 20px; /* h-5 */
   background-color: #e4e7ec;
-   border:1px solid #BE83DF
+  border: 1px solid #be83df;
 }
 
 .expiry-switch.ant-switch.ant-switch-checked {
   background-color: #7f56d9;
-   border:1px solid #BE83DF
+  border: 1px solid #be83df;
 }
 
 .expiry-switch.ant-switch .ant-switch-handle {
@@ -66,7 +66,6 @@ body {
   height: 16px;
   top: 2px;
   left: 2px;
-  
 }
 
 .expiry-switch.ant-switch.ant-switch-checked .ant-switch-handle {
@@ -83,3 +82,11 @@ body {
   box-shadow: none !important;
 }
 
+.no-scrollbar {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE & Edge */
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none; /* Chrome, Safari */
+}

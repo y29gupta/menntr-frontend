@@ -80,7 +80,7 @@ export default function Sidebar({ role, collapsed, onToggle }: Props) {
         {/* Menu */}
         <nav className={clsx('flex flex-col gap-2 px-3 mt-4')}>
           {menu.map((item: SidebarItem) => {
-            const active = pathname === item.path;
+            const active = pathname === item.path || pathname.startsWith(item.path + '/');
 
             return (
               <Link
