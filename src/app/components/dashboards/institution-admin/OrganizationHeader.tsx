@@ -9,7 +9,7 @@ const tabs: Props['activeTab'][] = ['Categories', 'Departments', 'Batches', 'Hie
 
 export default function OrganizationHeader({ activeTab, onTabChange }: Props) {
   return (
-    <div className="w-full   flex flex-col gap-6  ">
+    <div className="w-full  px-4 pt-4 flex flex-col gap-6  ">
       {/* <div className="flex justify-between items-center ">
             <div className="">
               <div className="flex space-x-2 text-xl items-center">

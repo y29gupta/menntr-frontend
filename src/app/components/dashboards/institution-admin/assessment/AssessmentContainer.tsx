@@ -83,18 +83,16 @@ export default function AssessmentContainer() {
   //   setActiveTab(urlToUiTab[tabFromUrl]);
   // }, [tabFromUrl]);
 
-  // 🔁 Tab click → URL sync
   const handleTabChange = (tab: UiTab) => {
     router.replace(`/admin/assessment?tab=${uiToUrlTab[tab]}`);
   };
 
-  // ✅ Create uses route (not local state)
   const handleCreate = () => {
     router.push('/admin/assessment/create');
   };
 
   return (
-    <div className="flex w-full rounded-2xl p-4 shadow-[0_0_8px_0_rgba(15,23,42,0.12)] flex-col">
+    <div className="flex w-full h-full rounded-2xl p-4 shadow-[0_0_8px_0_rgba(15,23,42,0.12)] flex-col">
       <AssessmentHeader
         activeTab={activeTab}
         onTabChange={handleTabChange}

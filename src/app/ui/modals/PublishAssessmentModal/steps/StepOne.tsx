@@ -16,7 +16,7 @@ export default function StepOne({ data }: { data: any }) {
         </div>
 
         <div className={CARD}>
-          <Item label="Total Questions" value={data.totalQuestions} />
+          <Item label="Total Questions" value={data.totalProblems} />
           <Item label="Total Marks" value={data.totalMarks} />
           <Item
             label="Difficulty Mix"

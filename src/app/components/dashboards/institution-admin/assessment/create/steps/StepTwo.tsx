@@ -194,7 +194,7 @@ export default function StepTwo({ form, onBack, onNext, onCancel }: Props) {
         <button
           type="button"
           onClick={onBack}
-          className="px-6 py-2 rounded-full border broder-[#7C3AED] !text-[#7C3AED]"
+          className="sm:px-6 px-2  py-2 rounded-full border broder-[#7C3AED] !text-[#7C3AED]"
         >
           Go Back
         </button>

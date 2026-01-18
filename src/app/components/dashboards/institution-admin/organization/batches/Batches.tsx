@@ -29,7 +29,7 @@ const Batches = ({ setBatchView }: Props) => {
       {view === 'list' && (
         <>
           {/* HEADER */}
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mb-4 px-4">
             <h2 className="font-semibold text-gray-800 text-sm sm:text-base lg:text-lg">
               Batches <span>({totalBatches})</span>
             </h2>
@@ -48,7 +48,7 @@ const Batches = ({ setBatchView }: Props) => {
           </div>
 
           {/* SEARCH + FILTER */}
-          <div className="flex gap-3 mb-4">
+          <div className="flex gap-3 px-4 mb-4">
             <div className="relative max-w-[400px] w-full">
               <Search className="absolute left-3 top-2.5 w-4 h-4 text-gray-400" />
               <input
@@ -71,25 +71,27 @@ const Batches = ({ setBatchView }: Props) => {
           </div>
 
           {/* TABLE */}
-          <BatchesTable
-            globalFilter={search}
-            onGlobalFilterChange={setSearch}
-            showColumnFilters={showColumnFilters}
-            onTotalChange={setTotalBatches}
-            onEdit={(batch) => {
-              console.log('ON EDIT ROW:', batch);
-              setSelectedBatch(batch); // ✅ REQUIRED
-              setView('form');
-            }}
-            onDelete={(batch) => setDeleteBatch(batch)}
-          />
+          <div className="px-4">
+            <BatchesTable
+              globalFilter={search}
+              onGlobalFilterChange={setSearch}
+              showColumnFilters={showColumnFilters}
+              onTotalChange={setTotalBatches}
+              onEdit={(batch) => {
+                console.log('ON EDIT ROW:', batch);
+                setSelectedBatch(batch);
+                setView('form');
+              }}
+              onDelete={(batch) => setDeleteBatch(batch)}
+            />
+          </div>
         </>
       )}
 
       {view === 'form' && (
         <BatchForm
           mode={selectedBatch ? 'edit' : 'create'}
-          batchId={selectedBatch?.id} // ✅ REQUIRED
+          batchId={selectedBatch?.id}
           editRow={selectedBatch}
           onBack={() => {
             setView('list');

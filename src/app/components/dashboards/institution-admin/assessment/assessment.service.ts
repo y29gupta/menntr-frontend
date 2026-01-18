@@ -9,7 +9,7 @@
 // }
 import { api } from "@/app/lib/api";
 import { AssessmentQuestionResponse, getAssessmentListResponse } from "./assessment.schema";
-import { AssessmentAccessPayload, AssessmentMetaResponse, CreateAssessmentPayload } from "./assessment.types";
+import { AssessmentAccessPayload, AssessmentMetaResponse, CreateAssessmentPayload, QuestionMetaType } from "./assessment.types";
 
 export type AssessmentTab = "active" | "draft" | "closed";
 
@@ -113,6 +113,53 @@ export const assessmentApi = {
 
   publishAssessment: (assessmentId: string | number) =>
     api.post(`/assessments/${assessmentId}/publish`),
+
+
+  // ------------------assessment coding api-------------------
+
+  
+  getCodingQuestionMeta: async () => {
+    const res = await api.get('/questions/coding/meta');
+    return res.data;
+  },
+
+
+
+  getQuestionMeta: (type: string) => {
+    switch (type) {
+      case 'MCQ':
+        return assessmentApi.getMCQMeta();
+
+      case 'Coding':
+        return assessmentApi.getCodingQuestionMeta();
+
+      default:
+        throw new Error('Unsupported question type');
+    }
+  },
+
+
+  bulkUploadQuestions: async (
+  assessmentId: string | null,
+  type: 'mcq' | 'coding',
+  file: File
+) => {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  const res = await api.post(
+    `/assessments/${assessmentId}/${type}/bulk-upload`,
+    formData,
+    {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    }
+  );
+
+  return res.data;
+}
+
 
 
 };

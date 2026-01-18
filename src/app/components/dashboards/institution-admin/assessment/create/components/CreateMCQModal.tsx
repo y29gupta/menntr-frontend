@@ -8,6 +8,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import FormDropdown from '@/app/ui/FormDropdown';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { assessmentApi } from '../../assessment.service';
+import { mcqMetaResponse } from '../../assessment.types';
 
 type Option = {
   id: string;
@@ -20,20 +21,16 @@ type Props = {
   onSave: (q: any) => void;
   onSaveAndNext: (q: any) => void;
   assessmentId: string;
-};
-type questionMetaResponse = {
-  topics: string[];
-  difficulties: string[];
-  questionTypes: string[];
+  meta: mcqMetaResponse;
 };
 
-// const DIFFICULTY_OPTIONS = [
-//   { label: 'Easy', value: 'easy' },
-//   { label: 'Medium', value: 'medium' },
-//   { label: 'Hard', value: 'hard' },
-// ];
-
-export default function CreateMCQModal({ onClose, onSave, onSaveAndNext, assessmentId }: Props) {
+export default function CreateMCQModal({
+  onClose,
+  onSave,
+  onSaveAndNext,
+  assessmentId,
+  meta,
+}: Props) {
   const [mounted, setMounted] = useState(false);
   const [question, setQuestion] = useState('');
   const [mandatory, setMandatory] = useState(true);
@@ -74,26 +71,26 @@ export default function CreateMCQModal({ onClose, onSave, onSaveAndNext, assessm
     mutationFn: (payload: any) => assessmentApi.createAssessmentQuestion(assessmentId, payload),
   });
 
-  const { data: questionMeta } = useQuery<questionMetaResponse>({
-    queryKey: ['questions-meta'],
-    queryFn: assessmentApi.getMCQMeta,
-    staleTime: Infinity,
-  });
+  // const { data: questionMeta } = useQuery<questionMetaResponse>({
+  //   queryKey: ['questions-meta'],
+  //   queryFn: assessmentApi.getMCQMeta,
+  //   staleTime: Infinity,
+  // });
 
   const topicOptions =
-    questionMeta?.topics.map((t) => ({
+    meta?.topics.map((t) => ({
       label: t,
       value: t,
     })) ?? [];
 
   const questionTypeOptions =
-    questionMeta?.questionTypes.map((q) => ({
+    meta?.questionTypes.map((q) => ({
       label: q.replace('_', ' ').replace(/\b\w/g, (c) => c.toUpperCase()),
       value: q,
     })) ?? [];
 
   const difficultyOptions =
-    questionMeta?.difficulties.map((d) => ({
+    meta?.difficulties.map((d) => ({
       label: d.charAt(0).toUpperCase() + d.slice(1),
       value: d,
     })) ?? [];
@@ -117,19 +114,19 @@ export default function CreateMCQModal({ onClose, onSave, onSaveAndNext, assessm
 
   if (!mounted) return null;
 
-  const onSubmit = (data: CreateMCQFormValues) => {
-    const payload = {
-      question,
-      mandatory,
-      marks,
-      difficulty: data.difficulty,
-      options,
-      subject: data.topic,
-      type: data.questionType,
-    };
+  // const onSubmit = (data: CreateMCQFormValues) => {
+  //   const payload = {
+  //     question,
+  //     mandatory,
+  //     marks,
+  //     difficulty: data.difficulty,
+  //     options,
+  //     subject: data.topic,
+  //     type: data.questionType,
+  //   };
 
-    onSave(payload);
-  };
+  //   onSave(payload);
+  // };
   const isTrueFalse = questionType === 'boolean';
   const disableAddOption = isTrueFalse && options.length >= 2;
 

@@ -5,11 +5,11 @@ import React from 'react';
 
 const layout = ({ children }: { children: React.ReactNode }) => {
   return (
-    <div className="flex min-h-screen  flex-col   gap-4  ">
+    <div className="flex min-h-full  flex-col   gap-4  ">
       {/* header */}
       <TopProfileBar userRole="Institution Admin Portal" RoleIcon={<SuperAdminIcon />} />
 
-      <div className="flex flex-1 h-full">{children}</div>
+      <div className="flex flex-1 sm:pb-0 h-full">{children}</div>
     </div>
   );
 };

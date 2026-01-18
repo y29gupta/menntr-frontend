@@ -43,3 +43,23 @@ export type AssessmentAccessPayload = {
   showCorrectAnswers: boolean;
   showScoreImmediately: boolean;
 };
+
+
+
+
+export type mcqMetaResponse = {
+  topics: string[];
+  difficulties: string[];
+  questionTypes: string[];
+};
+
+
+export interface CodingQuestionMetaResponse {
+  topics: string[];
+  difficulties: string[];
+  timeLimits: number[];
+  languages: string[];
+}
+
+
+  export type QuestionMetaType = 'MCQ' | 'CODING';

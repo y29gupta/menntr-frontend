@@ -61,9 +61,14 @@ export default function StepFour({
     // enabled: !!assessmentId,
   });
 
-  const assessmentData = {
-    id: '14',
-  };
+  // --------------meta data for question based on tyepe------------------
+
+  const { data: questionMeta } = useQuery({
+    queryKey: ['question-meta', activeQuestionType],
+    queryFn: () => assessmentApi.getQuestionMeta(activeQuestionType!),
+    enabled: !!activeQuestionType,
+    staleTime: Infinity,
+  });
 
   const ActiveModal = activeQuestionType && questionModalRegistry[activeQuestionType];
 
@@ -128,14 +133,14 @@ export default function StepFour({
 
         <div className="my-4 h-px bg-[#EAECF0]" />
 
-        <div className="space-y-4">
+        <div className="space-y-4 ">
           {questions.map((q, index) => (
-            <div className="flex" key={q.id}>
+            <div className="flex " key={q.id}>
               <div className="flex rounded-l-xl bg-[#F0F2F7] items-center px-2">
                 <GripVertical size={18} className="mt-1 shrink-0 text-[#98A2B3]" />
               </div>
 
-              <div className="flex w-full flex-col rounded-r-xl border border-[#EAECF0] p-2 sm:flex-row sm:gap-1">
+              <div className="flex w-full  flex-col rounded-r-xl border border-[#EAECF0] p-2 sm:flex-row sm:gap-1">
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                     <p className="break-words text-sm font-medium text-[#101828]">
@@ -216,6 +221,7 @@ export default function StepFour({
 
         {ActiveModal &&
           ActiveModal({
+            meta: questionMeta,
             assessmentId,
             onClose: onCloseModal,
             onSave: handleSaveQuestion,

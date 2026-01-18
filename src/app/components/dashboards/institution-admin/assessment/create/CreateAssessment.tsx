@@ -83,7 +83,7 @@ export default function CreateAssessment({ onCancel }: CreateAssessmentProps) {
     // });
 
     // setAssessmentId(res.id);
-    setAssessmentId('14');
+    setAssessmentId('26');
     setStep(2);
   };
   const handleStepTwoNext = async () => {
@@ -107,7 +107,13 @@ export default function CreateAssessment({ onCancel }: CreateAssessmentProps) {
   };
 
   return (
-    <div className="w-full bg-[#F9FAFB] rounded-2xl ">
+    <div
+      className="w-full  bg-white/60
+  backdrop-blur-[100px]
+  h-full
+  supports-[backdrop-filter]:backdrop-blur-[100px]
+  shadow-[0px_0px_8px_0px_#0F172A1F] p-4 rounded-2xl "
+    >
       <h2 className="text-xl font-semibold text-[#101828]">Create Assessment</h2>
       <p className="text-sm text-[#667085]">Set up your Assessment</p>
 
@@ -133,6 +139,7 @@ export default function CreateAssessment({ onCancel }: CreateAssessmentProps) {
           onCancel={onCancel}
           onAddMCQ={() => setStep(4)}
           questionTypes={questionTypes}
+          assessmentId={assessmentId}
         />
       )}
       {step === 4 && (

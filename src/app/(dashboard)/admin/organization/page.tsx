@@ -74,7 +74,7 @@ const Page = () => {
   };
 
   return (
-    <div className="flex rounded-2xl  flex-col p-4 gap-4  shadow-[0_0_16px_0_#0F172A26] w-full">
+    <div className="flex rounded-2xl   flex-1  flex-col  gap-4  shadow-[0_0_16px_0_#0F172A26] w-full">
       {!hideOrganizationHeader && (
         <OrganizationHeader activeTab={activeTab} onTabChange={setActiveTab} />
       )}
@@ -91,7 +91,7 @@ const Page = () => {
           {departmentView === 'list' ? (
             <>
               {/* Top bar */}
-              <div className="w-full">
+              <div className="w-full px-4 ">
                 <div className="flex items-center justify-between gap-4 mb-4">
                   <h2 className="hidden sm:block font-semibold text-gray-800 text-sm sm:text-base lg:text-lg">
                     Total Departments <span>(20)</span>
@@ -133,7 +133,7 @@ const Page = () => {
               </div>
 
               {/* TABLE */}
-              <div className="relative w-full h-full overflow-y-auto">
+              <div className="relative px-4  w-full h-full overflow-y-auto">
                 <DepartmentsTable
                   globalFilter={search}
                   onGlobalFilterChange={setSearch}
