@@ -8,7 +8,7 @@ export type Department = {
   // categoryId?: number;
   // hodUserId?: number;
   category: {};
-  hod: string | null;
+  hod: {} | null;
   students?: number;
   faculty?: number;
 };
@@ -21,12 +21,12 @@ export type DepartmentApiData = {
     id: number;
     name: string;
   } | null;
-  // hod: {
-  //   id: number;
-  //   name: string;
-  //   email: string;
-  // } | null;
-  hod: string | null;
+  hod: {
+    id: number;
+    name: string;
+    email: string;
+  } | null;
+  // hod: string | null;
   createdAt: string;
   updatedAt: string;
 };
@@ -97,7 +97,7 @@ export const departmentColumns = (
   {
     accessorKey: 'hod',
     header: 'HOD',
-    cell: ({ getValue }) => <span className="text-gray-600">{getValue() as string}</span>,
+    cell: ({ row }) => <span className="text-gray-600">{row.original.name as string}</span>,
   },
   {
     accessorKey: 'students',

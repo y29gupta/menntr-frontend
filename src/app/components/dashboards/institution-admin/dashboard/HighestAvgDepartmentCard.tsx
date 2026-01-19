@@ -1,33 +1,49 @@
 'use client';
 
-import { DepartmentMetric } from "@/app/components/graphs/DepartmentBarGraph";
-
 interface Props {
-  data: DepartmentMetric[];
+  label: string; // "Completion rate"
+  valueText: string; // "54%"
+  percentage: number; // 54
+  footerText?: string; // optional
+  barColor?: string;
+  barBgColor?: string;
 }
 
-const HighestAvgDepartmentCard = ({ data }: Props) => {
-  if (!data.length) return null;
-
-  const topDept = [...data].sort((a, b) => b.percentage - a.percentage)[0];
-
+const HighestAvgDepartmentCard = ({
+  label,
+  valueText,
+  percentage,
+  footerText,
+  barColor = '#C2410C',
+  barBgColor = '#FFEDD5',
+}: Props) => {
   return (
     <div className="w-full rounded-2xl bg-white p-4 sm:p-6 shadow-[0px_0px_16px_0px_#0F172A1F]">
-      <p className="text-sm text-[#64748B] mb-1">Dept. With Highest Avg</p>
+      {/* Label */}
+      <p className="text-sm text-[#64748B] mb-2">{label}</p>
 
-      <p className="text-xl sm:text-2xl font-semibold text-[#0F172A] mb-4">
-        {topDept.department} ({topDept.percentage}%)
-      </p>
+      {/* Value */}
+      <p className="text-2xl sm:text-3xl font-semibold text-[#0F172A] mb-2">{valueText}</p>
 
       {/* Progress bar */}
-      <div className="h-3 w-full rounded-full bg-[#DCFCE7] overflow-hidden">
+      <div
+        className="h-2 w-full rounded-full overflow-hidden"
+        style={{ backgroundColor: barBgColor }}
+      >
         <div
-          className="h-full rounded-full bg-[#16A34A] transition-all"
-          style={{ width: `${topDept.percentage}%` }}
+          className="h-full rounded-full transition-all duration-500"
+          style={{
+            width: `${percentage}%`,
+            background: barColor,
+          }}
         />
       </div>
 
-      <p className="mt-3 text-sm text-[#16A34A] font-medium">Showing best performance this month</p>
+      {footerText && (
+        <p className="mt-3 text-sm font-medium" style={{ color: barColor }}>
+          {footerText}
+        </p>
+      )}
     </div>
   );
 };

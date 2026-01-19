@@ -63,7 +63,7 @@ export const SIDEBAR_CONFIG = {
     },
     {
       label: 'Assessment',
-      path: '/admin/assessment',
+      path: '/admin/assessment?tab=active',
       icon: <BarChart3 size={20} />,
     },
   ],

@@ -1,26 +1,21 @@
-import { Users, GraduationCap, ClipboardList } from 'lucide-react';
-
-export const studentMetric = [
+export const studentMetricBackend = [
   {
-    title: 'Total Students',
-    total: 110,
-    percentage: 15,
-    trend: [72, 180, 560, 940, 1020, 2083],
-    icon: GraduationCap,
+    label: 'STUDENTS',
+    count: 110,
+    delta: 15,
+    history: [72, 180, 560, 940, 1020, 2083],
   },
   {
-    title: 'Faculty Members',
-    total: 15,
-    percentage: -1,
-    trend: [165, 162, 160, 158, 155, 50],
-    icon: Users,
+    label: 'FACULTY',
+    count: 15,
+    delta: -1,
+    history: [165, 162, 160, 158, 155, 50],
   },
   {
-    title: 'Assessments',
-    total: 12,
-    percentage: -10,
-    trend: [20, 18, 17, 55, 73, 120],
-    subText: '3 due today',
-    icon: ClipboardList,
+    label: 'ASSESSMENTS',
+    count: 12,
+    delta: -10,
+    history: [20, 18, 17, 55, 73, 120],
+    dueToday: 3,
   },
 ];

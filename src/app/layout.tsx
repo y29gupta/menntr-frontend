@@ -7,6 +7,7 @@ import QueryProvider from './providers/QueryProvider';
 
 import 'react-toastify/dist/ReactToastify.css';
 import { Bounce, ToastContainer } from 'react-toastify';
+import Providers from './providers/Providers';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -27,7 +28,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <ConfigProvider>
-        <body
+        {/* <body
           suppressHydrationWarning
           className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         >
@@ -44,6 +45,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               transition={Bounce}
             />
           </QueryProvider>
+        </body> */}
+        <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+          <Providers>{children}</Providers>
         </body>
       </ConfigProvider>
     </html>

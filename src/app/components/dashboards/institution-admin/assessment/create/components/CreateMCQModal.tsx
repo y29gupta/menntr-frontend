@@ -6,6 +6,9 @@ import { Controller, useForm } from 'react-hook-form';
 import { CreateMCQFormValues, createMCQSchema } from '../schema';
 import { zodResolver } from '@hookform/resolvers/zod';
 import FormDropdown from '@/app/ui/FormDropdown';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { assessmentApi } from '../../assessment.service';
+import { mcqMetaResponse } from '../../assessment.types';
 
 type Option = {
   id: string;
@@ -17,28 +20,17 @@ type Props = {
   onClose: () => void;
   onSave: (q: any) => void;
   onSaveAndNext: (q: any) => void;
+  assessmentId: string;
+  meta: mcqMetaResponse;
 };
 
-const TOPIC_OPTIONS = [
-  { label: 'Quantitative Aptitude', value: 'quant' },
-  { label: 'Logical Reasoning', value: 'logic' },
-  { label: 'Verbal Ability', value: 'verbal' },
-];
-
-const QUESTION_TYPE_OPTIONS = [
-  { label: 'MCQ - Single correct', value: 'single' },
-  { label: 'MCQ - Multiple correct', value: 'multiple' },
-  { label: 'True / False', value: 'boolean' },
-  { label: 'Numerical (Integer / Decimal)', value: 'numerical' },
-];
-
-const DIFFICULTY_OPTIONS = [
-  { label: 'Easy', value: 'easy' },
-  { label: 'Medium', value: 'medium' },
-  { label: 'Hard', value: 'hard' },
-];
-
-export default function CreateMCQModal({ onClose, onSave, onSaveAndNext }: Props) {
+export default function CreateMCQModal({
+  onClose,
+  onSave,
+  onSaveAndNext,
+  assessmentId,
+  meta,
+}: Props) {
   const [mounted, setMounted] = useState(false);
   const [question, setQuestion] = useState('');
   const [mandatory, setMandatory] = useState(true);
@@ -49,20 +41,68 @@ export default function CreateMCQModal({ onClose, onSave, onSaveAndNext }: Props
   const [showOptions, setShowOptions] = useState(false);
   const [questionType, setQuestionType] = useState<string>('');
 
-  const { control, handleSubmit } = useForm<CreateMCQFormValues>({
+  const { control, handleSubmit, setValue } = useForm<CreateMCQFormValues>({
     resolver: zodResolver(createMCQSchema),
     defaultValues: {
       topic: '',
       questionType: '',
       difficulty: 'easy',
+      options: [],
     },
   });
 
-  //   const [topic, setTopic] = useState<string>();
-  //   const [questionType, setQuestionType] = useState<string>();
-  //   const [difficulty, setDifficulty] = useState<string>('easy');
+  useEffect(() => {
+    setValue('options', options as any, { shouldValidate: true });
+  }, [options, setValue]);
+
+  const buildApiPayload = (data: CreateMCQFormValues) => ({
+    topic: data.topic,
+    question_text: question,
+    question_type: data.questionType,
+    difficulty_level: data.difficulty,
+    points: marks,
+    is_mandatory: mandatory,
+    options: options.map((o) => ({
+      option_text: o.text,
+      is_correct: o.correct,
+    })),
+  });
+  const createQuestionMutation = useMutation({
+    mutationFn: (payload: any) => assessmentApi.createAssessmentQuestion(assessmentId, payload),
+  });
+
+  // const { data: questionMeta } = useQuery<questionMetaResponse>({
+  //   queryKey: ['questions-meta'],
+  //   queryFn: assessmentApi.getMCQMeta,
+  //   staleTime: Infinity,
+  // });
+
+  const topicOptions =
+    meta?.topics.map((t) => ({
+      label: t,
+      value: t,
+    })) ?? [];
+
+  const questionTypeOptions =
+    meta?.questionTypes.map((q) => ({
+      label: q.replace('_', ' ').replace(/\b\w/g, (c) => c.toUpperCase()),
+      value: q,
+    })) ?? [];
+
+  const difficultyOptions =
+    meta?.difficulties.map((d) => ({
+      label: d.charAt(0).toUpperCase() + d.slice(1),
+      value: d,
+    })) ?? [];
 
   useEffect(() => setMounted(true), []);
+
+  const normalizeQuestionType = (type: string) => {
+    if (type === 'single_correct') return 'single';
+    if (type === 'multiple_correct') return 'multiple';
+    if (type === 'true_false') return 'boolean';
+    return type;
+  };
 
   useEffect(() => {
     if (!mounted) return;
@@ -74,28 +114,19 @@ export default function CreateMCQModal({ onClose, onSave, onSaveAndNext }: Props
 
   if (!mounted) return null;
 
+  // const onSubmit = (data: CreateMCQFormValues) => {
   //   const payload = {
   //     question,
   //     mandatory,
   //     marks,
-  //     difficulty,
+  //     difficulty: data.difficulty,
   //     options,
-  //     subject: 'Quantitative Aptitude',
-  //     type: 'MCQ - Single correct answer',
+  //     subject: data.topic,
+  //     type: data.questionType,
   //   };
-  const onSubmit = (data: CreateMCQFormValues) => {
-    const payload = {
-      question,
-      mandatory,
-      marks,
-      difficulty: data.difficulty,
-      options,
-      subject: data.topic,
-      type: data.questionType,
-    };
 
-    onSave(payload);
-  };
+  //   onSave(payload);
+  // };
   const isTrueFalse = questionType === 'boolean';
   const disableAddOption = isTrueFalse && options.length >= 2;
 
@@ -126,19 +157,8 @@ export default function CreateMCQModal({ onClose, onSave, onSaveAndNext }: Props
         </div>
 
         {/* Body */}
-        <div className="h-[calc(100%-160px)] overflow-y-scroll  p-6 space-y-6">
+        <div className="h-[calc(100%-160px)]  overflow-y-scroll  p-6 space-y-6">
           {/* Dropdowns */}
-          {/* <div className="flex gap-3">
-            {['Select Topic', 'Select Subtopic', 'QuestionType'].map((label) => (
-              <div
-                key={label}
-                className="flex flex-1 items-center justify-between rounded-lg border border-[#D0D5DD] px-3 py-2 text-sm text-[#667085]"
-              >
-                {label}
-                <ChevronDown size={16} />
-              </div>
-            ))}
-          </div> */}
           <div className="flex gap-3">
             {/* Topic */}
             <div className="w-[180px]">
@@ -149,18 +169,14 @@ export default function CreateMCQModal({ onClose, onSave, onSaveAndNext }: Props
                   <FormDropdown
                     value={field.value}
                     placeholder="Select Topic"
-                    options={TOPIC_OPTIONS}
+                    options={topicOptions}
                     onChange={field.onChange}
+                    dropdownPosition="auto"
+                    triggerClassName="border-2 border-[#D0D5DD] rounded-lg px-3 py-2"
                   />
                 )}
               />
             </div>
-
-            {/* Subtopic – untouched dummy */}
-            {/* <div className="flex flex-1 items-center justify-between rounded-lg border border-[#D0D5DD] px-3 py-2 text-sm text-[#667085]">
-              Select Subtopic
-              <ChevronDown size={16} />
-            </div> */}
 
             {/* Question Type */}
             <div className="w-[200px]">
@@ -171,17 +187,18 @@ export default function CreateMCQModal({ onClose, onSave, onSaveAndNext }: Props
                   <FormDropdown
                     value={field.value}
                     placeholder="QuestionType"
-                    options={QUESTION_TYPE_OPTIONS}
+                    options={questionTypeOptions}
                     onChange={(val) => {
-                      const value = Array.isArray(val) ? val[0] : val;
-                      field.onChange(value);
+                      const apiValue = Array.isArray(val) ? val[0] : val;
 
-                      setQuestionType(value);
+                      field.onChange(apiValue); // keep API value for payload
+                      setQuestionType(normalizeQuestionType(apiValue)); // FIXED logic
 
-                      // ✅ RESET previously rendered options
                       setOptions([]);
                       setShowOptions(false);
                     }}
+                    dropdownPosition="auto"
+                    triggerClassName="border-2 border-[#D0D5DD] rounded-lg px-3 py-2"
                   />
                 )}
               />
@@ -341,7 +358,7 @@ export default function CreateMCQModal({ onClose, onSave, onSaveAndNext }: Props
           </div>
 
           {/* Marks & Difficulty */}
-          <div className="flex gap-4">
+          <div className="flex gap-4  items-center">
             <div className="flex-1">
               <label className="mb-1 block text-sm font-medium text-[#101828]">Marks</label>
               <input
@@ -365,8 +382,10 @@ export default function CreateMCQModal({ onClose, onSave, onSaveAndNext }: Props
                   <FormDropdown
                     value={field.value}
                     placeholder="Difficulty"
-                    options={DIFFICULTY_OPTIONS}
+                    options={difficultyOptions}
                     onChange={field.onChange}
+                    dropdownPosition="auto"
+                    triggerClassName="border border-[#D0D5DD] rounded-lg px-3 py-2"
                   />
                 )}
               />
@@ -386,15 +405,6 @@ export default function CreateMCQModal({ onClose, onSave, onSaveAndNext }: Props
 
             <div className="flex gap-3">
               {/* <button
-                onClick={() => {
-                  onSaveAndNext(payload);
-                  setQuestion('');
-                }}
-                className="rounded-full bg-[#7F56D9] px-5 py-2 text-sm text-white"
-              >
-                Save & Add next
-              </button> */}
-              <button
                 onClick={handleSubmit((data) => {
                   const payload = {
                     question,
@@ -412,18 +422,29 @@ export default function CreateMCQModal({ onClose, onSave, onSaveAndNext }: Props
                 className="rounded-full bg-[linear-gradient(90deg,#904BFF_0%,#C053C2_100%)] px-5 py-2 text-sm !text-white"
               >
                 Save & Add next
+              </button> */}
+              <button
+                onClick={handleSubmit((data) => {
+                  const payload = buildApiPayload(data);
+
+                  createQuestionMutation.mutate(payload, {
+                    onSuccess: () => {
+                      onSaveAndNext(payload); // keeps StepFour behaviour intact
+
+                      // reset ONLY form-related state
+                      setQuestion('');
+                      setOptions([]);
+                      setMarks(1);
+                      setMandatory(true);
+                    },
+                  });
+                })}
+                className="rounded-full bg-[linear-gradient(90deg,#904BFF_0%,#C053C2_100%)] px-5 py-2 text-sm !text-white"
+              >
+                Save & Add next
               </button>
 
               {/* <button
-                onClick={() => {
-                  onSave(payload);
-                  onClose();
-                }}
-                className="rounded-full border border-[#7F56D9] px-5 py-2 text-sm text-[#7F56D9]"
-              >
-                Save Question
-              </button> */}
-              <button
                 onClick={handleSubmit((data) => {
                   const payload = {
                     question,
@@ -437,6 +458,21 @@ export default function CreateMCQModal({ onClose, onSave, onSaveAndNext }: Props
 
                   onSave(payload);
                   onClose();
+                })}
+                className="rounded-full border border-[#BE83DF] px-5 py-2 text-sm !text-[#BE83DF]"
+              >
+                Save Question
+              </button> */}
+              <button
+                onClick={handleSubmit((data) => {
+                  const payload = buildApiPayload(data);
+
+                  createQuestionMutation.mutate(payload, {
+                    onSuccess: () => {
+                      onSave(payload); // existing StepFour logic
+                      onClose(); // close modal
+                    },
+                  });
                 })}
                 className="rounded-full border border-[#BE83DF] px-5 py-2 text-sm !text-[#BE83DF]"
               >

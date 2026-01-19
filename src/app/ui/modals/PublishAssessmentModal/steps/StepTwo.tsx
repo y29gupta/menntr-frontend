@@ -1,14 +1,19 @@
 import { CARD } from '../constants';
+export type AssessmentAssignedToResponse = {
+  institutionCategory: string;
+  department: string;
+  batches: string[];
+};
 
-export default function StepTwo() {
+export default function StepTwo({ assignedTo }: { assignedTo: AssessmentAssignedToResponse }) {
   return (
     <div>
       <h3 className="mb-3 text-[14px] font-medium text-[#101828]">Assigned To</h3>
 
       <div className={CARD}>
-        <Item label="Institution Category" value="Engineering" />
-        <Item label="Department" value="CSE" />
-        <Item label="Batch" value="CSE – 2022–26, CSE – 2023–27" />
+        <Item label="Institution Category" value={assignedTo.institutionCategory} />
+        <Item label="Department" value={assignedTo.department} />
+        <Item label="Batch" value={assignedTo.batches.join(',')} />
       </div>
     </div>
   );

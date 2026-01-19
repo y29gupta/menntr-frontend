@@ -1,12 +1,11 @@
 'use client';
 
 import AssessmentIcon from '@/app/components/icons/AssessmentIcon';
-// import AssessmentIcon from '../../icons/AssessmentIcon';
 import Buttons from '@/app/ui/Button';
 
 type Props = {
   activeTab: 'Active' | 'Drafts' | 'Completed';
-  onTabChange: (tab: Props['activeTab']) => void;
+  onTabChange: (tab: 'Active' | 'Drafts' | 'Completed') => void;
   onCreate: () => void;
   tabCounts: Record<'Active' | 'Drafts' | 'Completed', number>;
 };
@@ -15,8 +14,7 @@ const tabs: Props['activeTab'][] = ['Active', 'Drafts', 'Completed'];
 
 export default function AssessmentHeader({ activeTab, onTabChange, onCreate, tabCounts }: Props) {
   return (
-    <div className="w-full  flex flex-col gap-4">
-      {/* Top row: title + CTA */}
+    <div className="w-full flex flex-col gap-4">
       <div className="flex items-center justify-between">
         <div>
           <div className="flex gap-2 items-center">
@@ -36,15 +34,7 @@ export default function AssessmentHeader({ activeTab, onTabChange, onCreate, tab
         </button>
       </div>
 
-      {/* Tabs – EXACT Organization style */}
-      <div
-        className="ml-2
-        flex gap-4
-        border-b border-[#616573]
-        
-        whitespace-nowrap
-        scrollbar-hide"
-      >
+      <div className="ml-2 flex gap-4 border-b border-[#616573] whitespace-nowrap scrollbar-hide">
         {tabs.map((tab) => (
           <button
             key={tab}
@@ -53,9 +43,9 @@ export default function AssessmentHeader({ activeTab, onTabChange, onCreate, tab
               ${activeTab === tab ? '!text-[#7C3AED]' : '!text-[#616570] hover:text-gray-700'}
             `}
           >
-            {tab} <span className="pl-1">({tabCounts[tab]}) </span>
+            {tab} <span className="pl-1">({tabCounts[tab]})</span>
             {activeTab === tab && (
-              <span className="absolute left-0 -bottom-[1px] h-[2px] w-full  rounded-full" />
+              <span className="absolute left-0 border -bottom-[1px] h-[2px] w-full rounded-full" />
             )}
           </button>
         ))}

@@ -13,9 +13,9 @@ export default function PublishAssessmentHeader({ step = TOTAL_STEPS }: { step?:
           </p>
         </div>
 
-        <span className="text-[14px] text-[#667085]">
-          Step {step} of {TOTAL_STEPS}
-        </span>
+        <p className="text-[16px] text-[#0F172A]">
+          Step <span className="font-bold text-[#0F172A] px-1">{step}</span> of {TOTAL_STEPS}
+        </p>
       </div>
 
       <div className="my-3 border-b border-[#C3CAD9]" />

@@ -53,7 +53,6 @@ export default function BatchForm({ mode, batchId, onBack, editRow }: Props) {
 
   useEffect(() => {
     if (mode === 'edit' && editRow && meta) {
-      // 🔥 RESOLVE DEPARTMENT ID (REAL FIX)
       const resolvedDepartmentId =
         editRow.department?.id !== 0
           ? editRow.department?.id
@@ -65,7 +64,6 @@ export default function BatchForm({ mode, batchId, onBack, editRow }: Props) {
       reset({
         name: editRow.name,
 
-        // ✅ CATEGORY (already OK in your case)
         category: String(
           typeof editRow.category === 'object'
             ? editRow.category.id
@@ -74,7 +72,6 @@ export default function BatchForm({ mode, batchId, onBack, editRow }: Props) {
               )?.id
         ),
 
-        // ✅ DEPARTMENT (THIS IS THE FIX)
         departmentId: String(resolvedDepartmentId ?? ''),
 
         facultyIds: editRow.coordinator ? [String(editRow.coordinator.id)] : [],
@@ -121,7 +118,7 @@ export default function BatchForm({ mode, batchId, onBack, editRow }: Props) {
   });
 
   return (
-    <div className="w-full">
+    <div className="w-full  px-4 pt-4">
       {/* HEADER */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex flex-col gap-3">
@@ -255,7 +252,7 @@ export default function BatchForm({ mode, batchId, onBack, editRow }: Props) {
           </div>
 
           {/* RIGHT COLUMN */}
-          <div className="space-y-8 pl-6">
+          <div className="space-y-8 sm:pl-6">
             {/* Institution Category */}
             <div>
               <label className="text-sm font-medium text-gray-700">
@@ -266,19 +263,19 @@ export default function BatchForm({ mode, batchId, onBack, editRow }: Props) {
                 name="category"
                 control={control}
                 render={({ field }) => (
-                  <div className="flex gap-3 mt-3 flex-wrap">
+                  <div className="flex sm:flex-row flex-col gap-3 mt-3 flex-wrap">
                     {categoryOptions.map((item: any) => (
                       <button
                         type="button"
                         key={item.value}
                         onClick={() => field.onChange(item.value)}
-                        className={`px-4 py-1.5 rounded-full border text-sm font-medium ${
+                        className={` px-4 py-1.5 rounded-full border text-sm font-medium ${
                           field.value === item.value
                             ? 'border-purple-500 !text-purple-600 bg-purple-50'
                             : 'border-gray-300 text-gray-500'
                         }`}
                       >
-                        <span className="flex items-center gap-2">
+                        <span className="flex justify-center items-center gap-2">
                           {field.value === item.value && <span>✓</span>}
                           {item.label}
                         </span>

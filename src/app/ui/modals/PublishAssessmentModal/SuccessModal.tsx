@@ -1,3 +1,5 @@
+import { useRouter } from 'next/navigation';
+
 export function SuccessModal({
   assessmentName,
   onClose,
@@ -5,8 +7,17 @@ export function SuccessModal({
   assessmentName: string;
   onClose: () => void;
 }) {
+  const router = useRouter();
+
+  const handleRedirect = () => {
+    // router.replace('/admin/assessment?tab=active');
+    // router.refresh();
+    // onClose();
+    window.location.href = '/admin/assessment?tab=active';
+  };
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div className="fixed inset-0 z-50 flex items-center justify-center" onClick={handleRedirect}>
       <div className="absolute inset-0 bg-black/40" />
 
       <div className="relative w-[420px] rounded-xl bg-white p-8 text-center shadow-lg">

@@ -28,7 +28,7 @@ export type CategoryFormData = {
   name: string;
   code: string;
   assignedUserId: string;
-  departments: string[];
+  departments?: string[];
 };
 
 export type UserOption = {

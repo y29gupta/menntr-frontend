@@ -53,7 +53,7 @@ const DepartmentForm = ({ mode, defaultValues, onBack, onSubmit }: Props) => {
 
   console.log(Categoryoption, 'categoryopt');
   return (
-    <div className="w-full">
+    <div className="w-full p-4">
       <div className="flex items-center  justify-between mb-4">
         <div className="flex flex-col  gap-4">
           <button
