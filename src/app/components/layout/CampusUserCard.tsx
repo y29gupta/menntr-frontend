@@ -1,8 +1,9 @@
-'use client';
+// 'use client';
 
 import { Button } from 'antd';
 import Image from 'next/image';
 import ArrowUpRightIcon from '../icons/ArrowUpRightIcon';
+import Link from 'next/link';
 
 export interface RoleCardProps {
   label: string;
@@ -11,7 +12,8 @@ export interface RoleCardProps {
   image: string;
   buttonText: string;
   gradient?: string;
-  onClick?: () => void;
+  // onClick?: () => void;
+  redirect: string;
 }
 
 export default function CampusUserCard({
@@ -21,7 +23,8 @@ export default function CampusUserCard({
   image,
   buttonText,
   gradient = 'bg-[linear-gradient(90deg,#904BFF_0%,#BD47BF_100%)]',
-  onClick,
+  // onClick,
+  redirect,
 }: RoleCardProps) {
   return (
     <div className="w-[320px] flex flex-col items-center">
@@ -45,10 +48,11 @@ export default function CampusUserCard({
         <div className="w-full h-px bg-gray-200 my-4" />
 
         {/* BUTTON */}
-        <Button
-          onClick={onClick}
-          type="text"
-          className="
+        <Link href={redirect}>
+          <Button
+            // onClick={onClick}
+            type="text"
+            className="
             !p-0
             !h-[44px]
             !leading-[44px]
@@ -59,16 +63,17 @@ export default function CampusUserCard({
             font-medium
             text-[15px]
           "
-        >
-          <span className="whitespace-nowrap">{buttonText}</span>
-
-          {/* ICON BOX (fixed size = no shift) */}
-          <span
-            className={`w-[32px] h-[32px] flex items-center justify-center rounded-md ${gradient}`}
           >
-            <ArrowUpRightIcon className="w-3 h-3 text-white" />
-          </span>
-        </Button>
+            <span className="whitespace-nowrap">{buttonText}</span>
+
+            {/* ICON BOX (fixed size = no shift) */}
+            <span
+              className={`w-[32px] h-[32px] flex items-center justify-center rounded-md ${gradient}`}
+            >
+              <ArrowUpRightIcon className="w-3 h-3 text-white" />
+            </span>
+          </Button>
+        </Link>
       </div>
     </div>
   );

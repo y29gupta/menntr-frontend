@@ -7,6 +7,7 @@ import { assessmentApi } from '../../assessment.service';
 import CreateCodingModal from '../components/CreateCodingModal';
 import { isMultiType, normalizeTypes, QuestionType } from '@/app/utils/questionType';
 import { questionModalRegistry } from '../questionModalRegistry';
+import { EditOutlined } from '@ant-design/icons';
 
 type Props = {
   onBack: () => void;
@@ -156,7 +157,7 @@ export default function StepFour({
                       {q.marks} Mark | {q.topic} | {q.questionTypeLabel}
                     </p>
 
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-4">
                       <span
                         className={`rounded-md px-2 py-1 text-xs font-medium ${
                           DIFFICULTY_STYLES[q.difficulty]
@@ -164,7 +165,14 @@ export default function StepFour({
                       >
                         {q.difficulty}
                       </span>
-                      <Trash2 size={16} className="text-[#636771] font-extrabold" />
+                      <EditOutlined
+                        size={16}
+                        className="cursor-pointer hover:!text-purple-600 font-extrabold"
+                      />
+                      <Trash2
+                        size={16}
+                        className=" font-extrabold cursor-pointer hover:!text-purple-600"
+                      />
                     </div>
                   </div>
                 </div>

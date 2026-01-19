@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import clsx from 'clsx';
 import { SIDEBAR_CONFIG } from '@/app/lib/sidebar.config';
-import { Role } from '@/app/lib/roles';
+import { Role, ROLE_TO_SIDEBAR_KEY } from '@/app/lib/roles';
 import CollapseIcon from '../icons/CollapseIcon';
 import ExpandMenuIcon from '../icons/ExpandMenuIcon';
 import MenntrCollapsedIcon from '../icons/MenntrCollapsedIcon';
@@ -17,14 +17,19 @@ type SidebarItem = {
 };
 
 type Props = {
-  role: Role;
+  role: Role | null;
   collapsed: boolean;
   onToggle: () => void;
 };
 
 export default function Sidebar({ role, collapsed, onToggle }: Props) {
   const pathname = usePathname();
-  const menu: readonly SidebarItem[] = SIDEBAR_CONFIG[role as SidebarRole] ?? [];
+  // const menu: readonly SidebarItem[] = SIDEBAR_CONFIG[role as SidebarRole] ?? [];
+
+  const sidebarKey = role ? ROLE_TO_SIDEBAR_KEY[role] : undefined;
+
+  const menu = sidebarKey ? (SIDEBAR_CONFIG[sidebarKey] ?? []) : [];
+  console.log(role, 'role sidebar');
 
   return (
     <>

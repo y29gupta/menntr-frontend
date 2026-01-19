@@ -54,3 +54,7 @@ export type CreateMCQFormValues = z.infer<typeof createMCQSchema>;
 export const createAssessmentSchema = stepOneSchema.merge(stepTwoSchema);
 
 export type CreateAssessmentForm = z.infer<typeof createAssessmentSchema>;
+
+export type StepOneForm = z.infer<typeof stepOneSchema>;
+export type StepTwoForm = z.infer<typeof stepTwoSchema>;
+

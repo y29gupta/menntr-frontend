@@ -37,7 +37,7 @@ const Batches = ({ setBatchView }: Props) => {
             {/* ADD BATCH */}
             <button
               onClick={() => {
-                setSelectedBatch(null); // ✅ IMPORTANT
+                setSelectedBatch(null);
                 setView('form');
               }}
               className="px-6 py-2.5 rounded-full text-sm font-medium !text-white

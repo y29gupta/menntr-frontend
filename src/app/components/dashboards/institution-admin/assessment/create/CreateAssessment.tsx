@@ -4,24 +4,34 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Stepper from './Stepper';
-import StepOne from './steps/StepOne';
-import StepTwo from './steps/StepTwo';
+// import StepOne from './steps/StepOne';
+
+const StepOne = dynamic(() => import('./steps/StepOne'), { ssr: false });
+const StepTwo = dynamic(() => import('./steps/StepTwo'), { ssr: false });
+const StepThree = dynamic(() => import('./steps/StepThree'), { ssr: false });
+const StepFour = dynamic(() => import('./steps/StepFour'), { ssr: false });
+
+// import StepTwo from './steps/StepTwo';
 import { createAssessmentSchema, CreateAssessmentForm, stepOneSchema } from './schema';
-import StepThree from './steps/StepThree';
-import StepFour from './steps/StepFour';
+// import StepThree from './steps/StepThree';
+// import StepFour from './steps/StepFour';
 import { useMutation } from '@tanstack/react-query';
 import { assessmentApi } from '../assessment.service';
 import { QuestionType } from '@/app/utils/questionType';
+import dynamic from 'next/dynamic';
+import { useRouter } from 'next/navigation';
 
-type CreateAssessmentProps = {
-  onCancel: () => void;
-};
-
-export default function CreateAssessment({ onCancel }: CreateAssessmentProps) {
+export default function CreateAssessment() {
   const [step, setStep] = useState(1);
 
   const closeQuestionModal = () => {
     setActiveQuestionType(null);
+  };
+
+  const router = useRouter();
+
+  const handleCancel = () => {
+    router.replace('/admin/assessment?tab=active');
   };
 
   const form = useForm<CreateAssessmentForm>({
@@ -122,21 +132,21 @@ export default function CreateAssessment({ onCancel }: CreateAssessmentProps) {
       {/* {step === 1 && <StepOne form={form} onNext={() => setStep(2)} />}
 
       {step === 2 && <StepTwo form={form} onBack={() => setStep(1)} onNext={() => setStep(3)} />} */}
-      {step === 1 && <StepOne form={form} onNext={handleStepOneNext} onCancel={onCancel} />}
+      {step === 1 && <StepOne form={form} onNext={handleStepOneNext} onCancel={handleCancel} />}
 
       {step === 2 && (
         <StepTwo
           form={form}
           onBack={() => setStep(1)}
           onNext={handleStepTwoNext}
-          onCancel={onCancel}
+          onCancel={handleCancel}
         />
       )}
       {step === 3 && (
         <StepThree
           onBack={() => setStep(2)}
           onNext={handleStepThreeNext}
-          onCancel={onCancel}
+          onCancel={handleCancel}
           onAddMCQ={() => setStep(4)}
           questionTypes={questionTypes}
           assessmentId={assessmentId}
@@ -145,7 +155,7 @@ export default function CreateAssessment({ onCancel }: CreateAssessmentProps) {
       {step === 4 && (
         <StepFour
           onBack={() => setStep(3)}
-          onCancel={onCancel}
+          onCancel={handleCancel}
           assessmentId={assessmentId!}
           questionTypes={questionTypes}
           activeQuestionType={activeQuestionType}
