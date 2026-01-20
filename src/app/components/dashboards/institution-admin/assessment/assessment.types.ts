@@ -63,3 +63,63 @@ export interface CodingQuestionMetaResponse {
 
 
   export type QuestionMetaType = 'MCQ' | 'CODING';
+
+
+//   export type BaseUpdateQuestionPayload = {
+//   type: 'mcq' | 'coding';
+//   topic: string;
+//   difficulty_level: string;
+//   points: number;
+// };
+
+export type CreateCodingQuestionPayload = {
+  topic: string; // array (backend expects this)
+  difficulty_level: string;
+  points: number;
+  time_limit_minutes: number;
+  problem_title: string;
+  problem_statement: string;
+  constraints: string;
+  input_format: string;
+  output_format: string;
+  supported_languages: string[];
+  sample_test_cases: {
+    input: string;
+    output: string;
+  }[];
+  is_mandatory: boolean;
+};
+
+export type UpdateMCQQuestionPayload = {
+  topic: string;
+  question_text: string;
+  question_type: string; // single_correct | multiple_correct | true_false
+  difficulty_level: string;
+  points: number;
+  is_mandatory: boolean;
+  options: {
+    option_text: string;
+    is_correct: boolean;
+  }[];
+};
+export type UpdateCodingQuestionPayload = {
+  type: 'coding';
+  topic: string;
+  difficulty_level: string;
+  points: number;
+  time_limit_minutes: number;
+  problem_title: string;
+  problem_statement: string;
+  constraints: string;
+  input_format: string;
+  output_format: string;
+  supported_languages: string[];
+  sample_test_cases: {
+    input: string;
+    output: string;
+  }[];
+};
+
+export type UpdateQuestionPayload =
+  | UpdateMCQQuestionPayload
+  | UpdateCodingQuestionPayload;

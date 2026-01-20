@@ -78,11 +78,6 @@ export default function AssessmentContainer() {
     [activeData.length, draftData.length, completedData.length]
   );
 
-  // 🔁 URL → state sync
-  // useEffect(() => {
-  //   setActiveTab(urlToUiTab[tabFromUrl]);
-  // }, [tabFromUrl]);
-
   const handleTabChange = (tab: UiTab) => {
     router.replace(`/admin/assessment?tab=${uiToUrlTab[tab]}`);
   };

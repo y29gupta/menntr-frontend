@@ -9,7 +9,7 @@
 // }
 import { api } from "@/app/lib/api";
 import { AssessmentQuestionResponse, getAssessmentListResponse } from "./assessment.schema";
-import { AssessmentAccessPayload, AssessmentMetaResponse, CreateAssessmentPayload, QuestionMetaType } from "./assessment.types";
+import { AssessmentAccessPayload, AssessmentMetaResponse, CreateAssessmentPayload, CreateCodingQuestionPayload, QuestionMetaType, UpdateQuestionPayload } from "./assessment.types";
 
 export type AssessmentTab = "active" | "draft" | "closed";
 
@@ -147,8 +147,8 @@ export const assessmentApi = {
   const formData = new FormData();
   formData.append('file', file);
 
-  const res = await api.post(
-    `/assessments/${assessmentId}/${type}/bulk-upload`,
+     const res = await api.post(
+    `/assessments/${assessmentId}/${type}/bulk-create`,
     formData,
     {
       headers: {
@@ -158,8 +158,38 @@ export const assessmentApi = {
   );
 
   return res.data;
-}
+  },
+  
+  getQuestionById: async (questionId: string) => {
+    // const { data } = await api.get(`/assessments/questions/${questionId}`);
+    const { data } = await api.get(`/assessments/questions/${questionId}`);
+    return data;
+  },
 
+  createCodingQuestion: (
+  assessmentId: string,
+  payload: CreateCodingQuestionPayload
+) =>
+  api.post(
+    `/assessments/${assessmentId}/questions/coding`,
+    payload
+  ),
+
+
+
+updateQuestion: (questionId: string, payload: UpdateQuestionPayload) =>
+    api.put(`/assessments/questions/${questionId}`, payload),
+
+deleteAssessmentQuestion: async (
+  assessmentId: string | null,
+  questionId: string
+) => {
+  console.log(assessmentId,questionId,"delete")
+  const res = await api.delete(
+    `/assessments/${assessmentId}/questions/${questionId}`
+  );
+  return res.data;
+},
 
 
 };

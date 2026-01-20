@@ -4,12 +4,16 @@ import { Controller, useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useState, useEffect } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import FormDropdown from '@/app/ui/FormDropdown';
 import { X } from 'lucide-react';
 import { createPortal } from 'react-dom';
 import { assessmentApi } from '../../assessment.service';
-import { CodingQuestionMetaResponse } from '../../assessment.types';
+import {
+  CodingQuestionMetaResponse,
+  CreateCodingQuestionPayload,
+  UpdateCodingQuestionPayload,
+} from '../../assessment.types';
 
 const problemSchema = z.object({
   topic: z.string().min(1, 'Topic is required'),
@@ -116,7 +120,7 @@ function TextArea({ placeholder, register, rows = 4, ...props }: any) {
 type CreateCodingModalProps = {
   onClose: () => void;
   onSubmit: (data: ProblemFormValues) => void;
-  initialData?: Partial<ProblemFormValues> | null;
+  initialData?: any;
   mode?: 'create' | 'edit';
   meta?: CodingQuestionMetaResponse;
 };
@@ -127,10 +131,13 @@ export default function CreateCodingModal({
   initialData = null,
   mode = 'create',
   meta,
+  assessmentId,
 }: any) {
   const [mandatory, setMandatory] = useState(true);
   const [mounted, setMounted] = useState(false);
   const [visible, setVisible] = useState(false);
+
+  console.log(initialData, 'edit coding');
 
   useEffect(() => {
     setMounted(true);
@@ -188,6 +195,42 @@ export default function CreateCodingModal({
     },
   });
 
+  // useEffect(() => {
+  //   if (!initialData) return;
+
+  //   Object.entries(initialData).forEach(([key, value]) => {
+  //     setValue(key as any, value, { shouldValidate: true });
+  //   });
+  // }, [initialData, setValue]);
+
+  useEffect(() => {
+    if (!initialData) return;
+
+    setValue('topic', initialData.topic);
+    setValue('title', initialData.problem_title);
+    setValue('statement', initialData.problem_statement);
+    setValue('constraints', initialData.constraints);
+    setValue('timeLimit', String(initialData.time_limit_minutes));
+    setValue('inputFormat', initialData.input_format);
+    setValue('outputFormat', initialData.output_format);
+
+    setValue(
+      'testCases',
+      initialData.sample_test_cases?.map((tc: any) => ({
+        input: tc.input,
+        output: tc.output,
+      })) || []
+    );
+
+    setValue(
+      'languages',
+      initialData.supported_languages?.map((l: string) => l.toLowerCase()) || []
+    );
+
+    setValue('marks', String(initialData.points));
+    setValue('difficulty', initialData.difficulty_level);
+  }, [initialData, setValue]);
+
   const testCases = watch('testCases');
 
   const addTestCase = () => {
@@ -203,10 +246,99 @@ export default function CreateCodingModal({
     }
   };
 
-  const onSubmit = (data: ProblemFormValues) => {
-    onSubmitCallback?.(data);
-  };
+  // const onSubmit = (data: ProblemFormValues) => {
+  //   onSubmitCallback?.(data);
+  // };
 
+  const updateQuestionMutation = useMutation({
+    mutationFn: (payload: UpdateCodingQuestionPayload) =>
+      assessmentApi.updateQuestion(initialData.assessment_question_id, payload),
+  });
+
+  const createQuestionMutation = useMutation({
+    mutationFn: (payload: CreateCodingQuestionPayload) =>
+      assessmentApi.createCodingQuestion(assessmentId, payload),
+  });
+
+  // const onSubmit = (data: ProblemFormValues) => {
+  //   const payload: UpdateCodingQuestionPayload = {
+  //     type: 'coding',
+  //     topic: data.topic,
+  //     difficulty_level: data.difficulty,
+  //     points: Number(data.marks),
+  //     time_limit_minutes: Number(data.timeLimit),
+  //     problem_title: data.title,
+  //     problem_statement: data.statement,
+  //     constraints: data.constraints,
+  //     input_format: data.inputFormat,
+  //     output_format: data.outputFormat,
+  //     supported_languages: data.languages.map((l) => l.toUpperCase()),
+  //     sample_test_cases: data.testCases,
+  //   };
+
+  //   if (mode === 'edit' && initialData?.assessment_question_id) {
+  //     updateQuestionMutation.mutate(payload, {
+  //       onSuccess: () => {
+  //         onSubmitCallback(payload);
+  //         onClose();
+  //       },
+  //     });
+  //   } else {
+  //     onSubmitCallback(payload); // existing create flow
+  //   }
+  // };
+
+  const onSubmit = (data: ProblemFormValues) => {
+    if (mode === 'edit' && initialData?.assessment_question_id) {
+      const payload: UpdateCodingQuestionPayload = {
+        type: 'coding',
+        topic: data.topic,
+        difficulty_level: data.difficulty,
+        points: Number(data.marks),
+        time_limit_minutes: Number(data.timeLimit),
+        problem_title: data.title,
+        problem_statement: data.statement,
+        constraints: data.constraints,
+        input_format: data.inputFormat,
+        output_format: data.outputFormat,
+        supported_languages: data.languages.map((l) => l.toUpperCase()),
+        sample_test_cases: data.testCases,
+      };
+
+      updateQuestionMutation.mutate(payload, {
+        onSuccess: () => {
+          onSubmitCallback(payload);
+          onClose();
+        },
+      });
+    } else {
+      /* =======================
+         CREATE FLOW (⭐ ADDED)
+      ======================= */
+      const payload: CreateCodingQuestionPayload = {
+        topic: data.topic,
+        difficulty_level: data.difficulty,
+        points: Number(data.marks),
+        time_limit_minutes: Number(data.timeLimit),
+        problem_title: data.title,
+        problem_statement: data.statement,
+        constraints: data.constraints,
+        input_format: data.inputFormat,
+        output_format: data.outputFormat,
+        supported_languages: data.languages.map((l) => l.toUpperCase()),
+        sample_test_cases: data.testCases,
+        is_mandatory: mandatory,
+      };
+      console.log(payload, 'coding payload');
+
+      createQuestionMutation.mutate(payload, {
+        onSuccess: () => {
+          onSubmitCallback(payload);
+          onClose();
+        },
+      });
+    }
+  };
   if (!mounted) return null;
 
   return (

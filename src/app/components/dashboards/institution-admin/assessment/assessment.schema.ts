@@ -11,7 +11,9 @@ export interface getAssessmentListResponse {
 }
 
 export interface AssessmentQuestionResponse {
-  id: string;
+  // id: string;
+  assessment_question_id: string;
+  question_id: string;
   questionNo: number;
   questionText: string;
   marks: number;
