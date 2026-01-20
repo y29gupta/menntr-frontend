@@ -15,11 +15,11 @@ export const SetPermissionsModal = ({
   moduleId: number | null;
   moduleName: string | null;
   onClose: () => void;
-  onConfirm: (moduleName: string, permissions: string[]) => void;
-  existingPermissions?: string[];
+  onConfirm: (moduleName: string, permissions: number[]) => void; // ✅ Changed to number[]
+  existingPermissions?: number[]; // ✅ Changed to number[]
 }) => {
   const [selectedFeature, setSelectedFeature] = useState<any | null>(null);
-  const [selectedPermissions, setSelectedPermissions] = useState<string[]>([]);
+  const [selectedPermissions, setSelectedPermissions] = useState<number[]>([]); // ✅ Using number[]
 
   const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
@@ -62,11 +62,12 @@ export const SetPermissionsModal = ({
 
   const permissions = permissionData ?? [];
 
+  // ✅ Set existing permissions when modal opens/permissions load
   useEffect(() => {
-    if (permissions) {
-      setSelectedPermissions(existingPermissions ?? []);
+    if (open && existingPermissions) {
+      setSelectedPermissions(existingPermissions);
     }
-  }, [permissions]);
+  }, [open, existingPermissions, permissions]);
 
   if (!open || !moduleName) return null;
 
@@ -113,36 +114,45 @@ export const SetPermissionsModal = ({
 
             {!loadingPermissions && (
               <div className="flex flex-wrap gap-2">
-                {permissions.map((p: any) => {
-                  const selected = selectedPermissions.includes(p.code);
+                {permissions.map(
+                  (p: {
+                    id: number;
+                    code: string;
+                    name: string;
+                    description: string;
+                    action_type: string;
+                  }) => {
+                    // ✅ Using p.id instead of p.code
+                    const selected = selectedPermissions.includes(p.id);
 
-                  return (
-                    <label
-                      key={p.code}
-                      className={`flex items-center gap-2 px-4 py-2 rounded-full cursor-pointer text-sm ${
-                        selected
-                          ? 'bg-purple-100 text-purple-700 border border-purple-300'
-                          : 'bg-gray-100 text-gray-600 border-gray-200 hover:border-purple-300'
-                      }`}
-                    >
-                      <input
-                        type="checkbox"
-                        className="sr-only"
-                        checked={selected}
-                        onChange={() =>
-                          setSelectedPermissions((prev) =>
-                            prev.includes(p.code)
-                              ? prev.filter((x) => x !== p.code)
-                              : [...prev, p.code]
-                          )
-                        }
-                      />
+                    return (
+                      <label
+                        key={p.id}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-full cursor-pointer text-sm ${
+                          selected
+                            ? 'bg-purple-100 text-purple-700 border border-purple-300'
+                            : 'bg-gray-100 text-gray-600 border-gray-200 hover:border-purple-300'
+                        }`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={selected}
+                          onChange={() =>
+                            setSelectedPermissions(
+                              (prev) =>
+                                prev.includes(p.id)
+                                  ? prev.filter((id) => id !== p.id) // ✅ Remove by id
+                                  : [...prev, p.id] // ✅ Add by id
+                            )
+                          }
+                        />
 
-                      {selected && <span>✓</span>}
-                      {p.name}
-                    </label>
-                  );
-                })}
+                        {selected && <span>✓</span>}
+                        {p.name}
+                      </label>
+                    );
+                  }
+                )}
               </div>
             )}
           </div>
@@ -156,7 +166,7 @@ export const SetPermissionsModal = ({
           </button>
 
           <button
-            onClick={() => moduleName && onConfirm(moduleName, selectedPermissions)}
+            onClick={() => moduleName && onConfirm(moduleName, selectedPermissions)} // ✅ Pass number[]
             className="w-full sm:flex-1 rounded-full py-2 text-sm text-white bg-[linear-gradient(90deg,#904BFF,#C053C2)]"
           >
             Confirm

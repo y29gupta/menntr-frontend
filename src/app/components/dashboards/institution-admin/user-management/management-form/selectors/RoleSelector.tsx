@@ -1,12 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
 
-// API Types
 interface Role {
   id: number;
   name: string;
-  showCategories?: boolean;
-  showDepartment?: boolean;
-  showBatch?: boolean;
 }
 
 interface RolesResponse {
@@ -15,7 +11,6 @@ interface RolesResponse {
   };
 }
 
-// Fetch function
 const fetchRoles = async (): Promise<RolesResponse> => {
   const response = await fetch(
     `${process.env.NEXT_PUBLIC_API_BASE_URL}/institutionsadmin/role-hierarchy`
@@ -26,12 +21,18 @@ const fetchRoles = async (): Promise<RolesResponse> => {
   return response.json();
 };
 
-// RoleSelector Component
-const RoleSelector = ({ selectedRole, register, onRoleSelect }: any) => {
+type Props = {
+  selectedRole?: string;
+  register: any;
+  onRoleSelect: (roleId: number) => void;
+  allRoles?: Role[];
+};
+
+const RoleSelector = ({ selectedRole, register, onRoleSelect, allRoles = [] }: Props) => {
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ['roles'],
     queryFn: fetchRoles,
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 5 * 60 * 1000,
   });
 
   if (isLoading) {
@@ -55,9 +56,9 @@ const RoleSelector = ({ selectedRole, register, onRoleSelect }: any) => {
     );
   }
 
-  const roles = data?.data?.roles || [];
+  const roleHierarchies = data?.data?.roles || [];
 
-  if (roles.length === 0) {
+  if (roleHierarchies.length === 0) {
     return (
       <div className="flex items-center justify-center py-8">
         <div className="text-gray-500 text-sm">No roles available</div>
@@ -66,31 +67,53 @@ const RoleSelector = ({ selectedRole, register, onRoleSelect }: any) => {
   }
 
   return (
-    <div className="flex flex-wrap gap-2 mb-6">
-      {roles.map((role) => {
-        const selected = selectedRole === role.name;
-        return (
-          <label
-            key={role.id}
-            onClick={() => onRoleSelect(role.id)}
-            className={`flex items-center gap-2 px-4 py-2 rounded-full cursor-pointer text-sm transition-colors
-              ${
-                selected
-                  ? 'bg-purple-100 text-purple-700 border border-purple-300'
-                  : 'bg-gray-100 text-gray-600 border border-gray-200 hover:border-purple-300'
-              }`}
-          >
-            <input
-              type="radio"
-              value={role.name}
-              {...register('roleHierarchy')}
-              className="sr-only"
-            />
-            {selected && <span className="text-purple-700">✓</span>}
-            {role.name}
-          </label>
-        );
-      })}
+    <div className="mb-6">
+      <h4 className="mb-3 text-sm font-medium text-gray-700">Select Role Hierarchy</h4>
+      <div className="flex flex-wrap gap-2">
+        {roleHierarchies.map((role) => {
+          const selected = selectedRole === role.name;
+          return (
+            <label
+              key={role.id}
+              onClick={() => {
+                onRoleSelect(role.id);
+              }}
+              className={`flex items-center gap-2 px-4 py-2 rounded-full cursor-pointer text-sm transition-colors
+                ${
+                  selected
+                    ? 'bg-purple-100 text-purple-700 border border-purple-300'
+                    : 'bg-gray-100 text-gray-600 border border-gray-200 hover:border-purple-300'
+                }`}
+            >
+              <input
+                type="radio"
+                value={role.name}
+                {...register('roleHierarchy')}
+                className="sr-only"
+              />
+              {selected && <span className="text-purple-700">✓</span>}
+              <span>{role.name}</span>
+            </label>
+          );
+        })}
+      </div>
+
+      {/* Display all roles with full names when a role hierarchy is selected */}
+      {allRoles.length > 0 && (
+        <div className="mt-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
+          <h5 className="text-xs font-semibold text-gray-600 mb-2">Available Roles (ID - Name):</h5>
+          <div className="flex flex-wrap gap-2">
+            {allRoles.map((role) => (
+              <span
+                key={role.id}
+                className="inline-block px-3 py-1 bg-white border border-gray-300 rounded-full text-xs text-gray-700"
+              >
+                <span className="font-semibold text-purple-600">{role.id}</span> - {role.name}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -12,8 +12,8 @@ type Props = {
   register: any;
   selectedModules: string[];
   onNext?: () => void;
-  modulePermissions: Record<string, string[]>;
-  setModulePermissions: React.Dispatch<React.SetStateAction<Record<string, string[]>>>;
+  modulePermissions: Record<string, number[]>;
+  setModulePermissions: React.Dispatch<React.SetStateAction<Record<string, number[]>>>;
 };
 
 const ModulesSection = ({
@@ -105,7 +105,7 @@ const ModulesSection = ({
 
           setModulePermissions((prev) => ({
             ...prev,
-            [String(activeModule.id)]: permissions,
+            [String(activeModule.id)]: permissions, // number[]
           }));
 
           setOpenPermissions(false);
