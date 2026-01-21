@@ -120,8 +120,8 @@ export async function loginpasswordsetup(payload: any) {
   try {
     console.log(payload, 'payload');
     const res = await toastApiPromise(
-      axios.post(
-        'https://menntr-backend.onrender.com/auth/consume-invite',
+      api.post(
+        '/auth/consume-invite',
         payload,
         {
           withCredentials: true,

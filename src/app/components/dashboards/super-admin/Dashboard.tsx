@@ -24,7 +24,7 @@ type Props = {
   onEditInstitution: (row: any) => void;
 };
 
-const ITEMS_PER_PAGE = 10;
+const ITEMS_PER_PAGE = 3;
 const DEBOUNCE_DELAY = 500;
 
 const Dashboard = ({ onCreateInstitution, onEditInstitution }: Props) => {
