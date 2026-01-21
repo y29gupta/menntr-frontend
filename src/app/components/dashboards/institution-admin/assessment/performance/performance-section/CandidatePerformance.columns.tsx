@@ -12,11 +12,14 @@ export type CandidatePerformance = {
   score: string;
   percentage: number;
   status: 'Completed' | 'In Progress' | 'Not Started';
+  assessmentName: string;
 };
 
 /* ========= COLUMNS ========= */
 
-export const candidatePerformanceColumns = (): ColumnDef<CandidatePerformance>[] => [
+export const candidatePerformanceColumns = (
+  onViewReport: (row: CandidatePerformance) => void
+): ColumnDef<CandidatePerformance>[] => [
   {
     accessorKey: 'name',
     header: 'Student Name',
@@ -75,8 +78,11 @@ export const candidatePerformanceColumns = (): ColumnDef<CandidatePerformance>[]
   {
     id: 'actions',
     header: 'Actions',
-    cell: () => (
-      <button className="flex items-center gap-2 text-purple-600 text-sm font-medium">
+    cell: ({ row }) => (
+      <button
+        onClick={() => onViewReport(row.original)}
+        className="flex items-center gap-2 text-purple-600! text-sm font-medium cursor-pointer"
+      >
         <FileText className="w-4 h-4" />
         View Report
       </button>

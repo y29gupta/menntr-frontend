@@ -1,7 +1,9 @@
 'use client';
 
+import { useState } from 'react';
 import DataTable from '@/app/components/table/DataTable';
 import { CandidatePerformance, candidatePerformanceColumns } from './CandidatePerformance.columns';
+import ViewReportModal from '../student-performance/ViewReportModal';
 
 const dummyData: CandidatePerformance[] = [
   {
@@ -12,6 +14,7 @@ const dummyData: CandidatePerformance[] = [
     score: '22/25',
     percentage: 85,
     status: 'Completed',
+    assessmentName: 'attempt 2',
   },
   {
     id: 2,
@@ -21,6 +24,7 @@ const dummyData: CandidatePerformance[] = [
     score: '24/25',
     percentage: 95,
     status: 'In Progress',
+    assessmentName: 'attempt 2',
   },
   {
     id: 3,
@@ -30,6 +34,7 @@ const dummyData: CandidatePerformance[] = [
     score: '15/25',
     percentage: 65,
     status: 'Not Started',
+    assessmentName: 'attempt 2',
   },
 ];
 
@@ -38,19 +43,34 @@ export default function CandidatePerformanceTable({
 }: {
   showColumnFilters: boolean;
 }) {
+  const [currentIndex, setCurrentIndex] = useState<number | null>(null);
+
   return (
-    <DataTable<CandidatePerformance>
-      data={dummyData}
-      columns={candidatePerformanceColumns()}
-      columnFilters={{}}
-      onColumnFilterChange={() => {}}
-      showColumnFilters={showColumnFilters}
-      currentPage={1}
-      pageCount={1}
-      onPreviousPage={() => {}}
-      onNextPage={() => {}}
-      canPreviousPage={false}
-      canNextPage={false}
-    />
+    <>
+      <DataTable
+        data={dummyData}
+        columns={candidatePerformanceColumns((candidate) => {
+          const index = dummyData.findIndex((c) => c.id === candidate.id);
+          setCurrentIndex(index);
+        })}
+        showColumnFilters={showColumnFilters}
+        columnFilters={{}}
+        onColumnFilterChange={() => {}}
+        currentPage={1}
+        pageCount={1}
+        onPreviousPage={() => {}}
+        onNextPage={() => {}}
+        canPreviousPage={false}
+        canNextPage={false}
+      />
+
+      <ViewReportModal
+        open={currentIndex !== null}
+        onClose={() => setCurrentIndex(null)}
+        candidate={currentIndex !== null ? dummyData[currentIndex] : null}
+        onNext={() => setCurrentIndex((i) => (i !== null && i < dummyData.length - 1 ? i + 1 : i))}
+        onPrev={() => setCurrentIndex((i) => (i !== null && i > 0 ? i - 1 : i))}
+      />
+    </>
   );
 }
