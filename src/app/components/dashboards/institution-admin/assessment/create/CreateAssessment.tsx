@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Stepper from './Stepper';
@@ -16,15 +16,35 @@ const StepFour = dynamic(() => import('./steps/StepFour'), { ssr: false });
 import { createAssessmentSchema, CreateAssessmentForm, stepOneSchema } from './schema';
 // import StepThree from './steps/StepThree';
 // import StepFour from './steps/StepFour';
-import { QueryClient, useMutation, useQueryClient } from '@tanstack/react-query';
+import { QueryClient, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { assessmentApi } from '../assessment.service';
 import { QuestionType } from '@/app/utils/questionType';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import ConfirmModal from '@/app/ui/modals/ConfirmModal';
+import { toTitleCase } from '@/app/utils/stringFormat';
 
-export default function CreateAssessment() {
+type Props = {
+  mode?: 'create' | 'edit';
+  editAssessmentId?: string;
+};
+
+export default function CreateAssessment({ mode = 'create', editAssessmentId }: Props) {
   const [step, setStep] = useState(1);
+
+  const [instructions, setInstructions] = useState<string | undefined>();
+  const [tags, setTags] = useState<string[] | undefined>();
+  const [durationMinutes, setDurationMinutes] = useState<number | undefined>();
+
+  const [activeQuestionType, setActiveQuestionType] = useState<QuestionType | null>(null);
+
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [deleteQuestionId, setDeleteQuestionId] = useState<string | null>(null);
+
+  const [assessmentId, setAssessmentId] = useState<string | null>(null);
+  const [isHydrated, setIsHydrated] = useState(false);
+
+  const isEdit = mode === 'edit';
 
   const closeQuestionModal = () => {
     setActiveQuestionType(null);
@@ -49,14 +69,14 @@ export default function CreateAssessment() {
     },
   });
 
-  const [assessmentId, setAssessmentId] = useState<string | null>(null);
+  const { data: assessmentResponse } = useQuery({
+    queryKey: ['edit-assessment', editAssessmentId],
+    queryFn: () => assessmentApi.getAssessmentById(editAssessmentId!),
+    enabled: isEdit && !!editAssessmentId,
+    staleTime: 1 * 60 * 1000, // performance
+  });
 
   const questionTypes = form.watch('questionType'); // comes from Step One meta API
-
-  const [activeQuestionType, setActiveQuestionType] = useState<QuestionType | null>(null);
-
-  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  const [deleteQuestionId, setDeleteQuestionId] = useState<string | null>(null);
 
   const openQuestionModal = (type: QuestionType) => {
     setActiveQuestionType(type);
@@ -68,6 +88,11 @@ export default function CreateAssessment() {
     mutationFn: assessmentApi.createAssessment,
   });
 
+  const updateAssessmentMutation = useMutation({
+    mutationFn: ({ assessmentId, payload }: { assessmentId: string; payload: any }) =>
+      assessmentApi.updateAssessment(assessmentId, payload),
+  });
+
   const updateAudienceMutation = useMutation({
     mutationFn: ({ assessmentId, batchIds }: { assessmentId: string; batchIds: number[] }) =>
       assessmentApi.updateAssessmentAudience(assessmentId, {
@@ -75,46 +100,150 @@ export default function CreateAssessment() {
       }),
   });
 
-  const handleStepOneNext = async () => {
-    const isValid = await form.trigger([
-      'title',
-      // 'description',
-      'category',
+  const buildCreatePayload = (values: CreateAssessmentForm) => {
+    return {
+      title: values.title,
+      description: values.description,
+      duration_minutes: 30, // or values.duration_minutes if you add later
+      tags: ['verbal', 'english'], // optional
+
+      category: values.category,
+      assessment_type: values.AssessmentType.toLowerCase(),
+      question_type: values.questionType.toLowerCase(),
+    };
+  };
+  const buildUpdatePayload = (values: CreateAssessmentForm) => {
+    return {
+      title: values.title,
+      description: values.description,
+
+      duration_minutes: durationMinutes,
+      instructions,
+      tags,
+
+      category: values.category,
+      assessment_type: values.AssessmentType,
+      question_type: values.questionType,
+    };
+  };
+
+  useEffect(() => {
+    if (!isEdit || !assessmentResponse || isHydrated) return;
+
+    setAssessmentId(assessmentResponse.id);
+    form.setValue('title', assessmentResponse.title, { shouldDirty: false });
+
+    // form.setValue('title', assessmentResponse.title);
+    form.setValue('description', assessmentResponse.description ?? '');
+    // form.setValue('category', assessmentResponse.metadata?.category);
+    // form.setValue(
+    //   'AssessmentType',
+    //   toTitleCase(assessmentResponse.metadata?.assessment_type) ?? ''
+    // );
+    // form.setValue('questionType', assessmentResponse.metadata?.question_type.toUpperCase());
+    form.setValue('category', assessmentResponse.metadata?.category ?? '', {
+      shouldDirty: false,
+    });
+
+    form.setValue(
       'AssessmentType',
-      'questionType',
-    ]);
+      toTitleCase(assessmentResponse.metadata?.assessment_type) ?? '',
+      { shouldDirty: false }
+    );
+
+    form.setValue('questionType', toTitleCase(assessmentResponse.metadata?.question_type) ?? '', {
+      shouldDirty: false,
+    });
+
+    // store non-form fields for UPDATE
+    setInstructions(assessmentResponse.instructions);
+    setTags(assessmentResponse.tags);
+    setDurationMinutes(assessmentResponse.duration_minutes);
+
+    if (assessmentResponse.batches?.length) {
+      form.setValue(
+        'batches',
+        assessmentResponse.batches.map((b: any) => String(b.id))
+      );
+    }
+
+    setIsHydrated(true);
+  }, [isEdit, assessmentResponse, isHydrated, form]);
+
+  // const handleStepOneNext = async () => {
+  //   const isValid = await form.trigger([
+  //     'title',
+  //     // 'description',
+  //     'category',
+  //     'AssessmentType',
+  //     'questionType',
+  //   ]);
+
+  //   if (!isValid) return;
+  //   const values = form.getValues();
+
+  //   // const res = await createAssessmentMutation.mutateAsync({
+  //   //   // feature_id: 5,
+  //   //   duration_minutes: 30,
+  //   //   tags: ['verbal', 'english'],
+
+  //   //   title: values.title,
+  //   //   description: values.description,
+  //   //   category: values.category,
+  //   //   assessment_type: values.AssessmentType.toLowerCase(),
+  //   //   question_type: values.questionType.toLowerCase(),
+  //   // });
+
+  //   // setAssessmentId(res.id);
+  //   setAssessmentId('31');
+  //   setStep(2);
+  // };
+
+  const handleStepOneNext = async () => {
+    const isValid = await form.trigger(['title', 'category', 'AssessmentType', 'questionType']);
 
     if (!isValid) return;
+
     const values = form.getValues();
 
-    // const res = await createAssessmentMutation.mutateAsync({
-    //   // feature_id: 5,
-    //   duration_minutes: 30,
-    //   tags: ['verbal', 'english'],
+    try {
+      if (isEdit && assessmentId) {
+        const payload = buildUpdatePayload(values);
 
-    //   title: values.title,
-    //   description: values.description,
-    //   category: values.category,
-    //   assessment_type: values.AssessmentType.toLowerCase(),
-    //   question_type: values.questionType.toLowerCase(),
-    // });
+        await updateAssessmentMutation.mutateAsync({
+          assessmentId,
+          payload,
+        });
 
-    // setAssessmentId(res.id);
-    setAssessmentId('31');
-    setStep(2);
+        message.success('Assessment updated successfully');
+      } else {
+        const payload = buildCreatePayload(values);
+
+        const res = await createAssessmentMutation.mutateAsync(payload);
+        setAssessmentId(res.id);
+
+        message.success('Assessment created successfully');
+      }
+
+      // SAME FLOW
+      setStep(2);
+    } catch (error) {
+      message.error('Failed to save assessment');
+    }
   };
+
   const handleStepTwoNext = async () => {
     const isValid = await form.trigger(['institutionCategory', 'department', 'batches']);
 
-    // if (!isValid || !assessmentId) return;
+    if (!isValid || !assessmentId) return;
     // if (!isValid) return;
 
     const { batches } = form.getValues();
 
-    // await updateAudienceMutation.mutateAsync({
-    //   assessmentId,
-    //   batchIds: batches.map((id) => Number(id)),
-    // });
+    await updateAudienceMutation.mutateAsync({
+      assessmentId,
+      batchIds: batches.map((id) => Number(id)),
+    });
 
     setStep(3);
   };

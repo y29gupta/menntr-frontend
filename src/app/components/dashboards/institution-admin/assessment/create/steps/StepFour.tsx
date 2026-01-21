@@ -58,9 +58,6 @@ export default function StepFour({
   const [editingQuestionId, setEditingQuestionId] = useState<string | null>(null);
   const [editQuestionData, setEditQuestionData] = useState<any>(null);
 
-  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  const [deleteQuestionId, setDeleteQuestionId] = useState<string | null>(null);
-
   const types = normalizeTypes(questionTypes);
   const multiType = isMultiType(questionTypes);
 
@@ -138,25 +135,6 @@ export default function StepFour({
   };
 
   // -----------------delete question----------------
-  const deleteQuestionMutation = useMutation({
-    mutationFn: (questionId: string) =>
-      assessmentApi.deleteAssessmentQuestion(assessmentId, questionId),
-
-    onSuccess: () => {
-      message.success('Question deleted successfully');
-
-      queryClient.invalidateQueries({
-        queryKey: ['assessment-questions', assessmentId],
-      });
-
-      setDeleteModalOpen(false);
-      setDeleteQuestionId(null);
-    },
-
-    onError: () => {
-      message.error('Failed to delete question');
-    },
-  });
 
   return (
     <>

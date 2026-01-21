@@ -189,7 +189,46 @@ deleteAssessmentQuestion: async (
     `/assessments/${assessmentId}/questions/${questionId}`
   );
   return res.data;
-},
+  },
+
+  
+
+  
+deleteDraftAssessment: async (
+  assessmentId: string | null,
+  
+) => {
+  console.log(assessmentId,"delete assessment")
+  const res = await api.delete(
+    `/assessments/${assessmentId}`
+  );
+  return res.data;
+  },
+
+
+  getAssessmentById: async (assessmentId: string) => {
+    console.log("edit ",assessmentId)
+    const { data } = await api.get(`/assessments/${assessmentId}`);
+    return data;
+  },
+
+  
+  updateAssessment: async (
+    assessmentId: string,
+    payload: {
+      title: string;
+      description?: string;
+      duration_minutes?: number;
+      instructions?: string;
+      tags?: string[];
+      category: string;
+      assessment_type: string;
+      question_type: string;
+    }
+  ) => {
+    const { data } = await api.put(`/assessments/${assessmentId}`, payload);
+    return data;
+  },
 
 
 };
