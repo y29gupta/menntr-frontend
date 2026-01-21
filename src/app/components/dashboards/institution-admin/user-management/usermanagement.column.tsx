@@ -6,15 +6,14 @@ export type Management = {
   name: string;
   role: string;
   Department: string;
-  status: 'Active' | 'Inactive';
+  status: 'Active' | 'Suspended';
   lastLogin: string;
   avatar?: string;
-
 };
 
 export const ManagementColumn = (
   onEditManagement: (row: Management) => void,
-  onDeleteManagement: (row: Management) => void
+  onSuspendManagement: (row: Management) => void
 ): ColumnDef<Management>[] => [
   {
     accessorKey: 'name',
@@ -55,19 +54,19 @@ export const ManagementColumn = (
     accessorKey: 'status',
     header: 'Status',
     cell: ({ getValue }) => {
-      const status = getValue() as string;
+      const status = getValue() as 'Active' | 'Suspended';
       const isActive = status === 'Active';
 
       return (
         <span
-          className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs
-          ${isActive ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-600'}
-        `}
+          className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-medium
+            ${isActive ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}
+          `}
         >
           <span
             className={`h-2 w-2 rounded-full
-            ${isActive ? 'bg-green-500' : 'bg-gray-400'}
-          `}
+              ${isActive ? 'bg-green-500' : 'bg-red-500'}
+            `}
           />
           {status}
         </span>
@@ -82,22 +81,34 @@ export const ManagementColumn = (
   {
     id: 'actions',
     header: 'Actions',
-    cell: ({ row }) => (
-      <div className="flex items-center gap-3">
-        <button
-          onClick={() => onEditManagement(row.original)}
-          className="p-2 rounded-md text-gray-400 hover:text-indigo-500 hover:bg-indigo-50"
-        >
-          <Pencil className="w-4 h-4" />
-        </button>
+    cell: ({ row }) => {
+      const isSuspended = row.original.status === 'Suspended';
 
-        <button
-          onClick={() => onDeleteManagement(row.original)}
-          className="p-2 rounded-md text-gray-400 hover:text-red-500 hover:bg-red-50"
-        >
-          <Trash2 className="w-4 h-4" />
-        </button>
-      </div>
-    ),
+      return (
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => onEditManagement(row.original)}
+            className="p-2 rounded-md text-gray-400 hover:text-indigo-500 hover:bg-indigo-50"
+          >
+            <Pencil className="w-4 h-4" />
+          </button>
+
+          <button
+            disabled={isSuspended}
+            onClick={() => onSuspendManagement(row.original)}
+            className={`p-2 rounded-md
+              ${
+                isSuspended
+                  ? 'cursor-not-allowed text-gray-300'
+                  : 'text-gray-400 hover:text-red-500 hover:bg-red-50'
+              }
+            `}
+            title={isSuspended ? 'User already suspended' : 'Suspend user'}
+          >
+            <Trash2 className="w-4 h-4" />
+          </button>
+        </div>
+      );
+    },
   },
 ];

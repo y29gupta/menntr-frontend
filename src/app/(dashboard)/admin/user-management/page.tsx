@@ -140,7 +140,7 @@ const Page = () => {
 
   return (
     <div className="flex flex-col h-full min-h-0 rounded-2xl p-4 gap-4 shadow-[0_0_16px_0_#0F172A26] w-full">
-      {view === 'list' ? (
+      {view === 'list' && (
         <>
           <div className="w-full">
             <div className="flex items-center justify-between gap-4 mb-4">
@@ -203,7 +203,7 @@ const Page = () => {
               setFormMode('edit');
               setFormData({
                 id: user.id,
-                status: user.status,
+                status: user.status as any,
                 firstName,
                 lastName,
                 permissions: {
@@ -224,7 +224,8 @@ const Page = () => {
             }}
           />
         </>
-      ) : (
+      )}
+      {view === 'form' && (
         <div className="flex-1 min-h-0 overflow-y-auto">
           {step === 1 && (
             <FormProvider {...profileForm}>
@@ -268,6 +269,14 @@ const Page = () => {
                 onBack={() => setStep(2)}
                 onSubmit={() => {
                   createUserMutation.mutate({
+                    email: formData.email,
+                    firstName: formData.firstName,
+                    lastName: formData.lastName,
+                    password: 'sample@123',
+                    roleId: formData.permissions?.roleId,
+                    permissionIds: formData.permissions?.permissionIds ?? [],
+                  });
+                  console.log('🚀 FINAL USER PAYLOAD:', {
                     email: formData.email,
                     firstName: formData.firstName,
                     lastName: formData.lastName,

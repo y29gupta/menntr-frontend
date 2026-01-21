@@ -67,6 +67,7 @@ export const institutionColumns = (
     header: 'Actions',
     cell: ({ row }) => {
       const router = useRouter();
+      console.log(row, 'row');
       return (
         <button
           onClick={() => router.push(`/super-admin/institutions/${row.original.id}`)}

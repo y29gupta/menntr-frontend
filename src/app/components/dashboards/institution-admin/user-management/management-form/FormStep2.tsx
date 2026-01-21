@@ -35,9 +35,7 @@ type Props = {
   onBack: () => void;
   onNext: () => void;
   modulePermissions: Record<string, number[]>;
-  setModulePermissions: React.Dispatch<
-    React.SetStateAction<Record<string, number[]>>
-  >;
+  setModulePermissions: React.Dispatch<React.SetStateAction<Record<string, number[]>>>;
 };
 
 const UserPermission = ({
@@ -47,8 +45,7 @@ const UserPermission = ({
   modulePermissions,
   setModulePermissions,
 }: Props) => {
-  const { register, watch, handleSubmit, setValue } =
-    useFormContext<FormData>();
+  const { register, watch, handleSubmit, setValue } = useFormContext<FormData>();
 
   const router = useRouter();
   const [modules, setModules] = useState<Module[]>([]);
@@ -60,6 +57,7 @@ const UserPermission = ({
   } | null>(null);
 
   const selectedRole = watch('roleHierarchy');
+
   const selectedCategory = watch('roleCategory');
   const selectedModules = watch('selectedModules') ?? [];
 
@@ -72,12 +70,10 @@ const UserPermission = ({
     : null;
 
   const departmentOptions =
-    ROLE_CONFIG.categories[selectedCategory as keyof typeof ROLE_CONFIG.categories]?.map(
-      (d) => ({
-        label: d,
-        value: d,
-      })
-    ) ?? [];
+    ROLE_CONFIG.categories[selectedCategory as keyof typeof ROLE_CONFIG.categories]?.map((d) => ({
+      label: d,
+      value: d,
+    })) ?? [];
 
   const batchOptions = ROLE_CONFIG.batches.map((b) => ({
     label: b,
@@ -126,9 +122,7 @@ const UserPermission = ({
   useEffect(() => {
     if (!roleMeta || !selectedCategory) return;
 
-    const matchedRole = roleMeta.roles.find(
-      (r) => r.name === selectedCategory
-    );
+    const matchedRole = roleMeta.roles.find((r) => r.name === selectedCategory);
 
     if (matchedRole) {
       setValue('roleId', matchedRole.id);
@@ -139,17 +133,13 @@ const UserPermission = ({
   useEffect(() => {
     if (!roleMeta?.roleHierarchyId) return;
 
-    router.push(
-      `/admin/user-management?roleHierarchyId=${roleMeta.roleHierarchyId}`,
-      { scroll: false }
-    );
+    router.push(`/admin/user-management?roleHierarchyId=${roleMeta.roleHierarchyId}`, {
+      scroll: false,
+    });
   }, [roleMeta?.roleHierarchyId, router]);
 
   return (
-    <form
-      onSubmit={handleSubmit(() => onNext())}
-      className="w-full flex flex-col gap-4"
-    >
+    <form onSubmit={handleSubmit(() => onNext())} className="w-full flex flex-col gap-4">
       <FormHeader
         title={mode === 'edit' ? 'Edit User' : 'Add User'}
         onBack={() => {

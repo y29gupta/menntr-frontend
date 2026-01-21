@@ -22,7 +22,7 @@ const fetchRoles = async (): Promise<RolesResponse> => {
 };
 
 type Props = {
-  selectedRole?: string;
+  selectedRole?: string | number;
   register: any;
   onRoleSelect: (roleId: number) => void;
   allRoles?: Role[];
@@ -71,7 +71,7 @@ const RoleSelector = ({ selectedRole, register, onRoleSelect, allRoles = [] }: P
       <h4 className="mb-3 text-sm font-medium text-gray-700">Select Role Hierarchy</h4>
       <div className="flex flex-wrap gap-2">
         {roleHierarchies.map((role) => {
-          const selected = selectedRole === role.name;
+          const selected = selectedRole === role.id || selectedRole === String(role.id);
           return (
             <label
               key={role.id}
@@ -87,11 +87,11 @@ const RoleSelector = ({ selectedRole, register, onRoleSelect, allRoles = [] }: P
             >
               <input
                 type="radio"
-                value={role.name}
+                value={role.id}
                 {...register('roleHierarchy')}
                 className="sr-only"
               />
-              {selected && <span className="text-purple-700">✓</span>}
+              {selected && <span className="text-purple-700 font-semibold">✓</span>}
               <span>{role.name}</span>
             </label>
           );

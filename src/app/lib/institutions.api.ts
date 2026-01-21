@@ -312,6 +312,7 @@ export function mapInstitutions(apiData: InstitutionApi[]): Institution[] {
 }
 
 export async function updateInstitution(id: number | string, payload: InstitutionFormValues) {
+  console.log(payload,"update isntitution")
   try {
     return await toastApiPromise(
       fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/institutions/${id}`, {
