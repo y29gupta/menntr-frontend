@@ -1,6 +1,7 @@
 import { ColumnDef } from '@tanstack/react-table';
-import { StudentApi } from '@/app/lib/services/students.api';
+
 import { Pencil, Trash } from 'lucide-react';
+import { StudentApi } from './student.types';
 
 export const studentColumns: ColumnDef<StudentApi>[] = [
   {
