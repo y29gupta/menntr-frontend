@@ -1,6 +1,6 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import DataTable from '@/app/components/table/DataTable';
 import { Management, ManagementColumn } from './usermanagement.column';
 
@@ -12,19 +12,10 @@ type Props = {
 };
 
 async function fetchUsers(): Promise<Management[]> {
-  const token = localStorage.getItem('auth_token');
-
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_API_BASE_URL}/institutionsadmin/user-management/users`,
-    {
-      method: 'GET',
-      credentials: 'include',
-      headers: {
-        Authorization: `Bearer ${token ?? ''}`,
-        'Content-Type': 'application/json',
-      },
-    }
-  );
+  const res = await fetch(`/api/institutionsadmin/user-management/users`, {
+    method: 'GET',
+    credentials: 'include',
+  });
 
   const result = await res.json();
 
@@ -33,8 +24,8 @@ async function fetchUsers(): Promise<Management[]> {
     name: u.name || '-',
     role: u.role || '-',
     Department: u.department || '-',
-    status: u.status === 'active' ? 'Active' : 'Inactive',
-    lastLogin: u.lastLoginAt ? u.lastLoginAt : '—',
+    status: u.status === 'active' ? 'Active' : 'Suspended',
+    lastLogin: u.lastLoginAt || '—',
   }));
 }
 
@@ -44,11 +35,48 @@ export default function ManagementTable({
   showColumnFilters,
   onEdit,
 }: Props) {
+  const queryClient = useQueryClient();
+
+  /* ---------------- FETCH USERS ---------------- */
+
   const { data = [] } = useQuery({
     queryKey: ['users'],
     queryFn: fetchUsers,
     refetchOnWindowFocus: false,
   });
+
+  /* ---------------- SOFT DELETE (SUSPEND) ---------------- */
+
+  const suspendUserMutation = useMutation({
+    mutationFn: async (userId: number) => {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/users/status/${userId}`, {
+        method: 'PATCH',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ status: 'suspended' }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to suspend user');
+      }
+
+      return data;
+    },
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['users'] });
+    },
+
+    onError: (err: any) => {
+      alert(err.message || 'Failed to suspend user');
+    },
+  });
+
+  /* ---------------- FILTER ---------------- */
 
   const columnFilters: Record<string, string> = globalFilter
     ? {
@@ -59,7 +87,7 @@ export default function ManagementTable({
       }
     : {};
 
-  const onColumnFilterChange = (_columnName: string, value: string) => {
+  const onColumnFilterChange = (_: string, value: string) => {
     onGlobalFilterChange(value);
   };
 
@@ -68,7 +96,13 @@ export default function ManagementTable({
       data={data}
       columns={ManagementColumn(
         (row) => onEdit(row),
-        (row) => console.log('Delete', row)
+        (row) => {
+          if (row.status === 'Suspended') return;
+
+          if (confirm(`Are you sure you want to suspend ${row.name}?`)) {
+            suspendUserMutation.mutate(row.id);
+          }
+        }
       )}
       columnFilters={columnFilters}
       onColumnFilterChange={onColumnFilterChange}
