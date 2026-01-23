@@ -103,14 +103,14 @@ const Page = () => {
       permissionIds: number[];
     }) => {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/institutionsadmin/create-user`,
+        `/institutionsadmin/create-user`,
 
         {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          credentials: 'include', // ✅ SEND COOKIES
+          credentials: 'include',
           body: JSON.stringify({
             payload,
           }),
@@ -268,14 +268,14 @@ const Page = () => {
                 mode={formMode}
                 onBack={() => setStep(2)}
                 onSubmit={() => {
-                  createUserMutation.mutate({
-                    email: formData.email,
-                    firstName: formData.firstName,
-                    lastName: formData.lastName,
-                    password: 'sample@123',
-                    roleId: formData.permissions?.roleId,
-                    permissionIds: formData.permissions?.permissionIds ?? [],
-                  });
+                  // createUserMutation.mutate({
+                  //   email: formData.email,
+                  //   firstName: formData.firstName,
+                  //   lastName: formData.lastName,
+                  //   password: 'sample@123',
+                  //   roleId: formData.permissions?.roleId,
+                  //   permissionIds: formData.permissions?.permissionIds ?? [],
+                  // });
                   console.log('🚀 FINAL USER PAYLOAD:', {
                     email: formData.email,
                     firstName: formData.firstName,

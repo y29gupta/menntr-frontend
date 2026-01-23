@@ -1,8 +1,50 @@
 'use client';
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
+import { useEffect, useState } from 'react';
 import DataTable from '@/app/components/table/DataTable';
 import { Management, ManagementColumn } from './usermanagement.column';
+
+/* =========================================================
+   DEBOUNCE HOOK
+========================================================= */
+
+function useDebounce<T>(value: T, delay = 500) {
+  const [debouncedValue, setDebouncedValue] = useState(value);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedValue(value), delay);
+    return () => clearTimeout(timer);
+  }, [value, delay]);
+
+  return debouncedValue;
+}
+
+/* =========================================================
+   TYPES
+========================================================= */
+
+type UsersApiResponse = {
+  data: {
+    id: string;
+    name: string;
+    email: string;
+    role: string | null;
+    department: string | null;
+    status: string;
+    lastLoginAt: string | null;
+  }[];
+  meta: {
+    isFirstPage: boolean;
+    isLastPage: boolean;
+    currentPage: number;
+    previousPage: number | null;
+    nextPage: number | null;
+    pageCount: number;
+    totalCount: number;
+    currentPageCount: number;
+  };
+};
 
 type Props = {
   globalFilter: string;
@@ -11,23 +53,9 @@ type Props = {
   onEdit: (row: Management) => void;
 };
 
-async function fetchUsers(): Promise<Management[]> {
-  const res = await fetch(`/api/institutionsadmin/user-management/users`, {
-    method: 'GET',
-    credentials: 'include',
-  });
-
-  const result = await res.json();
-
-  return (result?.data || []).map((u: any) => ({
-    id: Number(u.id),
-    name: u.name || '-',
-    role: u.role || '-',
-    Department: u.department || '-',
-    status: u.status === 'active' ? 'Active' : 'Suspended',
-    lastLogin: u.lastLoginAt || '—',
-  }));
-}
+/* =========================================================
+   COMPONENT
+========================================================= */
 
 export default function ManagementTable({
   globalFilter,
@@ -35,84 +63,106 @@ export default function ManagementTable({
   showColumnFilters,
   onEdit,
 }: Props) {
-  const queryClient = useQueryClient();
+  /* ---------------- STATE ---------------- */
 
-  /* ---------------- FETCH USERS ---------------- */
+  const [page, setPage] = useState(1);
+  const [limit] = useState(10);
+  const [columnFilters, setColumnFilters] = useState<Record<string, string>>({});
 
-  const { data = [] } = useQuery({
-    queryKey: ['users'],
+  const debouncedSearch = useDebounce(globalFilter, 500);
+  const debouncedColumnFilters = useDebounce(columnFilters, 500);
+
+  /* ---------------- RESET PAGE ON FILTER CHANGE ---------------- */
+
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedSearch, debouncedColumnFilters]);
+
+  /* ---------------- API CALL ---------------- */
+
+  const fetchUsers = async (): Promise<UsersApiResponse> => {
+    const params = new URLSearchParams();
+
+    params.set('page', String(page));
+    params.set('limit', String(limit));
+
+    if (debouncedSearch) {
+      params.set('search', debouncedSearch);
+    }
+
+    Object.entries(debouncedColumnFilters).forEach(([key, value]) => {
+      if (value) params.set(key, value);
+    });
+
+    const res = await fetch(`/api/institutionsadmin/user-management/users?${params.toString()}`, {
+      credentials: 'include',
+    });
+
+    if (!res.ok) {
+      throw new Error('Failed to fetch users');
+    }
+
+    return res.json();
+  };
+
+  /* ---------------- QUERY (FIXED FOR v5) ---------------- */
+
+  const { data, isLoading } = useQuery<UsersApiResponse>({
+    queryKey: ['users', page, debouncedSearch, debouncedColumnFilters],
     queryFn: fetchUsers,
+    placeholderData: (prev) => prev, // ✅ v5 replacement
     refetchOnWindowFocus: false,
   });
 
-  /* ---------------- SOFT DELETE (SUSPEND) ---------------- */
+  /* ---------------- MAP DATA ---------------- */
 
-  const suspendUserMutation = useMutation({
-    mutationFn: async (userId: number) => {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/users/status/${userId}`, {
-        method: 'PATCH',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ status: 'suspended' }),
-      });
+  const users: Management[] =
+    data?.data.map((u) => ({
+      id: Number(u.id),
+      name: u.name || '-',
+      role: u.role || '-',
+      Department: u.department || '-',
+      status: u.status === 'active' ? 'Active' : 'Suspended',
+      lastLogin: u.lastLoginAt || '—',
+    })) ?? [];
 
-      const data = await res.json();
+  const meta = data?.meta;
 
-      if (!res.ok) {
-        throw new Error(data.error || 'Failed to suspend user');
-      }
+  /* ---------------- COLUMN FILTER HANDLER ---------------- */
 
-      return data;
-    },
-
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['users'] });
-    },
-
-    onError: (err: any) => {
-      alert(err.message || 'Failed to suspend user');
-    },
-  });
-
-  /* ---------------- FILTER ---------------- */
-
-  const columnFilters: Record<string, string> = globalFilter
-    ? {
-        name: globalFilter,
-        role: globalFilter,
-        Department: globalFilter,
-        status: globalFilter,
-      }
-    : {};
-
-  const onColumnFilterChange = (_: string, value: string) => {
-    onGlobalFilterChange(value);
+  const onColumnFilterChange = (column: string, value: string) => {
+    setColumnFilters((prev) => ({
+      ...prev,
+      [column]: value,
+    }));
   };
+
+  /* ---------------- LOADING ---------------- */
+
+  if (isLoading) {
+    return <div className="text-sm text-gray-500">Loading users…</div>;
+  }
+
+  /* ---------------- TABLE ---------------- */
 
   return (
     <DataTable<Management>
-      data={data}
+      data={users}
       columns={ManagementColumn(
         (row) => onEdit(row),
-        (row) => {
-          if (row.status === 'Suspended') return;
-
-          if (confirm(`Are you sure you want to suspend ${row.name}?`)) {
-            suspendUserMutation.mutate(row.id);
-          }
-        }
+        () => {}
       )}
       columnFilters={columnFilters}
       onColumnFilterChange={onColumnFilterChange}
       showColumnFilters={showColumnFilters}
-      currentPage={1}
-      pageCount={1}
-      onPreviousPage={() => {}}
-      onNextPage={() => {}}
-      canPreviousPage={false}
-      canNextPage={false}
+      currentPage={meta?.currentPage ?? 1}
+      pageCount={meta?.pageCount ?? 1}
+      canPreviousPage={!meta?.isFirstPage}
+      canNextPage={!meta?.isLastPage}
+      onPreviousPage={() => setPage((p) => Math.max(p - 1, 1))}
+      onNextPage={() => {
+        if (meta?.nextPage) setPage(meta.nextPage);
+      }}
     />
   );
 }

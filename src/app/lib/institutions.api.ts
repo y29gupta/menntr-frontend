@@ -286,7 +286,7 @@ export async function fetchInstitutions(
   if (filters.planCode) queryParams.append('planCode', filters.planCode);
   if (filters.name) queryParams.append('name', filters.name);
 
-  const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/institutions${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+  const url = `/api/institutions${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
 
   const res = await fetch(url, {
     method: 'GET',

@@ -23,7 +23,7 @@ export type FeaturesResponse = {
   data: Feature[];
 };
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+
 
 /**
  * Fetch all modules for the institution
