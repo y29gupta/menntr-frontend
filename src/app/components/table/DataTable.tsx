@@ -3,8 +3,13 @@ import {
   flexRender,
   getCoreRowModel,
   RowData,
+  TableMeta,
   useReactTable,
 } from '@tanstack/react-table';
+
+export type DataTableMeta<TData extends RowData> = TableMeta<TData> & {
+  onRowClick?: (row: TData) => void;
+};
 
 interface DataTableProps<T extends RowData> {
   columns: ColumnDef<T, any>[];
@@ -19,6 +24,7 @@ interface DataTableProps<T extends RowData> {
   onNextPage: () => void;
   canPreviousPage: boolean;
   canNextPage: boolean;
+  meta?: DataTableMeta<T>;
 }
 
 function DataTable<T extends RowData>({
@@ -33,11 +39,13 @@ function DataTable<T extends RowData>({
   onNextPage,
   canPreviousPage,
   canNextPage,
+  meta,
 }: DataTableProps<T>) {
   const table = useReactTable({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
+    meta,
   });
 
   return (
@@ -85,29 +93,42 @@ function DataTable<T extends RowData>({
         </thead>
 
         <tbody>
-          {table.getRowModel().rows.map((row) => (
-            <tr key={row.id} className="border-b border-gray-200 last:border-none">
-              {row.getVisibleCells().map((cell) => (
-                <td key={cell.id} className="px-4 py-3 whitespace-nowrap">
-                  {/* {flexRender(cell.column.columnDef.cell, cell.getContext())} */}
-                  {(() => {
-                    const rendered = flexRender(cell.column.columnDef.cell, cell.getContext());
+          {table.getRowModel().rows.map((row) => {
+            const onRowClick = table.options.meta?.onRowClick;
+            const hasRowClick = typeof onRowClick === 'function';
 
-                    if (
-                      typeof rendered === 'object' &&
-                      rendered !== null &&
-                      !Array.isArray(rendered) &&
-                      !('$$typeof' in rendered)
-                    ) {
-                      return (rendered as any)?.name ?? '';
-                    }
+            return (
+              <tr
+                key={row.id}
+                onClick={hasRowClick ? () => onRowClick(row.original) : undefined}
+                title={hasRowClick ? 'Click to view performance' : undefined}
+                className={`border-b border-gray-200 last:border-none transition-colors duration-200
+    ${hasRowClick ? 'cursor-pointer hover:bg-purple-50' : ''}
+  `}
+                // className="border-b border-gray-200 last:border-none"
+              >
+                {row.getVisibleCells().map((cell) => (
+                  <td key={cell.id} className="px-4 py-3 whitespace-nowrap">
+                    {/* {flexRender(cell.column.columnDef.cell, cell.getContext())} */}
+                    {(() => {
+                      const rendered = flexRender(cell.column.columnDef.cell, cell.getContext());
 
-                    return rendered;
-                  })()}
-                </td>
-              ))}
-            </tr>
-          ))}
+                      if (
+                        typeof rendered === 'object' &&
+                        rendered !== null &&
+                        !Array.isArray(rendered) &&
+                        !('$$typeof' in rendered)
+                      ) {
+                        return (rendered as any)?.name ?? '';
+                      }
+
+                      return rendered;
+                    })()}
+                  </td>
+                ))}
+              </tr>
+            );
+          })}
 
           {table.getRowModel().rows.length === 0 && (
             <tr>

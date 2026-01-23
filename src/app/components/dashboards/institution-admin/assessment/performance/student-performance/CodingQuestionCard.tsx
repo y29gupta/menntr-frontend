@@ -35,11 +35,11 @@ export function CodingQuestionCard({ q }: { q: QuestionReport }) {
       {/* ================= HEADER ================= */}
       <div className="flex justify-between items-start gap-4">
         <div className="space-y-2">
-          <h3 className="text-base font-semibold text-[#101828]">
+          <h3 className="text-[16px] font-semibold text-[#2F3B52]">
             {q.questionNo}: {q.title}
           </h3>
 
-          <div className="text-sm text-[#667085] flex items-center gap-2">
+          <div className="text-sm text-[#5F636F] flex items-center gap-2">
             <span>{q.totalMarks} Mark</span>
             <span>|</span>
             <span>Domain</span>
@@ -50,7 +50,7 @@ export function CodingQuestionCard({ q }: { q: QuestionReport }) {
 
         {/* ===== DIFFICULTY BADGE (FIXED) ===== */}
         <div className="flex flex-col items-end gap-1">
-          <span className="text-sm text-[#667085]">Mandatory</span>
+          <span className="text-sm text-[#5F636F]">Mandatory</span>
 
           <span
             className={`rounded-md px-2 py-0.5 text-sm font-medium 
@@ -62,15 +62,15 @@ export function CodingQuestionCard({ q }: { q: QuestionReport }) {
         </div>
       </div>
 
-      <hr className="border-[#EAECF0]" />
+      <hr className="border-[#DBE3E9]" />
 
       {/* ================= SUBMITTED CODE ================= */}
-      <div className="space-y-3">
-        <p className="text-sm font-semibold text-[#344054]">Submitted code</p>
+      <div className="space-y-2">
+        <p className="text-[16px] font-semibold text-[#2F3B52]">Submitted code</p>
 
-        <p className="text-sm text-[#667085]">{q.language}</p>
+        <p className="text-[14px] text-[#5F636F]">{q.language}</p>
 
-        <pre className="rounded-lg bg-[#F9FAFB] p-4 text-sm leading-relaxed overflow-x-auto text-[#101828]">
+        <pre className="rounded-lg bg-[#EFEFEF] p-4 text-sm leading-relaxed overflow-x-auto text-[#101828]">
           {q.code}
         </pre>
       </div>
@@ -78,28 +78,28 @@ export function CodingQuestionCard({ q }: { q: QuestionReport }) {
       {/* ================= RESULT SECTION ================= */}
       <div className="space-y-1">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <p className="text-sm font-medium text-[#344054]">Test case results</p>
-          <p className="text-sm font-medium text-[#344054]">Result status</p>
+          <p className="text-[16px] font-medium text-[#2F3B52]">Test case results</p>
+          <p className="text-[16px] font-medium text-[#2F3B52]">Result status</p>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {/* Test cases */}
-          <div className="rounded-lg border border-[#EAECF0] px-4 py-2 space-y-1">
-            <p className="text-sm text-[#101828]">
+          <div className="rounded-lg border border-[#DBE3E9] px-4 py-2 space-y-1">
+            <p className="text-[16px] text-[#5F636F]">
               Test Cases Passed:{' '}
               <span className="font-semibold">
                 {q.testPassed}/{q.testTotal}
               </span>
             </p>
 
-            <p className="text-sm text-[#667085]">Execution Time: 1.2s</p>
+            <p className="text-[16px] text-[#5F636F]">Execution Time: 1.2s</p>
           </div>
 
           {/* Status */}
-          <div className="rounded-lg border border-[#EAECF0] px-4 py-2 space-y-1">
-            <p className={`text-sm font-semibold ${statusColor}`}>{status}</p>
+          <div className="rounded-lg border border-[#DBE3E9] px-4 py-2 space-y-1">
+            <p className={`text-[16px] font-semibold ${statusColor}`}>{status}</p>
 
-            <p className="text-sm text-[#101828]">
+            <p className="text-[16px] text-[#5F636F]">
               Score:{' '}
               <span className="font-semibold">
                 {q.marksObtained}/{q.totalMarks}
