@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import ActiveAssessmentsTable from './ActiveAssessmentsTable';
 import { useQuery } from '@tanstack/react-query';
 import { assessmentApi } from '../assessment.service';
-import { AssessmentRow } from './active.columns';
+import { AssessmentRow } from '../assessment.types';
 
 // type TabsCount = {
 //   Active: number;

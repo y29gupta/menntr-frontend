@@ -91,3 +91,24 @@ body {
 .no-scrollbar::-webkit-scrollbar {
   display: none; /* Chrome, Safari */
 }
+
+/* Thin scrollbar */
+.scrollbar-thin {
+  scrollbar-width: thin;              /* Firefox */
+  scrollbar-color: #c4b5fd transparent;
+}
+
+/* Chrome, Edge, Safari */
+.scrollbar-thin::-webkit-scrollbar {
+  width: 0px;
+  height: 3px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background-color: #c4b5fd;          /* violet-300 */
+  border-radius: 9999px;
+}

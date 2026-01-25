@@ -25,3 +25,6 @@ export interface StudentListResponse {
   meta: StudentMeta;
   data: StudentApi[];
 }
+
+
+

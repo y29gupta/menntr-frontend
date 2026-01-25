@@ -1,7 +1,8 @@
 'use client';
 
 import DataTable from '@/app/components/table/DataTable';
-import { assessmentColumns, AssessmentRow } from './active.columns';
+import { assessmentColumns } from './active.columns';
+import { AssessmentRow } from '../assessment.types';
 
 export default function ActiveAssessmentsTable({
   data,

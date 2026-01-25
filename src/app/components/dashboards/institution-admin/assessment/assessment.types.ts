@@ -14,16 +14,80 @@ export interface Assessment {
   status: AssessmentStatus;
 }
 
+
+// export type AssessmentRow = {
+//   id: string;
+//   assessmentName: string;
+//   category: string;
+//   departmentBatch: string;
+//   questions: number;
+//   publishedOn: string;
+//   expiryOn: string;
+//   lastEdited: string;
+//   status: string;
+// };
+
+// assessment.types.ts
+
+export type AssessmentMeta = {
+  isFirstPage: boolean;
+  isLastPage: boolean;
+  currentPage: number;
+  previousPage: number | null;
+  nextPage: number | null;
+  pageCount: number;
+  totalCount: number;
+  pageSize: number;
+};
+
+export type Batch = {
+  id: number;
+  institution_id: number;
+  name: string;
+  code: string;
+  category_role_id: number;
+  department_role_id: number;
+  academic_year: number;
+  semester: number | null;
+  start_date: string; // ISO date
+  end_date: string;   // ISO date
+  coordinator_id: string | null;
+  metadata: Record<string, unknown>;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+};
+export type AssessmentBatch = {
+  assessment_id: string;
+  batch_id: number;
+  assigned_by: string;
+  assigned_at: string; // ISO datetime
+  batch: Batch;
+};
+
+
 export type AssessmentRow = {
   id: string;
-  assessmentName: string;
-  category: string;
-  departmentBatch: string;
-  questions: number;
-  publishedOn: string;
-  expiryOn: string;
-  lastEdited: string;
-  status: string;
+  title: string;
+  status: 'active' | 'draft' | 'completed' | 'closed';
+  created_at: string;
+  updated_at: string;
+  published_at: string;
+  total_marks: number;
+  duration_minutes: number;
+  metadata?: {
+    category?: string;
+    question_type?: string;
+    assessment_type?: string;
+  };
+  tags?: string[];
+  questions?: any[];
+ batches?: AssessmentBatch[];
+};
+
+export type AssessmentListResult = {
+  rows: AssessmentRow[];
+  meta: AssessmentMeta;
 };
 
 

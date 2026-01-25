@@ -1,13 +1,14 @@
 'use client';
 
 import DataTable from '@/app/components/table/DataTable';
-import { assessmentColumns, AssessmentRow } from '../active/active.columns';
+// import { assessmentColumns } from '../active/active.columns';
 import { DraftColumns } from './draft.columns';
 import { useState } from 'react';
 import ConfirmModal from '@/app/ui/modals/ConfirmModal';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { assessmentApi } from '../assessment.service';
 import { message } from 'antd';
+import { AssessmentRow } from '../assessment.types';
 
 export default function DraftAssessmentsTable({
   data,

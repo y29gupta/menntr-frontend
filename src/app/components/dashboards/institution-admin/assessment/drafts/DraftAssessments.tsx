@@ -5,7 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { assessmentApi } from '../assessment.service';
 // import DraftAssessmentCard from './DraftAssessmentsCard';
 import DraftAssessmentsTable from './DraftAssessmentTable';
-import { AssessmentRow } from '../active/active.columns';
+import { AssessmentRow } from '../assessment.types';
 
 type props = {
   // setTabsCount: React.Dispatch<React.SetStateAction<TabsCount>>;
