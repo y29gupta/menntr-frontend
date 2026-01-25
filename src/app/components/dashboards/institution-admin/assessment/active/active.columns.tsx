@@ -1,18 +1,7 @@
 import { ColumnDef } from '@tanstack/react-table';
 import { EyeOutlined, BarChartOutlined, EditOutlined } from '@ant-design/icons';
 import { useRouter } from 'next/navigation';
-
-export type AssessmentRow = {
-  id: string;
-  assessmentName: string;
-  category: string;
-  departmentBatch: string;
-  questions: number;
-  publishedOn: string;
-  expiryOn: string;
-  lastEdited: string;
-  status: string;
-};
+import { AssessmentRow } from '../assessment.types';
 
 export const assessmentColumns: ColumnDef<AssessmentRow>[] = [
   { accessorKey: 'assessmentName', header: 'Assessment name' },

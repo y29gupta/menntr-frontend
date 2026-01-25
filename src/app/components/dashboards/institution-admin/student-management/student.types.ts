@@ -1,4 +1,4 @@
-export type StudentApi = {
+export interface StudentApi {
   id: string;
   studentName: string;
   email: string;
@@ -6,9 +6,22 @@ export type StudentApi = {
   category: string;
   department: string;
   batch: string;
-  section: string;
   assessmentsTaken: number;
-  averageScore: number | null;
   status: 'active' | 'inactive';
   lastLogin: string;
-};
+}
+
+export interface StudentMeta {
+  totalCount: number;
+  currentPage: number;
+  pageCount: number;
+  isFirstPage: boolean;
+  isLastPage: boolean;
+  nextPage?: number | null;
+  previousPage?: number | null;
+}
+
+export interface StudentListResponse {
+  meta: StudentMeta;
+  data: StudentApi[];
+}

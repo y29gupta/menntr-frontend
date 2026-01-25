@@ -2,10 +2,13 @@ import { ColumnDef } from '@tanstack/react-table';
 
 import { Pencil, Trash } from 'lucide-react';
 import { StudentApi } from './student.types';
+import Image from 'next/image';
+import { redirect, useRouter } from 'next/navigation';
 
 export const studentColumns: ColumnDef<StudentApi>[] = [
   {
     header: 'Student name',
+    accessorKey: 'studentName',
     cell: ({ row }) => (
       <div className="flex flex-col">
         <span className="text-sm font-medium text-gray-900">{row.original.studentName}</span>
@@ -19,6 +22,7 @@ export const studentColumns: ColumnDef<StudentApi>[] = [
   },
   {
     header: 'Category',
+    accessorKey: 'category',
     cell: ({ row }) => (
       <span className="inline-flex px-2 py-[2px] rounded-full text-xs font-medium bg-[#EEF2FF] text-[#4F46E5]">
         {row.original.category || '-'}
@@ -75,8 +79,16 @@ export const studentColumns: ColumnDef<StudentApi>[] = [
     header: 'Actions',
     cell: () => (
       <div className="flex items-center gap-3">
-        <Pencil size={16} className="cursor-pointer text-gray-500 hover:text-gray-700" />
-        <Trash size={16} className="cursor-pointer text-gray-500 hover:text-gray-700" />
+        <Image
+          width={16}
+          height={16}
+          src="/assets/performanceIcon.svg"
+          alt="performanceIcon"
+          onClick={(e) => e.stopPropagation()}
+        />
+        <Image width={18} height={18} src="/assets/deleteIcon.svg" alt="deleteIcon" />
+        {/* <Pencil size={16} className="cursor-pointer text-gray-500 hover:text-gray-700" /> */}
+        {/* <Trash size={16} className="cursor-pointer text-gray-500 hover:text-gray-700" /> */}
       </div>
     ),
   },

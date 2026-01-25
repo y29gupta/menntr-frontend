@@ -8,8 +8,8 @@
 //     }
 // }
 import { api } from "@/app/lib/api";
-import { AssessmentQuestionResponse, getAssessmentListResponse } from "./assessment.schema";
-import { AssessmentAccessPayload, AssessmentMetaResponse, CreateAssessmentPayload, CreateCodingQuestionPayload, QuestionMetaType, UpdateQuestionPayload } from "./assessment.types";
+// import { AssessmentQuestionResponse, getAssessmentListResponse } from "./assessment.schema";
+import { AssessmentAccessPayload, AssessmentMetaResponse, AssessmentQuestionResponse, CreateAssessmentPayload, CreateCodingQuestionPayload, getAssessmentListResponse, QuestionMetaType, UpdateQuestionPayload } from "./assessment.types";
 
 export type AssessmentTab = "active" | "draft" | "closed";
 

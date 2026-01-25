@@ -98,6 +98,7 @@ import { studentColumns } from './student.columns';
 import { useStudents } from '@/app/hooks/useStudents';
 import StudentIcon from '@/app/components/icons/StudentIcon';
 import { Plus, Upload } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 export default function StudentManagementPage() {
   const [page, setPage] = useState(1);
@@ -105,30 +106,48 @@ export default function StudentManagementPage() {
   const [showFilters, setShowFilters] = useState(true);
 
   const [searchInput, setSearchInput] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [pendingFilters, setPendingFilters] = useState<Record<string, string>>({});
 
-  const { data, isLoading } = useStudents(page, filters);
+  const { data, isLoading } = useStudents(page, debouncedSearch, filters);
 
+  const router = useRouter();
+
+  const meta = data?.meta ?? {
+    totalCount: 0,
+    currentPage: 1,
+    pageCount: 1,
+    isFirstPage: true,
+    isLastPage: true,
+  };
+
+  const students = data?.data ?? [];
   useEffect(() => {
     const timer = setTimeout(() => {
-      setFilters((prev) => ({
-        ...prev,
-        search: searchInput,
-      }));
-      setPage(1);
+      setDebouncedSearch(searchInput);
+      setPage(1); // reset page only
     }, 500);
 
     return () => clearTimeout(timer);
   }, [searchInput]);
 
-  if (isLoading || !data) return null;
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setFilters(pendingFilters);
+      setPage(1);
+    }, 500);
 
-  const { meta, data: students } = data;
+    return () => clearTimeout(timer);
+  }, [pendingFilters]);
+
+  const redirectToPerformancePage = (student: { id: string }) => {
+    router.push(`/admin/student-management/${student.id}/performance`);
+  };
 
   return (
     <div
-      className="w-full space-y-4 p-4 rounded-2xl backdrop-blur-[100px]
-      shadow-[0px_0px_8px_0px_rgba(15,23,42,0.12)]
-      bg-[#0F172A05]"
+      className="w-full space-y-4 p-4 rounded-2xl 
+     "
     >
       {/* Header (UNCHANGED UI) */}
       <div>
@@ -163,7 +182,8 @@ export default function StudentManagementPage() {
         <input
           className="w-full sm:max-w-80 px-3 py-2 border border-gray-300 rounded-md text-sm"
           placeholder="Search for students"
-          onChange={(e) => setFilters((prev) => ({ ...prev, search: e.target.value }))}
+          value={searchInput}
+          onChange={(e) => setSearchInput(e.target.value)}
         />
 
         <button
@@ -180,8 +200,16 @@ export default function StudentManagementPage() {
           columns={studentColumns}
           data={students}
           showColumnFilters={showFilters}
-          columnFilters={filters}
-          onColumnFilterChange={(key, value) => setFilters((prev) => ({ ...prev, [key]: value }))}
+          columnFilters={pendingFilters}
+          meta={{
+            onRowClick: redirectToPerformancePage,
+          }}
+          onColumnFilterChange={(key, value) => {
+            setPendingFilters((prev) => ({
+              ...prev,
+              [key]: value,
+            }));
+          }}
           currentPage={meta.currentPage}
           pageCount={meta.pageCount}
           canPreviousPage={!meta.isFirstPage}

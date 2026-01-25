@@ -10,7 +10,7 @@ import ActiveAssessments from './active/ActiveAssessments';
 import DraftAssessments from './drafts/DraftAssessments';
 
 import { assessmentApi } from './assessment.service';
-import { AssessmentRow } from './active/active.columns';
+import { AssessmentRow } from './assessment.types';
 
 type UrlTab = 'active' | 'drafts' | 'completed';
 type UiTab = 'Active' | 'Drafts' | 'Completed';
@@ -64,6 +64,7 @@ export default function AssessmentContainer() {
   });
 
   const [activeQuery, draftQuery, completedQuery] = results;
+  console.log(activeQuery, 'result');
 
   const activeData = activeQuery.data ?? [];
   const draftData = draftQuery.data ?? [];
