@@ -8,19 +8,36 @@
 //     }
 // }
 import { api } from "@/app/lib/api";
-import { AssessmentQuestionResponse, getAssessmentListResponse } from "./assessment.schema";
-import { AssessmentAccessPayload, AssessmentMetaResponse, CreateAssessmentPayload, CreateCodingQuestionPayload, QuestionMetaType, UpdateQuestionPayload } from "./assessment.types";
+// import { AssessmentQuestionResponse, getAssessmentListResponse } from "./assessment.schema";
+import { AssessmentAccessPayload, AssessmentListResult, AssessmentMetaResponse, AssessmentQuestionResponse, CreateAssessmentPayload, CreateCodingQuestionPayload, getAssessmentListResponse, QuestionMetaType, UpdateQuestionPayload } from "./assessment.types";
 
 export type AssessmentTab = "active" | "draft" | "closed";
 
 export const assessmentApi = {
-  getAssessmentList: async (
-    tab: AssessmentTab
-  ): Promise<getAssessmentListResponse[]> => {
-    const res = await api.get("/assessments", {
-      params: { tab }
+  // getAssessmentList: async (
+  //   tab: AssessmentTab
+  // ): Promise<getAssessmentListResponse[]> => {
+  //   const res = await api.get("/assessments", {
+  //     params: { tab }
+  //   });
+  //   return res.data;
+  // },
+
+   getAssessmentList: async (
+    tab: 'active' | 'draft' | 'closed',
+    page = 1
+  ): Promise<AssessmentListResult> => {
+    const res = await api.get('/assessments', {
+      params: {
+        tab,
+        page,
+      },
     });
-    return res.data;
+
+    return {
+      rows: res.data.data, // 👈 array for table
+      meta: res.data.meta, // 👈 pagination
+    };
   },
    getAssessmentMeta: async (): Promise<AssessmentMetaResponse> => {
     const res = await api.get("/assessments/meta");

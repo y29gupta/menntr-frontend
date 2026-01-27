@@ -4,43 +4,92 @@ import { Tooltip } from 'antd';
 import { Trash2 } from 'lucide-react';
 import { redirect } from 'next/navigation';
 import React from 'react';
-
-export type AssessmentRow = {
-  id: string;
-  assessmentName: string;
-  category: string;
-  departmentBatch: string;
-  questions: number;
-  publishedOn: string;
-  expiryOn: string;
-  lastEdited: string;
-  status: string;
-};
+import { AssessmentRow } from '../assessment.types';
+import { formatDate } from '@/app/utils/formatDate';
 
 export const DraftColumns = (
   setDeleteAssessmentId: React.Dispatch<React.SetStateAction<string | null>>,
   setDeleteModalOpen: React.Dispatch<React.SetStateAction<boolean>>
 ): ColumnDef<AssessmentRow>[] => [
-  { accessorKey: 'assessmentName', header: 'Assessment name' },
+  { accessorKey: 'title', header: 'Assessment name' },
   {
-    accessorKey: 'category',
+    accessorKey: 'metadata.category',
     header: 'Category',
     cell: ({ row }) => (
       <span
         className={`px-2 py-1 rounded-full text-[#404345] text-xs font-medium ${
-          row.original.category === 'Aptitude' ? 'bg-[#F4F6CE] ' : 'bg-[#CEE5F6]'
+          row.original.metadata?.category === 'Aptitude' ? 'bg-[#F4F6CE] ' : 'bg-[#CEE5F6]'
         }`}
       >
-        {row.original.category}
+        {row.original.metadata?.category}
       </span>
     ),
   },
-  { accessorKey: 'departmentBatch', header: 'Department / Batch' },
-  { accessorKey: 'questions', header: 'Questions' },
-  { accessorKey: 'publishedOn', header: 'Published On' },
-  { accessorKey: 'expiryOn', header: 'Expiry On' },
-  { accessorKey: 'lastEdited', header: 'Last Edited' },
+  // { accessorKey: 'departmentBatch', header: 'Department / Batch' },
+  {
+    accessorKey: 'batches',
+    header: 'Department / Batch',
+    cell: ({ row }) => {
+      const batches = row.original.batches;
+
+      if (!batches || batches.length === 0) {
+        return <span>-</span>;
+      }
+
+      return (
+        <div className="flex flex-col gap-1">
+          {batches.map((b) => (
+            <span key={b.batch_id}>{b.batch.name}</span>
+          ))}
+        </div>
+      );
+    },
+  },
+  // { accessorKey: 'questions', header: 'Questions' },
+  {
+    accessorKey: 'questions',
+    header: 'Questions',
+    cell: ({ row }) => {
+      console.log(row.original.questions?.length, 'ques');
+      return (
+        <>
+          <span>{row.original.questions?.length}</span>
+        </>
+      );
+    },
+  },
+  // { accessorKey: 'publishedOn', header: 'Published On' },
+  {
+    accessorKey: 'published_at',
+    header: 'Published On',
+    accessorFn: (row) => row.published_at,
+    cell: ({ getValue }) => formatDate(getValue<string>()),
+    // cell: ({ row }) => {
+    //   console.log(typeof row.original.created_at, 'ques');
+    //   return (
+    //     <>
+    //       <span>{row.original.questions?.length}</span>
+    //     </>
+    //   );
+    // },
+  },
+  // { accessorKey: 'expiryOn', header: 'Expiry On' },
+  {
+    accessorKey: 'updated_at',
+    header: 'Expiry On',
+    accessorFn: (row) => row.updated_at,
+    cell: ({ getValue }) => formatDate(getValue<string>()),
+  },
+  // { accessorKey: 'lastEdited', header: 'Last Edited' },
+
+  {
+    accessorKey: 'updated_at',
+    header: 'Last Edited',
+    accessorFn: (row) => row.updated_at,
+    cell: ({ getValue }) => formatDate(getValue<string>()),
+  },
   // { accessorKey: 'status', header: 'Status' },
+
   {
     id: 'actions',
     header: 'Actions',

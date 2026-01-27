@@ -14,7 +14,7 @@ function PerformanceSection() {
     },
   });
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col border gap-4">
       <QuestionPerformance data={questionWiseData} />
       <CandidatePerformanceHeader
         search={search}

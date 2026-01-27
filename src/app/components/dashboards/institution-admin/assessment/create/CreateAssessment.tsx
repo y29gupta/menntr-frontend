@@ -132,15 +132,8 @@ export default function CreateAssessment({ mode = 'create', editAssessmentId }: 
 
     setAssessmentId(assessmentResponse.id);
     form.setValue('title', assessmentResponse.title, { shouldDirty: false });
-
-    // form.setValue('title', assessmentResponse.title);
     form.setValue('description', assessmentResponse.description ?? '');
-    // form.setValue('category', assessmentResponse.metadata?.category);
-    // form.setValue(
-    //   'AssessmentType',
-    //   toTitleCase(assessmentResponse.metadata?.assessment_type) ?? ''
-    // );
-    // form.setValue('questionType', assessmentResponse.metadata?.question_type.toUpperCase());
+
     form.setValue('category', assessmentResponse.metadata?.category ?? '', {
       shouldDirty: false,
     });

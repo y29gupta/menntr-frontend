@@ -84,7 +84,7 @@ const QuestionPerformance = ({ data }: Props) => {
         <div
           className=" h-[260px] sm:h-[420px]"
           style={{
-            minWidth: `${data.length * 44}px`, // 👈 THIS LINE WAS MISSING
+            minWidth: `${data.length * 44}px`,
           }}
         >
           <ResponsiveContainer width="100%" height="100%">

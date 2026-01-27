@@ -10,7 +10,7 @@ import ActiveAssessments from './active/ActiveAssessments';
 import DraftAssessments from './drafts/DraftAssessments';
 
 import { assessmentApi } from './assessment.service';
-import { AssessmentRow } from './active/active.columns';
+import { AssessmentListResult, AssessmentRow } from './assessment.types';
 
 type UrlTab = 'active' | 'drafts' | 'completed';
 type UiTab = 'Active' | 'Drafts' | 'Completed';
@@ -50,24 +50,29 @@ export default function AssessmentContainer() {
     queries: [
       {
         queryKey: ['assessments', 'active'],
-        queryFn: (): Promise<AssessmentRow[]> => assessmentApi.getAssessmentList('active'),
+        queryFn: (): Promise<AssessmentListResult> => assessmentApi.getAssessmentList('active'),
       },
       {
         queryKey: ['assessments', 'drafts'],
-        queryFn: (): Promise<AssessmentRow[]> => assessmentApi.getAssessmentList('draft'),
+        queryFn: (): Promise<AssessmentListResult> => assessmentApi.getAssessmentList('draft'),
       },
       {
         queryKey: ['assessments', 'completed'],
-        queryFn: (): Promise<AssessmentRow[]> => assessmentApi.getAssessmentList('closed'),
+        queryFn: (): Promise<AssessmentListResult> => assessmentApi.getAssessmentList('closed'),
       },
     ],
   });
 
   const [activeQuery, draftQuery, completedQuery] = results;
+  console.log(activeQuery, 'result');
 
-  const activeData = activeQuery.data ?? [];
-  const draftData = draftQuery.data ?? [];
-  const completedData = completedQuery.data ?? [];
+  // const activeData = activeQuery.data ?? [];
+  // const draftData = draftQuery.data ?? [];
+  // const completedData = completedQuery.data ?? [];
+
+  const activeData = activeQuery.data?.rows ?? [];
+  const draftData = draftQuery.data?.rows ?? [];
+  const completedData = completedQuery.data?.rows ?? [];
 
   const tabsCount = useMemo(
     () => ({
@@ -87,7 +92,7 @@ export default function AssessmentContainer() {
   };
 
   return (
-    <div className="flex w-full h-full rounded-2xl p-4 shadow-[0_0_8px_0_rgba(15,23,42,0.12)] flex-col">
+    <div className="flex  w-full h-full rounded-2xl p-4 shadow-[0_0_8px_0_rgba(15,23,42,0.12)] flex-col">
       <AssessmentHeader
         activeTab={activeTab}
         onTabChange={handleTabChange}

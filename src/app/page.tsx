@@ -87,7 +87,7 @@ export default function Page() {
                 image="/assets/studentIcon.png"
                 buttonText="Continue as Student"
                 // onClick={() => router.push('/login?role=student')}
-                redirect="/login?role=student"
+                redirect="/login?role=Student"
               />
 
               <CampusUserCard
