@@ -312,7 +312,7 @@ export function mapInstitutions(apiData: InstitutionApi[]): Institution[] {
 }
 
 export async function updateInstitution(id: number | string, payload: InstitutionFormValues) {
-  console.log(payload,"update isntitution")
+  console.log(payload, 'update isntitution');
   try {
     return await toastApiPromise(
       fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/institutions/${id}`, {
@@ -386,7 +386,7 @@ export const updateCategory = async (categoryId: string, payload: CreateCategory
 
 export const getDepartments = async (): Promise<DepartmentApiResponse> => {
   const res = await api.get(`/organization/departments`);
-  console.log(res,"department list")
+  console.log(res, 'department list');
   return res.data;
 };
 

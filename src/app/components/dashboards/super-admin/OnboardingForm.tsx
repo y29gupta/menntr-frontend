@@ -2,10 +2,7 @@
 
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import {
-  InstitutionFormValues,
-  institutionSchema,
-} from '@/app/lib/institution';
+import { InstitutionFormValues, institutionSchema } from '@/app/lib/institution';
 import { Button } from 'antd';
 import CheckedIcon from '../../icons/CheckedIcon';
 import { Check } from 'lucide-react';
@@ -17,12 +14,7 @@ type Props = {
   onSubmitForm: (data: InstitutionFormValues) => void;
 };
 
-export default function OnboardingForm({
-  mode,
-  defaultValues,
-  onCancel,
-  onSubmitForm,
-}: Props) {
+export default function OnboardingForm({ mode, defaultValues, onCancel, onSubmitForm }: Props) {
   const {
     register,
     handleSubmit,
@@ -41,12 +33,7 @@ export default function OnboardingForm({
   });
 
   const planFeatures: Record<'BASIC' | 'PREMIUM', string[]> = {
-    BASIC: [
-      'User & Role ',
-      'Organization Structure',
-      'Student ',
-      'Assessment Management',
-    ],
+    BASIC: ['User & Role ', 'Organization Structure', 'Student ', 'Assessment Management'],
     PREMIUM: [
       'User & Role Management',
       'Organization Structure',
@@ -77,10 +64,7 @@ export default function OnboardingForm({
       {/* BACK */}
       <div className="flex w-full justify-between">
         <h1 className="flex items-center gap-2 whitespace-nowrap text-sm font-semibold text-gray-800 sm:text-base lg:text-lg">
-          <button
-            onClick={onCancel}
-            className="mb-4 flex gap-2 text-sm text-gray-500"
-          >
+          <button onClick={onCancel} className="mb-4 flex gap-2 text-sm text-gray-500">
             <img src="/Go-back.svg" alt="" className="cursor-pointer" />
             Go back to dashboard
           </button>
@@ -113,35 +97,23 @@ export default function OnboardingForm({
           <div className="w-full max-w-[462px] p-2">
             <div className="space-y-6">
               <div>
-                <label className="text-[16px] text-[#0F172A]">
-                  Institution Name
-                </label>
+                <label className="text-[16px] text-[#0F172A]">Institution Name</label>
                 <input
                   {...register('name')}
                   className="w-full border-b border-gray-300 py-2 focus:outline-none"
                   placeholder="ABC College"
                 />
-                {errors.name && (
-                  <p className="text-xs text-red-500">
-                    {errors.name.message}
-                  </p>
-                )}
+                {errors.name && <p className="text-xs text-red-500">{errors.name.message}</p>}
               </div>
 
               <div>
-                <label className="text-sm text-[#0F172A]">
-                  Institution Code
-                </label>
+                <label className="text-sm text-[#0F172A]">Institution Code</label>
                 <input
                   {...register('code')}
                   className="w-full border-b border-gray-300 py-2 focus:outline-none"
                   placeholder="ABC-ENG-001"
                 />
-                {errors.code && (
-                  <p className="text-xs text-red-500">
-                    {errors.code.message}
-                  </p>
-                )}
+                {errors.code && <p className="text-xs text-red-500">{errors.code.message}</p>}
               </div>
 
               <div>
@@ -152,34 +124,26 @@ export default function OnboardingForm({
                   placeholder="ABC-ENG-001"
                 />
                 {errors.subdomain && (
-                  <p className="text-xs text-red-500">
-                    {errors.subdomain.message}
-                  </p>
+                  <p className="text-xs text-red-500">{errors.subdomain.message}</p>
                 )}
               </div>
 
               <div>
-                <label className="text-sm text-[#0F172A]">
-                  Contact Email
-                </label>
+                <label className="text-sm text-[#0F172A]">Contact Email</label>
                 <input
                   {...register('contact_email')}
                   className="w-full border-b border-gray-300 py-2 focus:outline-none"
                   placeholder="admin@abc.edu"
                 />
                 {errors.contact_email && (
-                  <p className="text-xs text-red-500">
-                    {errors.contact_email.message}
-                  </p>
+                  <p className="text-xs text-red-500">{errors.contact_email.message}</p>
                 )}
               </div>
             </div>
           </div>
 
           <div className="w-full max-w-[500px] px-4 py-2">
-            <h3 className="mb-4 text-[18px] font-medium text-[#0F172A]">
-              Select Plan / Modules
-            </h3>
+            <h3 className="mb-4 text-[18px] font-medium text-[#0F172A]">Select Plan / Modules</h3>
 
             <div className="mb-6 flex justify-around gap-4">
               <button
@@ -236,10 +200,7 @@ export default function OnboardingForm({
 
             <ul className="space-y-3 text-sm text-gray-700">
               {planFeatures[plan]?.map((feature) => (
-                <li
-                  key={feature}
-                  className="flex items-center gap-2 text-[16px]"
-                >
+                <li key={feature} className="flex items-center gap-2 text-[16px]">
                   <Check className="h-4 w-4 shrink-0 text-purple-600" />
                   <span>{feature}</span>
                 </li>
@@ -251,23 +212,14 @@ export default function OnboardingForm({
         <div className="w-full border-b border-[#C3CAD9]" />
 
         <div className="w-full">
-          <h2 className="mb-4 text-[18px] font-medium text-[#0F172A]">
-            Resource limits
-          </h2>
+          <h2 className="mb-4 text-[18px] font-medium text-[#0F172A]">Resource limits</h2>
 
           <div className="flex gap-6">
             {resourceLimits.map((item) => (
-              <div
-                key={item.label}
-                className="flex-1 rounded-xl border border-[#E2E8F0] p-6"
-              >
+              <div key={item.label} className="flex-1 rounded-xl border border-[#E2E8F0] p-6">
                 <div className="flex flex-col gap-2 border-b border-[#C3CAD9]">
-                  <h3 className="text-[16px] font-medium text-[#0F172A]">
-                    {item.label}
-                  </h3>
-                  <p className="text-sm text-[#64748B]">
-                    {item.placeholder}
-                  </p>
+                  <h3 className="text-[16px] font-medium text-[#0F172A]">{item.label}</h3>
+                  <p className="text-sm text-[#64748B]">{item.placeholder}</p>
                 </div>
               </div>
             ))}

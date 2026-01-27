@@ -169,7 +169,7 @@ const UserPermission = ({
         modulePermissions={modulePermissions}
         setModulePermissions={setModulePermissions}
         onNext={onNext}
-        roleId={roleId} // ✅ SENT TO PERMISSIONS API
+        roleId={roleId}
       />
     </form>
   );

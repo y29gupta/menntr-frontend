@@ -92,8 +92,7 @@ const FormDropdown = ({
             {selected.map((opt) => (
               <span
                 key={opt.value}
-                className="flex border-[#C3CAD9] border items-center gap-2 px-3 py-1 rounded-full
-         text-sm text-gray-700"
+                className="flex border-[#C3CAD9] border items-center gap-2 px-3 py-1 rounded-full text-sm text-gray-700"
               >
                 {opt.label}
                 <span
@@ -144,7 +143,6 @@ const FormDropdown = ({
             }
             ${dropdownClassName ?? ''}
           `}
-          // className="absolute z-50 mt-2 min-w-full w-full max-w-[90vw] rounded-2xl bg-white shadow-[0_4px_16px_0_#00000033]"
         >
           {/* 🔍 Search (optional) */}
           {searchable && (

@@ -26,18 +26,14 @@
 
 // export default ModuleSelector;
 
+'use client';
 
-// ============================================
-// 5. ModuleSelector.tsx
-// ============================================
-"use client";
+import { Module } from '@/app/lib/api/fetchModules';
 
-import { Module } from "@/app/lib/api/fetchModules";
-
-const ModuleSelector = ({ 
-  modules, 
-  selectedModules, 
-  register 
+const ModuleSelector = ({
+  modules,
+  selectedModules,
+  register,
 }: {
   modules: Module[];
   selectedModules: string[];
@@ -52,17 +48,17 @@ const ModuleSelector = ({
           key={m.id}
           className={`px-4 py-2 rounded-full cursor-pointer text-sm border transition-all ${
             isSelected
-              ? "bg-purple-100 text-purple-700 border-purple-300"
-              : "bg-gray-100 text-gray-600 border-gray-200 hover:border-purple-300"
+              ? 'bg-purple-100 text-purple-700 border-purple-300'
+              : 'bg-gray-100 text-gray-600 border-gray-200 hover:border-purple-300'
           }`}
         >
           <input
             type="checkbox"
             value={m.id}
-            {...register("selectedModules")}
+            {...register('selectedModules')}
             className="sr-only"
           />
-          {isSelected && "✓ "} 
+          {isSelected && '✓ '}
           {m.name}
         </label>
       );

@@ -24,19 +24,15 @@
 
 // export default ModulesGrid;
 
-
-// ============================================
-// 2. ModulesGrid.tsx
-// ============================================
-"use client";
+'use client';
 
 import { Module, Feature } from '@/app/lib/api/fetchModules';
 import ModuleCard from './ModuleCard';
 
-const ModulesGrid = ({ 
-  selectedModules, 
-  modules, 
-  onOpenPermissions 
+const ModulesGrid = ({
+  selectedModules,
+  modules,
+  onOpenPermissions,
 }: {
   selectedModules: string[];
   modules: Module[];

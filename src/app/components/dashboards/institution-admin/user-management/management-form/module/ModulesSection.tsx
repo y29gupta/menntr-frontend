@@ -122,12 +122,10 @@
 
 // export default ModulesSection;
 
-
-
 // ============================================
 // 4. ModulesSection.tsx
 // ============================================
-"use client";
+'use client';
 
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
@@ -169,9 +167,7 @@ const ModulesSection = ({
   if (isLoading) {
     return (
       <div className="bg-white rounded-lg shadow-sm p-8">
-        <div className="flex items-center justify-center py-12 text-gray-500">
-          Loading modules…
-        </div>
+        <div className="flex items-center justify-center py-12 text-gray-500">Loading modules…</div>
       </div>
     );
   }
@@ -219,17 +215,11 @@ const ModulesSection = ({
 
   return (
     <div className="bg-white border-2 border-gray-200 rounded-[24px] shadow-sm p-8">
-      <h2 className="text-xl font-semibold mb-6 text-gray-800">
-        Select Modules / Features
-      </h2>
+      <h2 className="text-xl font-semibold mb-6 text-gray-800">Select Modules / Features</h2>
 
       <div className="border-t border-gray-300 mb-5" />
 
-      <ModuleSelector 
-        modules={modules} 
-        selectedModules={selectedModules} 
-        register={register} 
-      />
+      <ModuleSelector modules={modules} selectedModules={selectedModules} register={register} />
 
       {selectedModules.length > 0 && (
         <ModulesGrid
@@ -257,9 +247,7 @@ const ModulesSection = ({
         moduleName={activeModule?.name ?? null}
         roleId={roleId}
         selectedFeatures={selectedFeatures}
-        existingPermissions={
-          activeModule ? (modulePermissions[String(activeModule.id)] ?? []) : []
-        }
+        existingPermissions={activeModule ? (modulePermissions[String(activeModule.id)] ?? []) : []}
         onClose={handleClosePermissions}
         onConfirm={handleConfirmPermissions}
       />

@@ -14,12 +14,9 @@ interface RolesHierarchyResponse {
 }
 
 const fetchRoleHierarchies = async (): Promise<RolesHierarchyResponse> => {
-  const res = await fetch(
-    `/api/institutionsadmin/role-hierarchy`,
-    {
-      credentials: 'include', 
-    }
-  );
+  const res = await fetch(`/api/institutionsadmin/role-hierarchy`, {
+    credentials: 'include',
+  });
 
   if (!res.ok) {
     throw new Error('Failed to fetch role hierarchies');
@@ -31,16 +28,11 @@ const fetchRoleHierarchies = async (): Promise<RolesHierarchyResponse> => {
 type Props = {
   selectedRole?: string | number;
   register: any;
-  onRoleSelect: (roleHierarchyId: number) => void; // ✅ REQUIRED
+  onRoleSelect: (roleHierarchyId: number) => void;
   allRoles?: Role[];
 };
 
-const RoleSelector = ({
-  selectedRole,
-  register,
-  onRoleSelect,
-  allRoles = [],
-}: Props) => {
+const RoleSelector = ({ selectedRole, register, onRoleSelect, allRoles = [] }: Props) => {
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ['role-hierarchies'],
     queryFn: fetchRoleHierarchies,
@@ -63,15 +55,11 @@ const RoleSelector = ({
 
   return (
     <div className="mb-6">
-      <h4 className="mb-3 text-sm font-medium text-gray-700">
-        Select Role Hierarchy
-      </h4>
+      <h4 className="mb-3 text-sm font-medium text-gray-700">Select Role Hierarchy</h4>
 
       <div className="flex flex-wrap gap-2">
         {roleHierarchies.map((role) => {
-          const isSelected =
-            selectedRole === role.id ||
-            selectedRole === String(role.id);
+          const isSelected = selectedRole === role.id || selectedRole === String(role.id);
 
           return (
             <label
@@ -97,8 +85,6 @@ const RoleSelector = ({
           );
         })}
       </div>
-
-     
     </div>
   );
 };

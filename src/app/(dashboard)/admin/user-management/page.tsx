@@ -268,14 +268,14 @@ const Page = () => {
                 mode={formMode}
                 onBack={() => setStep(2)}
                 onSubmit={() => {
-                  // createUserMutation.mutate({
-                  //   email: formData.email,
-                  //   firstName: formData.firstName,
-                  //   lastName: formData.lastName,
-                  //   password: 'sample@123',
-                  //   roleId: formData.permissions?.roleId,
-                  //   permissionIds: formData.permissions?.permissionIds ?? [],
-                  // });
+                  createUserMutation.mutate({
+                    email: formData.email,
+                    firstName: formData.firstName,
+                    lastName: formData.lastName,
+                    password: 'sample@123',
+                    roleId: formData.permissions?.roleId,
+                    permissionIds: formData.permissions?.permissionIds ?? [],
+                  });
                   console.log('🚀 FINAL USER PAYLOAD:', {
                     email: formData.email,
                     firstName: formData.firstName,

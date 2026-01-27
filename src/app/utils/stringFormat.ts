@@ -8,9 +8,6 @@
 //     .join(' ');
 // }
 
-
-
-
 // export function normalizeToMetaValue(
 //   metaValues: string[] | undefined,
 //   backendValue?: string | null
@@ -31,12 +28,11 @@ export function toTitleCase(value?: string) {
 
   const lower = value.toLowerCase();
 
-
   if (lower === 'mcq') return 'MCQ';
 
   // default title case
   return lower
     .split('_')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(' ');
 }

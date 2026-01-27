@@ -1,19 +1,12 @@
-export type Role =
-  | 'student'
-  | 'Institution Admin'
-  | 'faculty'
-  | 'procurement-head'
-  | 'Super Admin';
+export type Role = 'student' | 'Institution Admin' | 'faculty' | 'procurement-head' | 'Super Admin';
 
 export const ROLE_REDIRECT: Record<Role, string> = {
   student: 'student',
-  "Institution Admin": 'admin/dashboard',
+  'Institution Admin': 'admin/dashboard',
   faculty: 'faculty',
   'procurement-head': 'procurement-head',
-  "Super Admin": 'super-admin',
+  'Super Admin': 'super-admin',
 };
-
-
 
 export type SidebarRole = 'student' | 'admin' | 'super-admin';
 

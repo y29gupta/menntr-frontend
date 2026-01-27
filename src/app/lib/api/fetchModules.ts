@@ -23,8 +23,6 @@ export type FeaturesResponse = {
   data: Feature[];
 };
 
-
-
 /**
  * Fetch all modules for the institution
  */
