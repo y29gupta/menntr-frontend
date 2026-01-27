@@ -99,6 +99,8 @@ import { useStudents } from '@/app/hooks/useStudents';
 import StudentIcon from '@/app/components/icons/StudentIcon';
 import { Plus, Upload } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import CreateStudentForm from './createStudent/CreateStudentForm';
+import AddStudentLayout from './AddStudentLayout';
 
 export default function StudentManagementPage() {
   const [page, setPage] = useState(1);
@@ -108,6 +110,8 @@ export default function StudentManagementPage() {
   const [searchInput, setSearchInput] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [pendingFilters, setPendingFilters] = useState<Record<string, string>>({});
+
+  const [showCreateForm, setShowCreateForm] = useState(false);
 
   const { data, isLoading } = useStudents(page, debouncedSearch, filters);
 
@@ -146,10 +150,16 @@ export default function StudentManagementPage() {
 
   return (
     <div
-      className="w-full space-y-4 p-4 rounded-2xl 
+      className="w-full space-y-4  p-4 rounded-2xl 
      "
     >
       {/* Header (UNCHANGED UI) */}
+
+      {/* {showCreateForm ? (
+        // <CreateStudentForm mode="create" onCancel={() => setShowCreateForm(false)} />
+        <AddStudentLayout onBack={() => setShowCreateForm(false)} />
+      ) : (
+        <> */}
       <div>
         <div className="flex gap-2">
           <StudentIcon />
@@ -168,6 +178,8 @@ export default function StudentManagementPage() {
             <Upload size={16} /> Bulk Upload
           </button>
           <button
+            // onClick={() => setShowCreateForm(true)}
+            onClick={() => router.push('/admin/student-management/add-student')}
             className="px-4 py-2 flex items-center gap-1 text-sm rounded-[64px]
             bg-[linear-gradient(90deg,#904BFF_0%,#C053C2_100%)]
             !text-white hover:bg-[#6D28D9]"
@@ -222,6 +234,8 @@ export default function StudentManagementPage() {
           }}
         />
       </div>
+      {/* </> */}
+      {/* )} */}
     </div>
   );
 }

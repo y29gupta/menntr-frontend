@@ -54,13 +54,13 @@ function DataTable<T extends RowData>({
     <>
       <div className="w-full h-full overflow-auto scrollbar-thin">
         <table className="min-w-[900px] h-full w-full border border-gray-200 rounded-lg text-xs sm:text-sm">
-          <thead className="bg-gray-50 border-b border-gray-200 sticky top-0 z-20">
+          <thead className="bg-gray-50  border-b border-gray-200 sticky top-0 z-20">
             {table.getHeaderGroups().map((hg) => (
               <tr key={hg.id}>
                 {hg.headers.map((header) => (
                   <th
                     key={header.id}
-                    className="px-4 py-3 text-left whitespace-nowrap font-semibold text-gray-900 bg-gray-50"
+                    className="px-4 py-3 text-left font-semibold !text-[#1A2C50] bg-gray-50"
                   >
                     {flexRender(header.column.columnDef.header, header.getContext())}
                   </th>
@@ -114,7 +114,7 @@ function DataTable<T extends RowData>({
                   // className="border-b border-gray-200 last:border-none"
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <td key={cell.id} className="px-4 py-3 whitespace-nowrap">
+                    <td key={cell.id} className="px-4 py-3 ">
                       {/* {flexRender(cell.column.columnDef.cell, cell.getContext())} */}
                       {(() => {
                         const rendered = flexRender(cell.column.columnDef.cell, cell.getContext());

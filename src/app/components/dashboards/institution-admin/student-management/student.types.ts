@@ -27,4 +27,34 @@ export interface StudentListResponse {
 }
 
 
+//student form 
+export type StudentFormValues = {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  rollNumber: string;
+  gender: 'male' | 'female' | 'other'; 
+};
+
+// student-management/student.types.ts
+import { z } from 'zod';
+export const studentFormSchema = z.object({
+  firstName: z.string().min(1, 'First name is required'),
+  lastName: z.string().min(1, 'Last name is required'),
+  email: z.string().email('Invalid email'),
+  phone: z.string().min(10, 'Phone is required'),
+  gender: z.enum(['male', 'female', 'other']),
+  rollNumber: z.string().min(1, 'Roll number is required'),
+});
+
+/* backend payload type */
+export type CreateStudentPayload = {
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone: string;
+  gender: string;
+  roll_number: string;
+};
 

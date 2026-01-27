@@ -68,10 +68,10 @@ export const SIDEBAR_CONFIG = {
     },
   ],
 
-  student: [
+  Student: [
     {
       label: 'Dashboard',
-      path: '/student',
+      path: '/Student',
       icon: <LayoutDashboard size={20} />,
     },
     {

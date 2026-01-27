@@ -1,4 +1,4 @@
-import { StudentListResponse } from "@/app/components/dashboards/institution-admin/student-management/student.types";
+import { CreateStudentPayload, StudentFormValues, StudentListResponse } from "@/app/components/dashboards/institution-admin/student-management/student.types";
 import { api } from "@/app/lib/api";
 
 
@@ -36,5 +36,19 @@ export const studentsApi = {
     });
 
     return data;
+  },
+  
+ 
+  createStudent: (data: StudentFormValues) => {
+    const payload: CreateStudentPayload = {
+      first_name: data.firstName,
+      last_name: data.lastName,
+      email: data.email,
+      phone: data.phone,
+      gender: data.gender,
+      roll_number: data.rollNumber,
+    };
+
+    return api.post('/students', payload);
   },
 };
