@@ -32,25 +32,52 @@ export default function StepOne({ form, onNext, onCancel }: Props) {
   const questionTypes = metaData?.questionTypes ?? [];
 
   useEffect(() => {
-    if (assessmentCategories.length && !category) {
-      setValue('category', assessmentCategories[0] as any, {
-        shouldValidate: true,
-        shouldDirty: true,
-      });
+    // if (assessmentCategories.length && !category) {
+    //   setValue('category', assessmentCategories[0] as any, {
+    //     shouldValidate: true,
+    //     shouldDirty: true,
+    //   });
+    // }
+
+    if (assessmentCategories.length && !form.formState.dirtyFields.category) {
+      if (!category) {
+        setValue('category', assessmentCategories[0] as any, {
+          shouldValidate: true,
+          shouldDirty: false,
+        });
+      }
     }
 
-    if (assessmentTypes.length && !type) {
-      setValue('AssessmentType', assessmentTypes[0] as any, {
-        shouldValidate: true,
-        shouldDirty: true,
-      });
+    // if (assessmentTypes.length && !type) {
+    //   setValue('AssessmentType', assessmentTypes[0] as any, {
+    //     shouldValidate: true,
+    //     shouldDirty: true,
+    //   });
+    // }
+
+    if (assessmentTypes.length && !form.formState.dirtyFields.AssessmentType) {
+      if (!type) {
+        setValue('AssessmentType', assessmentTypes[0] as any, {
+          shouldValidate: true,
+          shouldDirty: false,
+        });
+      }
     }
 
-    if (questionTypes.length && !questionType) {
-      setValue('questionType', questionTypes[0] as any, {
-        shouldValidate: true,
-        shouldDirty: true,
-      });
+    // if (questionTypes.length && !questionType) {
+    //   setValue('questionType', questionTypes[0] as any, {
+    //     shouldValidate: true,
+    //     shouldDirty: true,
+    //   });
+    // }
+
+    if (questionTypes.length && !form.formState.dirtyFields.questionType) {
+      if (!questionType) {
+        setValue('questionType', questionTypes[0] as any, {
+          shouldValidate: true,
+          shouldDirty: false,
+        });
+      }
     }
   }, [
     assessmentCategories,

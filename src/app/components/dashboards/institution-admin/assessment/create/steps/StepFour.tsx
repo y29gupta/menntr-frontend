@@ -1,13 +1,15 @@
 import { GripVertical, Trash2, Plus } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import CreateMCQModal from '../components/CreateMCQModal';
 import { PublishAssessmentModal } from '@/app/ui/modals/PublishAssessmentModal/PublishAssessmentModal';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { assessmentApi } from '../../assessment.service';
 import CreateCodingModal from '../components/CreateCodingModal';
 import { isMultiType, normalizeTypes, QuestionType } from '@/app/utils/questionType';
 import { questionModalRegistry } from '../questionModalRegistry';
 import { EditOutlined } from '@ant-design/icons';
+import { message } from 'antd';
+import ConfirmModal from '@/app/ui/modals/ConfirmModal';
 
 type Props = {
   onBack: () => void;
@@ -17,10 +19,14 @@ type Props = {
   activeQuestionType: QuestionType | null;
   onSelectQuestionType: (type: QuestionType) => void;
   onCloseModal: () => void;
+
+  onDeleteQuestion: (type: string) => void;
 };
 
 type Question = {
-  id: string;
+  // id: string;
+  assessment_question_id: string;
+  question_id: string;
   questionText: string;
   isMandatory: boolean;
   marks: number;
@@ -43,9 +49,14 @@ export default function StepFour({
   activeQuestionType,
   onSelectQuestionType,
   onCloseModal,
+
+  onDeleteQuestion,
 }: Props) {
   const [isMCQOpen, setIsMCQOpen] = useState(false);
   const [open, setOpen] = useState(false);
+
+  const [editingQuestionId, setEditingQuestionId] = useState<string | null>(null);
+  const [editQuestionData, setEditQuestionData] = useState<any>(null);
 
   const types = normalizeTypes(questionTypes);
   const multiType = isMultiType(questionTypes);
@@ -61,6 +72,36 @@ export default function StepFour({
     queryFn: () => assessmentApi.getAssessmentQuestions(assessmentId),
     // enabled: !!assessmentId,
   });
+
+  // -------------edit questionapi-----------------
+
+  const { data: fetchedEditQuestion, isError: isEditError } = useQuery({
+    queryKey: ['edit-question', editingQuestionId],
+    queryFn: () => assessmentApi.getQuestionById(editingQuestionId!),
+    enabled: !!editingQuestionId,
+  });
+
+  useEffect(() => {
+    if (!fetchedEditQuestion) return;
+
+    const typeMap: Record<string, QuestionType> = {
+      mcq: 'MCQ',
+      coding: 'Coding',
+    };
+
+    setEditQuestionData(fetchedEditQuestion);
+    onSelectQuestionType(typeMap[fetchedEditQuestion.type]);
+  }, [fetchedEditQuestion, onSelectQuestionType]);
+
+  useEffect(() => {
+    if (isEditError) {
+      message.error('Failed to load question details');
+    }
+  }, [isEditError]);
+
+  const handleEditClick = (questionId: string) => {
+    setEditingQuestionId(questionId);
+  };
 
   // --------------meta data for question based on tyepe------------------
 
@@ -82,11 +123,18 @@ export default function StepFour({
   };
 
   const handleSaveAndNextQuestion = (q: any) => {
+    console.log('FINAL PAYLOAD FROM MODAL →', q);
     queryClient.invalidateQueries({
       queryKey: ['assessment-questions', assessmentId],
     });
     // DO NOT close modal → modal already resets itself
   };
+
+  const handleRowClick = (questionId: string) => {
+    setEditingQuestionId(questionId);
+  };
+
+  // -----------------delete question----------------
 
   return (
     <>
@@ -136,7 +184,22 @@ export default function StepFour({
 
         <div className="space-y-4 ">
           {questions.map((q, index) => (
-            <div className="flex " key={q.id}>
+            <div
+              title="Click to edit question"
+              className="  group
+    flex
+    
+    cursor-pointer
+    rounded-xl
+    transition-all
+    duration-200
+    ease-in-out
+    hover:hover:bg-[#F7F9FD]
+
+    hover:shadow-sm"
+              key={q.question_id}
+              onClick={() => handleRowClick(q.assessment_question_id)}
+            >
               <div className="flex rounded-l-xl bg-[#F0F2F7] items-center px-2">
                 <GripVertical size={18} className="mt-1 shrink-0 text-[#98A2B3]" />
               </div>
@@ -165,13 +228,27 @@ export default function StepFour({
                       >
                         {q.difficulty}
                       </span>
-                      <EditOutlined
+                      {/* <EditOutlined
                         size={16}
                         className="cursor-pointer hover:!text-purple-600 font-extrabold"
-                      />
+                        onClick={() => handleEditClick(q.assessment_question_id)}
+                      /> */}
                       <Trash2
                         size={16}
-                        className=" font-extrabold cursor-pointer hover:!text-purple-600"
+                        className="
+                                  font-extrabold
+                                  cursor-pointer
+                                  transition-colors
+                                  duration-200
+                                  hover:!text-red-600
+                                "
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          // setDeleteQuestionId(q.assessment_question_id);
+                          // setDeleteModalOpen(true);
+                          onDeleteQuestion(q.assessment_question_id);
+                        }}
+                        // className=" font-extrabold cursor-pointer hover:!text-purple-600"
                       />
                     </div>
                   </div>
@@ -206,34 +283,20 @@ export default function StepFour({
           </div>
         </div>
 
-        {/* {isMCQOpen && (
-          <>
-            <CreateMCQModal
-              assessmentId={assessmentId}
-              onClose={() => setIsMCQOpen(false)}
-              onSave={() => {
-                queryClient.invalidateQueries({
-                  queryKey: ['assessment-questions', assessmentId],
-                });
-              }}
-              onSaveAndNext={() => {
-                queryClient.invalidateQueries({
-                  queryKey: ['assessment-questions', assessmentId],
-                });
-              }}
-            />
-
-            <CreateCodingModal onClose={() => setIsMCQOpen(false)} />
-          </>
-        )} */}
-
         {ActiveModal &&
           ActiveModal({
             meta: questionMeta,
             assessmentId,
-            onClose: onCloseModal,
+            // onClose: onCloseModal,
+            onClose: () => {
+              setEditingQuestionId(null);
+              setEditQuestionData(null);
+              onCloseModal();
+            },
             onSave: handleSaveQuestion,
             onSaveAndNext: handleSaveAndNextQuestion,
+            initialData: editQuestionData,
+            mode: editQuestionData ? 'edit' : 'create',
           })}
 
         <PublishAssessmentModal

@@ -1,11 +1,13 @@
-'use client';
-
-import { useRouter } from 'next/navigation';
+import SuperAdminIcon from '@/app/components/icons/SuperAdminIcon';
+import TopProfileBar from '@/app/ui/TopProfileBar';
+import React from 'react';
 
 const page = () => {
-  const router = useRouter();
-  router.push('/student/dashboard');
-  return <></>;
+  return (
+    <>
+      <TopProfileBar userRole="Student Portal" RoleIcon={<SuperAdminIcon />} />
+    </>
+  );
 };
 
 export default page;

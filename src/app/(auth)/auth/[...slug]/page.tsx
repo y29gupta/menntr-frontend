@@ -14,10 +14,11 @@ const page = () => {
   const [setupToken, setSetupToken] = useState<string | null>(null);
 
   const token = params.get('token');
+  console.log(emailToken, 'emailtoken from url');
 
   const consumeInvite = async () => {
     const response = await loginpasswordsetup({ token: emailToken });
-
+    console.log(response, 'setuptoken to send changepassword');
     setSetupToken(response?.token);
   };
 

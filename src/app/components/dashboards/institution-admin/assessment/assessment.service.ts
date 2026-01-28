@@ -8,19 +8,36 @@
 //     }
 // }
 import { api } from "@/app/lib/api";
-import { AssessmentQuestionResponse, getAssessmentListResponse } from "./assessment.schema";
-import { AssessmentAccessPayload, AssessmentMetaResponse, CreateAssessmentPayload, QuestionMetaType } from "./assessment.types";
+// import { AssessmentQuestionResponse, getAssessmentListResponse } from "./assessment.schema";
+import { AssessmentAccessPayload, AssessmentListResult, AssessmentMetaResponse, AssessmentQuestionResponse, CreateAssessmentPayload, CreateCodingQuestionPayload, getAssessmentListResponse, QuestionMetaType, UpdateQuestionPayload } from "./assessment.types";
 
 export type AssessmentTab = "active" | "draft" | "closed";
 
 export const assessmentApi = {
-  getAssessmentList: async (
-    tab: AssessmentTab
-  ): Promise<getAssessmentListResponse[]> => {
-    const res = await api.get("/assessments", {
-      params: { tab }
+  // getAssessmentList: async (
+  //   tab: AssessmentTab
+  // ): Promise<getAssessmentListResponse[]> => {
+  //   const res = await api.get("/assessments", {
+  //     params: { tab }
+  //   });
+  //   return res.data;
+  // },
+
+   getAssessmentList: async (
+    tab: 'active' | 'draft' | 'closed',
+    page = 1
+  ): Promise<AssessmentListResult> => {
+    const res = await api.get('/assessments', {
+      params: {
+        tab,
+        page,
+      },
     });
-    return res.data;
+
+    return {
+      rows: res.data.data, // 👈 array for table
+      meta: res.data.meta, // 👈 pagination
+    };
   },
    getAssessmentMeta: async (): Promise<AssessmentMetaResponse> => {
     const res = await api.get("/assessments/meta");
@@ -147,8 +164,8 @@ export const assessmentApi = {
   const formData = new FormData();
   formData.append('file', file);
 
-  const res = await api.post(
-    `/assessments/${assessmentId}/${type}/bulk-upload`,
+     const res = await api.post(
+    `/assessments/${assessmentId}/${type}/bulk-create`,
     formData,
     {
       headers: {
@@ -158,8 +175,77 @@ export const assessmentApi = {
   );
 
   return res.data;
-}
+  },
+  
+  getQuestionById: async (questionId: string) => {
+    // const { data } = await api.get(`/assessments/questions/${questionId}`);
+    const { data } = await api.get(`/assessments/questions/${questionId}`);
+    return data;
+  },
 
+  createCodingQuestion: (
+  assessmentId: string,
+  payload: CreateCodingQuestionPayload
+) =>
+  api.post(
+    `/assessments/${assessmentId}/questions/coding`,
+    payload
+  ),
+
+
+
+updateQuestion: (questionId: string, payload: UpdateQuestionPayload) =>
+    api.put(`/assessments/questions/${questionId}`, payload),
+
+deleteAssessmentQuestion: async (
+  assessmentId: string | null,
+  questionId: string
+) => {
+  console.log(assessmentId,questionId,"delete")
+  const res = await api.delete(
+    `/assessments/${assessmentId}/questions/${questionId}`
+  );
+  return res.data;
+  },
+
+  
+
+  
+deleteDraftAssessment: async (
+  assessmentId: string | null,
+  
+) => {
+  console.log(assessmentId,"delete assessment")
+  const res = await api.delete(
+    `/assessments/${assessmentId}`
+  );
+  return res.data;
+  },
+
+
+  getAssessmentById: async (assessmentId: string) => {
+    console.log("edit ",assessmentId)
+    const { data } = await api.get(`/assessments/${assessmentId}`);
+    return data;
+  },
+
+  
+  updateAssessment: async (
+    assessmentId: string,
+    payload: {
+      title: string;
+      description?: string;
+      duration_minutes?: number;
+      instructions?: string;
+      tags?: string[];
+      category: string;
+      assessment_type: string;
+      question_type: string;
+    }
+  ) => {
+    const { data } = await api.put(`/assessments/${assessmentId}`, payload);
+    return data;
+  },
 
 
 };

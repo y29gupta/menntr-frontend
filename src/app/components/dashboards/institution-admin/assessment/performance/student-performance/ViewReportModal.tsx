@@ -47,7 +47,7 @@ export default function ViewReportModal({ open, onClose, candidate, onNext, onPr
   return (
     <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center px-4">
       {/* MODAL */}
-      <div className="flex w-full max-w-4xl flex-col bg-white max-h-[85vh] rounded-xl">
+      <div className="flex  w-full max-w-4xl flex-col bg-white max-h-[85vh] rounded-xl">
         {/* ================= HEADER ================= */}
         <div
           className="

@@ -8,7 +8,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import FormDropdown from '@/app/ui/FormDropdown';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { assessmentApi } from '../../assessment.service';
-import { mcqMetaResponse } from '../../assessment.types';
+import { mcqMetaResponse, UpdateMCQQuestionPayload } from '../../assessment.types';
 
 type Option = {
   id: string;
@@ -22,6 +22,9 @@ type Props = {
   onSaveAndNext: (q: any) => void;
   assessmentId: string;
   meta: mcqMetaResponse;
+
+  initialData?: any;
+  mode?: 'create' | 'edit';
 };
 
 export default function CreateMCQModal({
@@ -30,6 +33,9 @@ export default function CreateMCQModal({
   onSaveAndNext,
   assessmentId,
   meta,
+
+  initialData,
+  mode = 'create',
 }: Props) {
   const [mounted, setMounted] = useState(false);
   const [question, setQuestion] = useState('');
@@ -41,7 +47,7 @@ export default function CreateMCQModal({
   const [showOptions, setShowOptions] = useState(false);
   const [questionType, setQuestionType] = useState<string>('');
 
-  const { control, handleSubmit, setValue } = useForm<CreateMCQFormValues>({
+  const { control, handleSubmit, setValue, reset } = useForm<CreateMCQFormValues>({
     resolver: zodResolver(createMCQSchema),
     defaultValues: {
       topic: '',
@@ -52,10 +58,32 @@ export default function CreateMCQModal({
   });
 
   useEffect(() => {
+    if (!initialData) return;
+
+    setQuestion(initialData.question_text);
+    setMarks(initialData.points);
+    setMandatory(initialData.is_mandatory ?? true);
+
+    setValue('topic', initialData.topic);
+    setValue('difficulty', initialData.difficulty_level);
+    setValue('questionType', initialData.question_type);
+
+    setOptions(
+      initialData.options.map((o: any) => ({
+        id: o.id,
+        text: o.option_text,
+        correct: o.is_correct,
+      }))
+    );
+
+    setQuestionType(normalizeQuestionType(initialData.question_type));
+    setShowOptions(true);
+  }, [initialData, setValue]);
+
+  useEffect(() => {
     setValue('options', options as any, { shouldValidate: true });
   }, [options, setValue]);
-
-  const buildApiPayload = (data: CreateMCQFormValues) => ({
+  const buildApiPayload = (data: CreateMCQFormValues): UpdateMCQQuestionPayload => ({
     topic: data.topic,
     question_text: question,
     question_type: data.questionType,
@@ -67,8 +95,14 @@ export default function CreateMCQModal({
       is_correct: o.correct,
     })),
   });
+
   const createQuestionMutation = useMutation({
     mutationFn: (payload: any) => assessmentApi.createAssessmentQuestion(assessmentId, payload),
+  });
+
+  const updateQuestionMutation = useMutation({
+    mutationFn: (payload: UpdateMCQQuestionPayload) =>
+      assessmentApi.updateQuestion(initialData.assessment_question_id, payload),
   });
 
   // const { data: questionMeta } = useQuery<questionMetaResponse>({
@@ -148,7 +182,11 @@ export default function CreateMCQModal({
         {/* Header */}
         <div className="flex items-start justify-between border-b border-[#EAECF0] px-6 py-2">
           <div>
-            <h3 className="text-base font-semibold text-[#101828]">Create MCQ Question</h3>
+            {/* <h3 className="text-base font-semibold text-[#101828]">Create MCQ Question</h3> */}
+            <h3 className="text-base font-semibold text-[#101828]">
+              {mode === 'edit' ? 'Edit MCQ Question' : 'Create MCQ Question'}
+            </h3>
+
             <p className="mt-1 text-sm text-[#667085]">
               Add a question to Aptitude Mock - Jan 2025
             </p>
@@ -403,39 +441,30 @@ export default function CreateMCQModal({
               Cancel
             </button>
 
-            <div className="flex gap-3">
-              {/* <button
-                onClick={handleSubmit((data) => {
-                  const payload = {
-                    question,
-                    mandatory,
-                    marks,
-                    difficulty: data.difficulty,
-                    options,
-                    subject: data.topic,
-                    type: data.questionType,
-                  };
-
-                  onSaveAndNext(payload);
-                  setQuestion('');
-                })}
-                className="rounded-full bg-[linear-gradient(90deg,#904BFF_0%,#C053C2_100%)] px-5 py-2 text-sm !text-white"
-              >
-                Save & Add next
-              </button> */}
+            {/* <div className="flex gap-3">
+             
               <button
                 onClick={handleSubmit((data) => {
                   const payload = buildApiPayload(data);
 
                   createQuestionMutation.mutate(payload, {
                     onSuccess: () => {
-                      onSaveAndNext(payload); // keeps StepFour behaviour intact
+                      onSaveAndNext(payload);
 
-                      // reset ONLY form-related state
+                      reset({
+                        topic: '',
+                        questionType: '',
+                        difficulty: 'easy',
+                        options: [],
+                      });
+
+                      // reset local state
                       setQuestion('');
                       setOptions([]);
                       setMarks(1);
                       setMandatory(true);
+                      setShowOptions(false);
+                      setQuestionType('');
                     },
                   });
                 })}
@@ -444,25 +473,7 @@ export default function CreateMCQModal({
                 Save & Add next
               </button>
 
-              {/* <button
-                onClick={handleSubmit((data) => {
-                  const payload = {
-                    question,
-                    mandatory,
-                    marks,
-                    difficulty: data.difficulty,
-                    options,
-                    subject: data.topic,
-                    type: data.questionType,
-                  };
-
-                  onSave(payload);
-                  onClose();
-                })}
-                className="rounded-full border border-[#BE83DF] px-5 py-2 text-sm !text-[#BE83DF]"
-              >
-                Save Question
-              </button> */}
+             
               <button
                 onClick={handleSubmit((data) => {
                   const payload = buildApiPayload(data);
@@ -477,6 +488,64 @@ export default function CreateMCQModal({
                 className="rounded-full border border-[#BE83DF] px-5 py-2 text-sm !text-[#BE83DF]"
               >
                 Save Question
+              </button>
+            </div> */}
+
+            <div className="flex gap-3">
+              {mode === 'create' && (
+                <button
+                  onClick={handleSubmit((data) => {
+                    const payload = buildApiPayload(data);
+
+                    createQuestionMutation.mutate(payload, {
+                      onSuccess: () => {
+                        onSaveAndNext(payload);
+
+                        reset({
+                          topic: '',
+                          questionType: '',
+                          difficulty: 'easy',
+                          options: [],
+                        });
+
+                        setQuestion('');
+                        setOptions([]);
+                        setMarks(1);
+                        setMandatory(true);
+                        setShowOptions(false);
+                        setQuestionType('');
+                      },
+                    });
+                  })}
+                  className="rounded-full bg-[linear-gradient(90deg,#904BFF_0%,#C053C2_100%)] px-5 py-2 text-sm !text-white"
+                >
+                  Save & Add next
+                </button>
+              )}
+
+              <button
+                onClick={handleSubmit((data) => {
+                  const payload = buildApiPayload(data);
+
+                  if (mode === 'edit') {
+                    updateQuestionMutation.mutate(payload, {
+                      onSuccess: () => {
+                        onSave(payload);
+                        onClose();
+                      },
+                    });
+                  } else {
+                    createQuestionMutation.mutate(payload, {
+                      onSuccess: () => {
+                        onSave(payload);
+                        onClose();
+                      },
+                    });
+                  }
+                })}
+                className="rounded-full border border-[#BE83DF] px-5 py-2 text-sm !text-[#BE83DF]"
+              >
+                {mode === 'edit' ? 'Update Question' : 'Save Question'}
               </button>
             </div>
           </div>

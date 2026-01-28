@@ -1,7 +1,12 @@
+type Category = {
+  id: number;
+  name: string;
+};
+
 type Props = {
   selectedCategory?: string;
   register: any;
-  categories: string[];
+  categories: Category[];
 };
 
 const CategorySelector = ({ selectedCategory, register, categories }: Props) => {
@@ -11,11 +16,11 @@ const CategorySelector = ({ selectedCategory, register, categories }: Props) => 
 
       <div className="flex flex-wrap gap-2">
         {categories.map((cat) => {
-          const selected = selectedCategory === cat;
+          const selected = selectedCategory === cat.name;
 
           return (
             <label
-              key={cat}
+              key={cat.id}
               className={`flex items-center gap-2 px-4 py-2 rounded-full cursor-pointer text-sm
                 ${
                   selected
@@ -23,9 +28,14 @@ const CategorySelector = ({ selectedCategory, register, categories }: Props) => 
                     : 'bg-gray-100 text-gray-600 border border-gray-200 hover:border-purple-300'
                 }`}
             >
-              <input type="radio" value={cat} {...register('roleCategory')} className="sr-only" />
+              <input
+                type="radio"
+                value={cat.name}
+                {...register('roleCategory')}
+                className="sr-only"
+              />
               {selected && <span>✓</span>}
-              {cat}
+              {cat.name}
             </label>
           );
         })}

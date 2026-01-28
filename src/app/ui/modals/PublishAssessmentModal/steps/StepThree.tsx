@@ -27,7 +27,7 @@ const StepThree = forwardRef<StepThreeHandle>((_, ref) => {
       }
 
       if (setExpiry && expiryAt && expiryAt.isBefore(publishAt)) {
-        throw new Error('Expiry cannot be before publish date');
+        throw new Error('Expiry date & time cannot be before publish date & time');
       }
 
       const payload: {
@@ -115,19 +115,37 @@ function DateInput({
           suffixIcon={null}
           allowClear={false}
           className="w-full border-none shadow-none"
-          disabledDate={(current) => !!disabledBefore && current.isBefore(disabledBefore, 'minute')}
+          // disabledDate={(current) => !!disabledBefore && current.isBefore(disabledBefore, 'minute')}
+          disabledDate={(current) => !!disabledBefore && current.isBefore(disabledBefore, 'day')}
+          // disabledTime={(current) => {
+          //   if (!disabledBefore || !current) return {};
+          //   if (current.isSame(disabledBefore, 'day')) {
+          //     return {
+          //       disabledHours: () => Array.from({ length: disabledBefore.hour() }, (_, i) => i),
+          //       disabledMinutes: (hour) =>
+          //         hour === disabledBefore.hour()
+          //           ? Array.from({ length: disabledBefore.minute() }, (_, i) => i)
+          //           : [],
+          //     };
+          //   }
+          //   return {};
+          // }}
           disabledTime={(current) => {
             if (!disabledBefore || !current) return {};
-            if (current.isSame(disabledBefore, 'day')) {
-              return {
-                disabledHours: () => Array.from({ length: disabledBefore.hour() }, (_, i) => i),
-                disabledMinutes: (hour) =>
-                  hour === disabledBefore.hour()
-                    ? Array.from({ length: disabledBefore.minute() }, (_, i) => i)
-                    : [],
-              };
-            }
-            return {};
+
+            const isSameDay = current.isSame(disabledBefore, 'day');
+
+            if (!isSameDay) return {};
+
+            const publishHour = disabledBefore.hour();
+            const publishMinute = disabledBefore.minute();
+
+            return {
+              disabledHours: () => Array.from({ length: publishHour }, (_, i) => i),
+
+              disabledMinutes: (hour) =>
+                hour === publishHour ? Array.from({ length: publishMinute }, (_, i) => i) : [],
+            };
           }}
           inputRender={(inputProps) => (
             <div className="relative mt-1 w-full">
