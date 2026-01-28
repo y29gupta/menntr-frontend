@@ -5,7 +5,7 @@ export type FormFieldOption = {
   value: string;
 };
 
-export type FieldType = 'text' | 'email' | 'number' | 'dropdown';
+export type FieldType = 'text' | 'email' | 'number' | 'dropdown' | 'chip'| 'date';
 
 export type InputType = 'text' | 'email' | 'number';
 
@@ -16,4 +16,6 @@ export type FormFieldConfig<T> = {
   type: FieldType;
   options?: FormFieldOption[];
   required?: boolean;
+  dropdownPosition?: string;
+  message?:string
 };

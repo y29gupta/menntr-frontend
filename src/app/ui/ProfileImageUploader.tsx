@@ -20,7 +20,7 @@ export default function ProfileImageUploader({ value, onChange }: Props) {
 
   return (
     <div className="flex justify-center">
-      <div className="relative">
+      <div className="relative" onClick={() => inputRef.current?.click()}>
         {/* Circle */}
         <div className="h-[120px] w-[120px] rounded-full bg-[#EEF1F6] flex items-center justify-center overflow-hidden">
           {preview ? (
@@ -36,7 +36,6 @@ export default function ProfileImageUploader({ value, onChange }: Props) {
         {/* Edit icon */}
         <button
           type="button"
-          onClick={() => inputRef.current?.click()}
           className="absolute bottom-1 right-1 h-8 w-8 rounded-full bg-white shadow flex items-center justify-center"
         >
           <Pencil size={16} />

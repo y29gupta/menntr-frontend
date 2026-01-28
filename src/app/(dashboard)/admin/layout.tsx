@@ -15,7 +15,7 @@ w-full
       {/* header */}
       <TopProfileBar userRole="Institution Admin Portal" RoleIcon={<SuperAdminIcon />} />
 
-      <div className="flex    h-full sm:pb-0">{children}</div>
+      <div className="flex     sm:pb-0">{children}</div>
     </div>
   );
 };

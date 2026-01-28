@@ -48,26 +48,29 @@ export default function CreateStudentForm({ mode, defaultValues, onCancel }: Pro
 
   const mutation = useMutation({
     mutationFn: studentsApi.createStudent,
-    onSuccess: (res) => {
+    onSuccess: (res, variable) => {
       const { student_id } = res.data ?? '';
 
       queryClient.invalidateQueries({ queryKey: ['students'] });
-      router.push(`/admin/student-management/${student_id}/studentSetup`);
+      router.push(
+        `/admin/student-management/${student_id}/studentSetup?rollNumber=${variable.rollNumber}`
+      );
     },
   });
   const onSubmit = (data: StudentFormValues) => {
-    console.log(data, 'got the data and submited');
     mutation.mutate(data);
   };
 
   return (
     <form onSubmit={methods.handleSubmit(onSubmit)} className="space-y-6">
-      <DynamicForm<StudentFormValues>
-        title="Add Student"
-        fields={studentFields}
-        layout="two-column"
-        form={methods}
-      />
+      <div className="relative  border px-6 pt-6 pb-8 rounded-3xl border-[#DBE3E9]">
+        <DynamicForm<StudentFormValues>
+         
+          fields={studentFields}
+          layout="two-column"
+          form={methods}
+        />
+      </div>
 
       <div className="flex justify-center gap-4">
         <button

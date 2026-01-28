@@ -49,7 +49,7 @@ export default function FormField({
           />
         </div>
       </Flex> */}
-      <label className="text-sm text-[#0F172A]">{label}</label>
+      <label className="text-sm  !text-[#0F172A]">{label}</label>
 
       <Input
         type={type}
