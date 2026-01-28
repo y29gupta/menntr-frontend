@@ -12,16 +12,20 @@ export type CandidatePerformance = {
   score: string;
   percentage: number;
   status: 'Completed' | 'In Progress' | 'Not Started';
+  assessmentName: string;
 };
 
 /* ========= COLUMNS ========= */
 
-export const candidatePerformanceColumns = (): ColumnDef<CandidatePerformance>[] => [
+export const candidatePerformanceColumns = (
+  onRowClick: (row: CandidatePerformance) => void,
+  onViewReport: (row: CandidatePerformance) => void
+): ColumnDef<CandidatePerformance>[] => [
   {
     accessorKey: 'name',
     header: 'Student Name',
     cell: ({ row }) => (
-      <div className="flex items-center gap-3">
+      <div className="relative z-10 flex items-center gap-3">
         <img
           src={row.original.avatarUrl || '/avatar-placeholder.png'}
           className="w-9 h-9 rounded-full object-cover"
@@ -34,7 +38,9 @@ export const candidatePerformanceColumns = (): ColumnDef<CandidatePerformance>[]
     accessorKey: 'email',
     header: 'Email',
     cell: ({ getValue }) => (
-      <span className="text-gray-600 truncate block max-w-[200px]">{getValue() as string}</span>
+      <span className="relative z-10 text-gray-600 truncate block max-w-[200px]">
+        {getValue() as string}
+      </span>
     ),
   },
   {
@@ -50,7 +56,7 @@ export const candidatePerformanceColumns = (): ColumnDef<CandidatePerformance>[]
     header: 'Overall %',
     cell: ({ getValue }) => {
       const value = getValue<number>();
-      return <span className="font-medium">{value}%</span>;
+      return <span className="relative z-10 font-medium">{value}%</span>;
     },
   },
   {
@@ -66,7 +72,7 @@ export const candidatePerformanceColumns = (): ColumnDef<CandidatePerformance>[]
       };
 
       return (
-        <span className={`px-3 py-1 rounded-full text-xs font-medium ${map[status]}`}>
+        <span className={`relative z-10 px-3 py-1 rounded-full text-xs font-medium ${map[status]}`}>
           {status}
         </span>
       );
@@ -75,8 +81,14 @@ export const candidatePerformanceColumns = (): ColumnDef<CandidatePerformance>[]
   {
     id: 'actions',
     header: 'Actions',
-    cell: () => (
-      <button className="flex items-center gap-2 text-purple-600 text-sm font-medium">
+    cell: ({ row }) => (
+      <button
+        onClick={(e) => {
+          e.stopPropagation(); // 🚫 block row click
+          onViewReport(row.original); // ✅ only ViewReport
+        }}
+        className="relative z-20 flex items-center gap-2 text-purple-600! text-sm font-medium cursor-pointer"
+      >
         <FileText className="w-4 h-4" />
         View Report
       </button>

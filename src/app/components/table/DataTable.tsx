@@ -25,7 +25,6 @@ interface DataTableProps<T extends RowData> {
   onNextPage: () => void;
   canPreviousPage: boolean;
   canNextPage: boolean;
-
   meta?: DataTableMeta<T>;
 }
 

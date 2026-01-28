@@ -9,15 +9,23 @@ import { assessmentMetricsUI } from './assessmentMetricsUI';
 import ScoreDistributionCard from './ScoreDistributionCard';
 import PerformanceTabs from './PerformanceTabs';
 import PerformanceSection from './PerformanceSection';
+import QuestionsSection from './QuestionsSection';
+import SettingConfigForm from './settings/SettingConfigForm';
 
 type AssessmentPerformanceProps = {
   assessmentId: string;
 };
 
+type TabKey = 'performance' | 'questions' | 'settings';
+
 const AssessmentPerformance = ({ assessmentId }: AssessmentPerformanceProps) => {
-  const [activeTab, setActiveTab] = useState<'performance' | 'questions' | 'settings'>(
-    'performance'
-  );
+  const tabs = [
+    { key: 'performance', label: 'Performance' },
+    { key: 'questions', label: 'Questions (25)' },
+    { key: 'settings', label: 'Settings' },
+  ] as const;
+
+  const [activeTab, setActiveTab] = useState<TabKey>('performance');
 
   return (
     <div className="w-full min-h-screen flex flex-col gap-4 rounded-2xl bg-gradient-to-b from-white/90 to-white/70 p-4 shadow-[0_0_8px_0_rgba(15,23,42,0.12)]">
@@ -79,9 +87,11 @@ const AssessmentPerformance = ({ assessmentId }: AssessmentPerformanceProps) => 
         ]}
       />
 
-      <div>
-        <PerformanceTabs activeTab={activeTab} onChange={setActiveTab} questionCount={25} />
+      <div className="flex flex-col gap-4">
+        <PerformanceTabs tabs={tabs} activeTab={activeTab} onChange={setActiveTab} />
         {activeTab === 'performance' && <PerformanceSection />}
+        {activeTab === 'questions' && <QuestionsSection />}
+        {activeTab === 'settings' && <SettingConfigForm />}
       </div>
     </div>
   );
