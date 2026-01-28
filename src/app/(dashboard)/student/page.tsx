@@ -1,7 +1,11 @@
-import React from 'react';
+'use client';
+
+import { useRouter } from 'next/navigation';
 
 const page = () => {
-  return <div>page</div>;
+  const router = useRouter();
+  router.push('/student/dashboard');
+  return <></>;
 };
 
 export default page;

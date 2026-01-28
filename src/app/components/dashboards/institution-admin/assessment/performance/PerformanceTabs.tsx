@@ -19,7 +19,7 @@ export default function PerformanceTabs<T extends string>({ tabs, activeTab, onC
           <button
             key={tab.key}
             onClick={() => onChange(tab.key)}
-            className={`pb-3 text-sm font-medium transition
+            className={`pb-3 text-[16px] font-medium transition
               ${
                 activeTab === tab.key
                   ? 'text-purple-600! border-b-2 border-purple-600'
