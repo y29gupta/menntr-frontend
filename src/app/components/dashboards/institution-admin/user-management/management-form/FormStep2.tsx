@@ -1,14 +1,16 @@
 'use client';
 
-import FormHeader from './FormHeader';
 import React, { useEffect, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { useRouter } from 'next/navigation';
-import { ROLE_CONFIG } from '@/app/constants/roleConfig';
+import { useQuery } from '@tanstack/react-query';
+
+import FormHeader from './FormHeader';
 import RoleSelector from './selectors/RoleSelector';
 import CategorySelector from './selectors/CategorySelector';
 import ScopeSelectors from './selectors/ScopeSelectors';
 import ModulesSection from './module/ModulesSection';
+import { ROLE_CONFIG } from '@/app/constants/roleConfig';
 import { fetchModules, Module } from '@/app/lib/api/fetchModules';
 
 export interface FormData {
@@ -25,10 +27,7 @@ export interface FormData {
   reportAndAnalytics: string[];
 }
 
-type RoleCategory = {
-  id: number;
-  name: string;
-};
+type Role = { id: number; name: string };
 
 type Props = {
   mode: 'create' | 'edit';
@@ -36,6 +35,17 @@ type Props = {
   onNext: () => void;
   modulePermissions: Record<string, number[]>;
   setModulePermissions: React.Dispatch<React.SetStateAction<Record<string, number[]>>>;
+};
+
+/* ---------------- FETCH ROLES BY HIERARCHY ---------------- */
+const fetchRolesByHierarchy = async (hierarchyId: number) => {
+  const res = await fetch(`/api/institutionsadmin/role-hierarchy/roles/${hierarchyId}`, {
+    credentials: 'include',
+  });
+
+  if (!res.ok) throw new Error('Failed to fetch roles');
+
+  return res.json();
 };
 
 const UserPermission = ({
@@ -48,24 +58,55 @@ const UserPermission = ({
   const { register, watch, handleSubmit, setValue } = useFormContext<FormData>();
 
   const router = useRouter();
-  const [modules, setModules] = useState<Module[]>([]);
-  const [roleMeta, setRoleMeta] = useState<{
-    roleHierarchyId: number;
-    roleType: string;
-    categories: RoleCategory[];
-    roles: Array<{ id: number; name: string }>;
-  } | null>(null);
 
-  const selectedRole = watch('roleHierarchy');
-
+  /* ---------------- WATCHERS ---------------- */
+  const roleHierarchy = watch('roleHierarchy');
   const selectedCategory = watch('roleCategory');
   const selectedModules = watch('selectedModules') ?? [];
+  const roleId = watch('roleId'); // ✅ THIS IS CORRECT
 
-  const roleRules = roleMeta
+  const [roleHierarchyId, setRoleHierarchyId] = useState<number | null>(null);
+
+  /* ---------------- MODULES ---------------- */
+  const { data: modulesData } = useQuery({
+    queryKey: ['modules'],
+    queryFn: fetchModules,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const modules: Module[] = modulesData?.data ?? [];
+
+  /* ---------------- ROLES ---------------- */
+  const { data: rolesResponse } = useQuery({
+    enabled: !!roleHierarchyId,
+    queryKey: ['roles-by-hierarchy', roleHierarchyId],
+    queryFn: () => fetchRolesByHierarchy(roleHierarchyId!),
+  });
+
+  const roles: Role[] = rolesResponse?.data?.roles ?? [];
+
+  /* ---------------- ROLE → ROLE ID ---------------- */
+  useEffect(() => {
+    if (!selectedCategory || !roles.length) return;
+
+    const matched = roles.find((r) => r.name === selectedCategory);
+    if (matched) {
+      setValue('roleId', matched.id);
+    }
+  }, [selectedCategory, roles, setValue]);
+
+  /* ---------------- ROUTE UPDATE ---------------- */
+  useEffect(() => {
+    if (!roleHierarchyId) return;
+
+    router.push(`/admin/user-management?roleHierarchyId=${roleHierarchyId}`, { scroll: false });
+  }, [roleHierarchyId, router]);
+
+  const roleRules = roles.length
     ? {
-        showCategories: roleMeta.categories.length > 0,
-        showDepartment: roleMeta.roleType.includes('Department'),
-        showBatch: roleMeta.roleType === 'Student',
+        showCategories: true,
+        showDepartment: roles[0].name.includes('Department'),
+        showBatch: roles[0].name === 'Student',
       }
     : null;
 
@@ -80,64 +121,6 @@ const UserPermission = ({
     value: b,
   }));
 
-  /* ---------------- FETCH MODULES ---------------- */
-  useEffect(() => {
-    const loadModules = async () => {
-      try {
-        const response = await fetchModules();
-        setModules(response.data);
-      } catch (error) {
-        console.error('Error fetching modules:', error);
-      }
-    };
-    loadModules();
-  }, []);
-
-  /* ---------------- ROLE SELECT ---------------- */
-  const handleRoleSelect = async (roleHierarchyId: number) => {
-    // Reset stale values
-    setValue('roleCategory', undefined);
-    setValue('roleId', undefined);
-    setRoleMeta(null);
-
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_BASE_URL}/institutionsadmin/role-hierarchy/roles/${roleHierarchyId}`
-    );
-
-    const json = await res.json();
-    const rawRoles: Array<{ id: number; name: string }> = json.data.roles;
-
-    setRoleMeta({
-      roleHierarchyId,
-      roleType: rawRoles[0]?.name ?? '',
-      categories: rawRoles.map((r) => ({
-        id: r.id,
-        name: r.name,
-      })),
-      roles: rawRoles,
-    });
-  };
-
-  /* ---------------- ROLE ID SYNC ---------------- */
-  useEffect(() => {
-    if (!roleMeta || !selectedCategory) return;
-
-    const matchedRole = roleMeta.roles.find((r) => r.name === selectedCategory);
-
-    if (matchedRole) {
-      setValue('roleId', matchedRole.id);
-    }
-  }, [selectedCategory, roleMeta, setValue]);
-
-  /* ---------------- ROUTE UPDATE ---------------- */
-  useEffect(() => {
-    if (!roleMeta?.roleHierarchyId) return;
-
-    router.push(`/admin/user-management?roleHierarchyId=${roleMeta.roleHierarchyId}`, {
-      scroll: false,
-    });
-  }, [roleMeta?.roleHierarchyId, router]);
-
   return (
     <form onSubmit={handleSubmit(() => onNext())} className="w-full flex flex-col gap-4">
       <FormHeader
@@ -148,33 +131,35 @@ const UserPermission = ({
         }}
       />
 
-      {/* ---------------- ROLE & SCOPE ---------------- */}
-      <div className="bg-white border-2 border-gray-200 rounded-[24px] shadow-sm p-8">
-        <h2 className="text-xl font-semibold mb-6">Select Role & Scope</h2>
-        <div className="w-full h-px bg-gray-200 mb-6" />
-
+      {/* ---------------- ROLE ---------------- */}
+      <div className="bg-white border-2 border-gray-200 rounded-[24px] p-8">
         <RoleSelector
-          selectedRole={selectedRole}
+          selectedRole={roleHierarchy}
           register={register}
-          onRoleSelect={handleRoleSelect}
+          onRoleSelect={(id) => {
+            setValue('roleCategory', undefined);
+            setValue('roleId', undefined);
+            setRoleHierarchyId(id);
+          }}
+          allRoles={roles}
         />
 
-        {roleMeta && roleMeta.categories.length > 0 && (
+        {roles.length > 0 && (
           <CategorySelector
             selectedCategory={selectedCategory}
             register={register}
-            categories={roleMeta.categories}
+            categories={roles}
           />
         )}
 
-        <ScopeSelectors
+        {/* <ScopeSelectors
           roleRules={roleRules}
           selectedCategory={selectedCategory}
           watch={watch}
           setValue={setValue}
           departmentOptions={departmentOptions}
           batchOptions={batchOptions}
-        />
+        /> */}
       </div>
 
       {/* ---------------- MODULES ---------------- */}
@@ -184,6 +169,7 @@ const UserPermission = ({
         modulePermissions={modulePermissions}
         setModulePermissions={setModulePermissions}
         onNext={onNext}
+        roleId={roleId}
       />
     </form>
   );

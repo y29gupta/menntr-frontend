@@ -76,11 +76,11 @@ export default function OnboardingForm({ mode, defaultValues, onCancel, onSubmit
       </div>
 
       {/* TITLE */}
-
       <div className="item- flex w-full flex-col justify-evenly gap-6">
         <h2 className="mb-8 text-center text-xl font-semibold">
           {mode === 'create' ? ' Institution Setup' : 'Edit Institution'}
         </h2>
+
         <div className="flex justify-between">
           <h2 className="text-[#0F172A]">Institutoin Details</h2>
           <button
@@ -90,7 +90,9 @@ export default function OnboardingForm({ mode, defaultValues, onCancel, onSubmit
             {mode === 'create' ? 'Create Institution' : 'Save Changes'}
           </button>
         </div>
-        <div className="w-full border-b border-[#C3CAD9]"></div>
+
+        <div className="w-full border-b border-[#C3CAD9]" />
+
         <div className="flex w-full justify-between gap-6">
           <div className="w-full max-w-[462px] p-2">
             <div className="space-y-6">
@@ -113,6 +115,7 @@ export default function OnboardingForm({ mode, defaultValues, onCancel, onSubmit
                 />
                 {errors.code && <p className="text-xs text-red-500">{errors.code.message}</p>}
               </div>
+
               <div>
                 <label className="text-sm text-[#0F172A]">Sub Domain</label>
                 <input
@@ -147,16 +150,18 @@ export default function OnboardingForm({ mode, defaultValues, onCancel, onSubmit
                 type="button"
                 onClick={() => setValue('plan_id', 'BASIC')}
                 className={`
-    px-10 py-3 rounded-full border
-    flex items-center gap-3
-    cursor-pointer
-    transition-all duration-300 ease-in-out
-
-    hover:!text-white
-    hover:bg-[linear-gradient(90deg,#7F3FFF_0%,#A844B3_100%)]
-
-    ${plan === 'BASIC' ? 'border-purple-500 text-purple-600' : 'border-gray-300 text-gray-700'}
-  `}
+                  px-10 py-3 rounded-full border
+                  flex items-center gap-3
+                  cursor-pointer
+                  transition-all duration-300 ease-in-out
+                  hover:!text-white
+                  hover:bg-[linear-gradient(90deg,#7F3FFF_0%,#A844B3_100%)]
+                  ${
+                    plan === 'BASIC'
+                      ? 'border-purple-500 text-purple-600'
+                      : 'border-gray-300 text-gray-700'
+                  }
+                `}
               >
                 {plan === 'BASIC' && (
                   <span className="group-hover:!text-white">
@@ -170,20 +175,22 @@ export default function OnboardingForm({ mode, defaultValues, onCancel, onSubmit
                 type="button"
                 onClick={() => setValue('plan_id', 'PREMIUM')}
                 className={`
-    group
-    px-10 py-3 rounded-full border
-    flex items-center gap-3
-    cursor-pointer
-    transition-all duration-300 ease-in-out
-
-    hover:!text-white
-    hover:bg-[linear-gradient(90deg,#7F3FFF_0%,#A844B3_100%)]
-
-    ${plan === 'PREMIUM' ? 'border-purple-500 text-purple-600' : 'border-gray-300 text-gray-700'}
-  `}
+                  group
+                  px-10 py-3 rounded-full border
+                  flex items-center gap-3
+                  cursor-pointer
+                  transition-all duration-300 ease-in-out
+                  hover:!text-white
+                  hover:bg-[linear-gradient(90deg,#7F3FFF_0%,#A844B3_100%)]
+                  ${
+                    plan === 'PREMIUM'
+                      ? 'border-purple-500 text-purple-600'
+                      : 'border-gray-300 text-gray-700'
+                  }
+                `}
               >
                 {plan === 'PREMIUM' && (
-                  <span className="">
+                  <span>
                     <CheckedIcon />
                   </span>
                 )}
@@ -192,7 +199,7 @@ export default function OnboardingForm({ mode, defaultValues, onCancel, onSubmit
             </div>
 
             <ul className="space-y-3 text-sm text-gray-700">
-              {planFeatures[plan].map((feature) => (
+              {planFeatures[plan]?.map((feature) => (
                 <li key={feature} className="flex items-center gap-2 text-[16px]">
                   <Check className="h-4 w-4 shrink-0 text-purple-600" />
                   <span>{feature}</span>
@@ -201,7 +208,8 @@ export default function OnboardingForm({ mode, defaultValues, onCancel, onSubmit
             </ul>
           </div>
         </div>
-        <div className="w-full border-b border-[#C3CAD9]"></div>
+
+        <div className="w-full border-b border-[#C3CAD9]" />
 
         <div className="w-full">
           <h2 className="mb-4 text-[18px] font-medium text-[#0F172A]">Resource limits</h2>

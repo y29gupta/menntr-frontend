@@ -1,9 +1,9 @@
 // lib/api/error.ts
-import axios from "axios"
+import axios from 'axios';
 
 export interface ApiError {
-  status: number
-  message: string
+  status: number;
+  message: string;
 }
 
 export function parseApiError(error: unknown): ApiError {
@@ -13,12 +13,12 @@ export function parseApiError(error: unknown): ApiError {
       message:
         (error.response?.data as any)?.message ||
         (error.response?.data as any)?.error ||
-        "Something went wrong. Please try again.",
-    }
+        'Something went wrong. Please try again.',
+    };
   }
 
   return {
     status: 500,
-    message: "Unexpected error occurred.",
-  }
+    message: 'Unexpected error occurred.',
+  };
 }
