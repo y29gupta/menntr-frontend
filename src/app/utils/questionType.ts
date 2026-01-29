@@ -2,17 +2,12 @@
 
 export type QuestionType = string;
 
-export const normalizeTypes = (
-  types?: QuestionType | QuestionType[]
-): QuestionType[] => {
+export const normalizeTypes = (types?: QuestionType | QuestionType[]): QuestionType[] => {
   if (!types) return [];
   return Array.isArray(types) ? types : [types];
 };
 
-export const hasType = (
-  types: QuestionType | QuestionType[] | undefined,
-  type: QuestionType
-) => {
+export const hasType = (types: QuestionType | QuestionType[] | undefined, type: QuestionType) => {
   return normalizeTypes(types).includes(type);
 };
 

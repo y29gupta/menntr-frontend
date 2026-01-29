@@ -55,6 +55,5 @@ export const config = {
     '/faculty/:path*',
     '/procurement-head/:path*',
     '/admin',
-   
   ],
 };

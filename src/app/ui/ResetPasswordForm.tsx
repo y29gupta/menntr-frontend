@@ -53,7 +53,6 @@ const ResetPasswordForm = ({ token }: { token: string }) => {
     }
   };
 
- 
   let imageSrc = '/assets/Admin.png';
   if (role === 'student') imageSrc = '/assets/HappyStudent.png';
   if (role === 'superadmin') imageSrc = '/assets/superadmin.png';

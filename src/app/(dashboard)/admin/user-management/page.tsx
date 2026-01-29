@@ -103,14 +103,14 @@ const Page = () => {
       permissionIds: number[];
     }) => {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/institutionsadmin/create-user`,
+        `/institutionsadmin/create-user`,
 
         {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          credentials: 'include', // ✅ SEND COOKIES
+          credentials: 'include',
           body: JSON.stringify({
             payload,
           }),

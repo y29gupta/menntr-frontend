@@ -65,32 +65,29 @@ export function toastApiPromise<T>(
     error?: string | ((error: unknown) => string);
   }
 ): Promise<T> {
-  toast.promise(
-    promise,
-    {
-      pending: messages.pending,
-      success: {
-        render({ data }) {
-          return typeof messages.success === 'function'
-            ? messages.success(data as T)
-            : messages.success;
-        },
+  toast.promise(promise, {
+    pending: messages.pending,
+    success: {
+      render({ data }) {
+        return typeof messages.success === 'function'
+          ? messages.success(data as T)
+          : messages.success;
       },
-      error: {
-        render({ data }) {
-          if (typeof messages.error === 'function') {
-            return messages.error(data);
-          }
+    },
+    error: {
+      render({ data }) {
+        if (typeof messages.error === 'function') {
+          return messages.error(data);
+        }
 
-          if (typeof messages.error === 'string') {
-            return messages.error;
-          }
+        if (typeof messages.error === 'string') {
+          return messages.error;
+        }
 
-          return getErrorMessage(data);
-        },
+        return getErrorMessage(data);
       },
-    }
-  );
+    },
+  });
 
   return promise;
 }

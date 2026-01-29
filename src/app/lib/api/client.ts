@@ -1,7 +1,6 @@
 import axios from 'axios';
 import { parseApiError } from './error';
 
-
 export const api = axios.create({
   baseURL: '/api',
   withCredentials: true,
@@ -13,17 +12,17 @@ export const api = axios.create({
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    const parsedError = parseApiError(error)
+    const parsedError = parseApiError(error);
 
     // Auth failure handling ONLY
     if (parsedError.status === 401) {
-      localStorage.clear()
-      sessionStorage.clear()
+      localStorage.clear();
+      sessionStorage.clear();
 
       // Optional: central redirect
       // window.location.href = "/login"
     }
 
-    return Promise.reject(parsedError)
+    return Promise.reject(parsedError);
   }
-)
+);

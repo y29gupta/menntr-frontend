@@ -286,7 +286,7 @@ export async function fetchInstitutions(
   if (filters.planCode) queryParams.append('planCode', filters.planCode);
   if (filters.name) queryParams.append('name', filters.name);
 
-  const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/institutions${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+  const url = `/api/institutions${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
 
   const res = await fetch(url, {
     method: 'GET',
@@ -312,7 +312,7 @@ export function mapInstitutions(apiData: InstitutionApi[]): Institution[] {
 }
 
 export async function updateInstitution(id: number | string, payload: InstitutionFormValues) {
-  console.log(payload,"update isntitution")
+  console.log(payload, 'update isntitution');
   try {
     return await toastApiPromise(
       fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/institutions/${id}`, {
@@ -386,7 +386,7 @@ export const updateCategory = async (categoryId: string, payload: CreateCategory
 
 export const getDepartments = async (): Promise<DepartmentApiResponse> => {
   const res = await api.get(`/organization/departments`);
-  console.log(res,"department list")
+  console.log(res, 'department list');
   return res.data;
 };
 

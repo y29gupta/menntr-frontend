@@ -11,7 +11,7 @@ export const profileSchema = z.object({
   lastName: z.string().min(1, 'Last name is required'),
   email: z.string().email('Invalid email format'),
   // mobile: z.string().min(10, 'Phone must be at least 10 characters'),
-   mobile: z.string().optional(), // ✅ OPTIONAL
+  mobile: z.string().optional(),
 });
 
 export type ProfileFormValues = z.infer<typeof profileSchema>;

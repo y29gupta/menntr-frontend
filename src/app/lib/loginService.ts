@@ -8,8 +8,6 @@
 //   return res.data;
 // }
 
-
-
 // export async function loginpasswordsetup(payload: any) {
 //   console.log(payload,"payload")
 //   const res = await axios.post('https://menntr-backend.onrender.com/auth/consume-invite', payload, {
@@ -68,7 +66,6 @@
 //   }
 // }
 
-
 // export const adminPasswordSetup = ( payload: {
 //     password: string;
 //     confirmPassword: string;
@@ -88,9 +85,9 @@
 //       },
 //     }
 //   );
- 
+
 //   // const passwordSetupResponse = api.post('/auth/change-password', sendPayload);
- 
+
 //   // return passwordSetupResponse
 // };
 
@@ -120,13 +117,9 @@ export async function loginpasswordsetup(payload: any) {
   try {
     console.log(payload, 'consume invite api token from url');
     const res = await toastApiPromise(
-      api.post(
-        '/auth/consume-invite',
-        payload,
-        {
-          withCredentials: true,
-        }
-      ),
+      api.post('/auth/consume-invite', payload, {
+        withCredentials: true,
+      }),
       {
         pending: 'Setting up password...',
         success: 'Password setup successful',
@@ -178,11 +171,7 @@ export async function sendForgotPassword(payload: any) {
 export async function validateResetToken(token: string, email: string) {
   try {
     const res = await toastApiPromise(
-      api.post(
-        '/auth/forgot-password/verify',
-        { token, email },
-        { withCredentials: true }
-      ),
+      api.post('/auth/forgot-password/verify', { token, email }, { withCredentials: true }),
       {
         pending: 'Validating reset token...',
         success: 'Token validated',
