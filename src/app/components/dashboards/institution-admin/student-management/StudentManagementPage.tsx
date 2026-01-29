@@ -174,7 +174,10 @@ export default function StudentManagementPage() {
         <h2 className="text-lg font-semibold text-[#1A2C50]">Total Students ({meta.totalCount})</h2>
 
         <div className="flex gap-2">
-          <button className="px-4 flex items-center gap-2 py-2 text-sm rounded-[64px] border border-[#904BFF] !text-[#904BFF] hover:bg-gray-50">
+          <button
+            onClick={() => router.push('/admin/student-management/bulk-upload')}
+            className="px-4 flex items-center gap-2 py-2 text-sm rounded-[64px] border border-[#904BFF] !text-[#904BFF] hover:bg-gray-50"
+          >
             <Upload size={16} /> Bulk Upload
           </button>
           <button
