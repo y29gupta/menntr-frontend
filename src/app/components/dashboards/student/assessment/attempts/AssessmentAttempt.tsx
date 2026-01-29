@@ -35,12 +35,33 @@ import AssessmentHeader from './AssessmentHeader';
 // import QuestionStepper from './QuestionStepper';
 import AssessmentFooter from './AssessmentFooter';
 import { QuestionRenderer } from './questions/QuestionRenderer';
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
 type Props = {
   assessmentId: string;
 };
 
+const router = useRouter();
+
 export default function AssessmentAttempt({ assessmentId }: Props) {
+  useEffect(() => {
+    document.documentElement.requestFullscreen?.().catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      if (!document.fullscreenElement) {
+        // ESC pressed → exit assessment
+        router.replace('/student/assessment');
+      }
+    };
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    };
+  }, [router]);
   return (
     <div className="min-h-screen border bg-[#F7F6FB] flex flex-col">
       <AssessmentHeader />
