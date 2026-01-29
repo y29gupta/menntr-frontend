@@ -19,7 +19,7 @@ const Buttons = ({ role, status, label, mode = 'login' }: ButtonsProps) => {
 
   // Default login label
   const loginLabel =
-    role === 'student'
+    role === 'Student'
       ? 'Login to Student Portal'
       : role === 'Super Admin'
         ? 'Login to Super Admin Portal'
