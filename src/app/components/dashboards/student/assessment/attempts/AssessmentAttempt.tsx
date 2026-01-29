@@ -35,7 +35,7 @@ import AssessmentHeader from './AssessmentHeader';
 // import QuestionStepper from './QuestionStepper';
 import AssessmentFooter from './AssessmentFooter';
 import { QuestionRenderer } from './questions/QuestionRenderer';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 
 type Props = {
@@ -45,6 +45,10 @@ type Props = {
 const router = useRouter();
 
 export default function AssessmentAttempt({ assessmentId }: Props) {
+  const router = useRouter();
+  const isExitingRef = useRef(false);
+
+  // // 🔹 Enter fullscreen on mount
   useEffect(() => {
     document.documentElement.requestFullscreen?.().catch(() => {});
   }, []);
@@ -65,10 +69,7 @@ export default function AssessmentAttempt({ assessmentId }: Props) {
   return (
     <div className="min-h-screen border bg-[#F7F6FB] flex flex-col">
       <AssessmentHeader />
-
-      <div className="px-6 mt-6">
-        <AssessmentStepper />
-      </div>
+      <AssessmentStepper />
 
       <div className="flex-1 px-6 mt-6">
         <div className="bg-white rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.06)] p-6">

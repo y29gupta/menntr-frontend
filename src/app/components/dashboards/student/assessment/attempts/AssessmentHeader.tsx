@@ -1,5 +1,6 @@
 import RobotClient from '@/app/components/RobotClient';
 import Timer from './Timer';
+import { X } from 'lucide-react';
 
 export default function AssessmentHeader() {
   return (
