@@ -1,6 +1,6 @@
 import { GripVertical, Trash2 } from 'lucide-react';
 import { useState } from 'react';
-import QuestionModal from './QuuestonModal';
+import QuestionModal from './QuestonModal';
 
 type Question = {
   id: string;
