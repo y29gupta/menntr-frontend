@@ -79,5 +79,10 @@ export const SIDEBAR_CONFIG = {
       path: '/student/courses',
       icon: <BookOpen size={20} />,
     },
+     {
+      label: 'Assessment',
+      path: '/student/assessment',
+      icon: <BookOpen size={20} />,
+    },
   ],
 } as const;
