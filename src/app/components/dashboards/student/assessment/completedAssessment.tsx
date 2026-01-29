@@ -1,7 +1,10 @@
 'use client';
 
-import EmptyAssessmentState from './EmptyAssessmentState';
+import { useMemo, useState } from 'react';
 import CompletedAssessmentCard from './CompletedAssessmentCard';
+import EmptyAssessmentState from './EmptyAssessmentState';
+import SearchWithFilter from './SearchWithFilter';
+import CompletedAssessmentFilterModal from '@/app/ui/modals/CompletedAssessmentFilterModal';
 
 type CompletedAssessmentItem = {
   id: number;
@@ -35,17 +38,15 @@ const completedAssessments: CompletedAssessmentItem[] = [
   },
 ];
 
-export function useCompletedAssessments() {
-  return {
-    completedAssessments,
-    isEmpty: completedAssessments.length === 0,
-  };
-}
+export default function CompletedAssessment() {
+  const [search, setSearch] = useState('');
+  const [showFilters, setShowFilters] = useState(false);
 
-const CompletedAssessment = () => {
-  const { completedAssessments, isEmpty } = useCompletedAssessments();
+  const filteredData = useMemo(() => {
+    return completedAssessments.filter((a) => a.title.toLowerCase().includes(search.toLowerCase()));
+  }, [search]);
 
-  if (isEmpty) {
+  if (filteredData.length === 0) {
     return (
       <EmptyAssessmentState
         imageSrc="/assets/empty-ongoing-assessment.svg"
@@ -56,18 +57,30 @@ const CompletedAssessment = () => {
   }
 
   return (
-    <div className="space-y-4">
-      {completedAssessments.map((assessment) => (
-        <CompletedAssessmentCard
-          key={assessment.id}
-          title={assessment.title}
-          type={assessment.type}
-          submittedOn={assessment.submittedOn}
-          status={assessment.status}
+    <>
+      <div className="w-130">
+        <SearchWithFilter
+          value={search}
+          onSearchChange={(v) => {
+            console.log('🔍 Compled search:', v);
+            setSearch(v);
+          }}
+          onToggleFilters={() => setShowFilters((p) => !p)}
+          filterOpen={showFilters}
+          filterModal={
+            <CompletedAssessmentFilterModal
+              onApply={() => setShowFilters(false)}
+              onClose={() => setShowFilters(false)}
+            />
+          }
         />
-      ))}
-    </div>
-  );
-};
+      </div>
 
-export default CompletedAssessment;
+      <div className="space-y-4">
+        {filteredData.map((assessment) => (
+          <CompletedAssessmentCard key={assessment.id} {...assessment} />
+        ))}
+      </div>
+    </>
+  );
+}

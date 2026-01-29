@@ -2,38 +2,20 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
-import SearchWithFilter from './SearchWithFilter';
-import OngoingAssessments, { useOngoingAssessments } from './OngoingAssessments';
-import UpcomingAssessments, { useUpcomingAssessments } from './upcomingAssessments';
-import CompletedAssessment, { useCompletedAssessments } from './completedAssessment';
-import AssessmentFilterModal from '@/app/ui/modals/AssessmentFilterModal';
+import OngoingAssessments from './OngoingAssessments';
+import UpcomingAssessments from './upcomingAssessments';
+import CompletedAssessment from './completedAssessment';
+
+type TabType = 'ongoing' | 'upcoming' | 'completed';
 
 export default function AssessmentTab() {
-  const [activeTab, setActiveTab] = useState<'ongoing' | 'upcoming' | 'completed'>('ongoing');
-  const [search, setSearch] = useState('');
-  const [showFilters, setShowFilters] = useState(false);
-
-  const ongoing = useOngoingAssessments();
-  const upcoming = useUpcomingAssessments();
-  const completed = useCompletedAssessments();
-
-  const isEmpty =
-    activeTab === 'ongoing'
-      ? ongoing.isEmpty
-      : activeTab === 'upcoming'
-        ? upcoming.isEmpty
-        : completed.isEmpty;
+  const [activeTab, setActiveTab] = useState<TabType>('ongoing');
 
   const tabs = [
     { id: 'ongoing', label: 'Ongoing' },
     { id: 'upcoming', label: 'Upcoming' },
     { id: 'completed', label: 'Completed' },
   ] as const;
-
-  const handleApplyFilters = (filters: any) => {
-    console.log('Applied Filters:', filters);
-    setShowFilters(false);
-  };
 
   return (
     <div className="min-h-screen w-full bg-white relative">
@@ -57,11 +39,7 @@ export default function AssessmentTab() {
           {tabs.map((tab) => (
             <button
               key={tab.id}
-              onClick={() => {
-                setActiveTab(tab.id);
-                setShowFilters(false);
-                setSearch('');
-              }}
+              onClick={() => setActiveTab(tab.id)}
               className={`relative pb-2 ${
                 activeTab === tab.id ? 'text-gray-900' : 'hover:text-gray-700'
               }`}
@@ -74,23 +52,6 @@ export default function AssessmentTab() {
           ))}
         </div>
       </div>
-
-      {!isEmpty && (
-        <div className="relative mb-4 w-[520px]">
-          <SearchWithFilter
-            value={search}
-            onSearchChange={setSearch}
-            onToggleFilters={() => setShowFilters((prev) => !prev)}
-          />
-
-          {showFilters && (
-            <AssessmentFilterModal
-              onApply={handleApplyFilters}
-              onClose={() => setShowFilters(false)}
-            />
-          )}
-        </div>
-      )}
 
       {/* Content */}
       <div className="mt-4">
