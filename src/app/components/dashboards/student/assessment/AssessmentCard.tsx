@@ -1,6 +1,7 @@
 'use client';
 
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 
 export type AssessmentStatus = { kind: 'pending' } | { kind: 'ends'; timeLeft: string };
 
@@ -14,10 +15,12 @@ type AssessmentCardProps = {
 export default function AssessmentCard({ title, type, duration, status }: AssessmentCardProps) {
   const isPending = status.kind === 'pending';
 
+  const router = useRouter();
+
   return (
     <div
       className={`
-        flex justify-between items-center w-full rounded-xl p-4 transition-all
+        flex justify-between  items-center w-full rounded-xl p-4 transition-all
         border shadow-[0_2px_8px_rgba(0,0,0,0.08)]
         ${
           isPending
@@ -56,6 +59,7 @@ export default function AssessmentCard({ title, type, duration, status }: Assess
             hover:opacity-90
             transition
           "
+          onClick={() => router.push(`/student/assessment/${2}`)}
         >
           Take Assessment
         </button>

@@ -150,7 +150,7 @@ const Loginform = ({ role, setupToken }: LoginFormProps) => {
                 <p className="text-[#0F172A] text-[16px] sm:text-[20px] font-semibold pt-4">
                   {isOneTimeLogin
                     ? 'Institution Admin Setup'
-                    : role === 'student'
+                    : role === 'Student'
                       ? 'Student Login'
                       : role === 'Super Admin'
                         ? 'Super Admin Login'
@@ -173,7 +173,7 @@ const Loginform = ({ role, setupToken }: LoginFormProps) => {
                 <p className="text-[#1A2C50] text-[14px] sm:text-[16px] font-semibold text-center">
                   {isOneTimeLogin
                     ? 'Set your password to activate your account'
-                    : role === 'student'
+                    : role === 'Student'
                       ? 'Enter your student login details'
                       : role === 'Super Admin'
                         ? 'Enter your super admin login details'
