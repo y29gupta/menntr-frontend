@@ -4,7 +4,7 @@ import { X } from 'lucide-react';
 
 export default function AssessmentHeader() {
   return (
-    <div className="bg-[#F7F6FB] flex items-center justify-between  w-full py-4">
+    <div className="bg-[#F7F6FB]   flex items-center justify-between  w-full py-4">
       {/* <RobotClient /> */}
       <div className="max-w-6xl mx-auto flex items-center justify-between px-6">
         <div className="text-center w-full">

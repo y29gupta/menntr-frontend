@@ -7,6 +7,7 @@ import {
   BarChart3,
   BookOpen,
   UserRound,
+  BookText,
 } from 'lucide-react';
 import StudentIcon from '../components/icons/StudentIcon';
 
@@ -75,13 +76,23 @@ export const SIDEBAR_CONFIG = {
       icon: <LayoutDashboard size={20} />,
     },
     {
-      label: 'My Courses',
-      path: '/student/courses',
-      icon: <BookOpen size={20} />,
-    },
-     {
       label: 'Assessment',
       path: '/student/assessment',
+      icon: <BookOpen size={20} />,
+    },
+    {
+      label: 'Assignment',
+      path: '/student/assignment',
+      icon: <BookText size={20} />,
+    },
+    {
+      label: 'placement',
+      path: '/student/placement',
+      icon: <BookOpen size={20} />,
+    },
+    {
+      label: 'Profile',
+      path: '/student/profile',
       icon: <BookOpen size={20} />,
     },
   ],
