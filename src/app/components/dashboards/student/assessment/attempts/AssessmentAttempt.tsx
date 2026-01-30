@@ -42,8 +42,6 @@ type Props = {
   assessmentId: string;
 };
 
-const router = useRouter();
-
 export default function AssessmentAttempt({ assessmentId }: Props) {
   const router = useRouter();
   const isExitingRef = useRef(false);
@@ -67,12 +65,12 @@ export default function AssessmentAttempt({ assessmentId }: Props) {
     };
   }, [router]);
   return (
-    <div className="min-h-screen border bg-[#F7F6FB] flex flex-col">
+    <div className="max-h-screen border bg-[#F7F6FB] flex flex-col overflow-hidden">
       <AssessmentHeader />
       <AssessmentStepper />
 
-      <div className="flex-1 px-6 mt-6">
-        <div className="bg-white rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.06)] p-6">
+      <div className="flex-1 px-6 mt-6 overflow-hidden">
+        <div className="bg-white rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.06)] p-6 h-full overflow-hidden">
           <QuestionRenderer />
         </div>
       </div>
