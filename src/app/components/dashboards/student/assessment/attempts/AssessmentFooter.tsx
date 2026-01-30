@@ -14,7 +14,10 @@ export default function AssessmentFooter({ currentIndex, total, onPrev, onNext, 
         Next Question
       </button> */}
       {currentIndex > 0 && (
-        <button onClick={onPrev} className="px-6 py-2 rounded-full border text-sm font-medium">
+        <button
+          onClick={onPrev}
+          className="px-6 py-2 rounded-full border border-[#904BFF] !text-[#904BFF] text-sm font-medium"
+        >
           Prev Question
         </button>
       )}
@@ -29,7 +32,7 @@ export default function AssessmentFooter({ currentIndex, total, onPrev, onNext, 
       ) : (
         <button
           onClick={onNext}
-          className="px-6 py-2 rounded-full bg-purple-600 text-white text-sm font-medium"
+          className="px-6 py-2 rounded-full bg-linear-to-r from-[#904BFF] to-[#C053C2] !text-white text-sm font-medium"
         >
           Next Question
         </button>
