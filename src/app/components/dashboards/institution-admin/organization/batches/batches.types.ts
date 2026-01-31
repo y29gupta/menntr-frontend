@@ -18,10 +18,10 @@ export type CreateBatchPayload = {
   categoryRoleId: number;
   departmentRoleId: number;
   coordinatorId?: string | number;
-  academicYear: number;
   startDate: string;
   endDate: string;
   isActive: boolean;
+  sections: string[];
 };
 
 export type UpdateBatchVariables = {

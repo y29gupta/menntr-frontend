@@ -10,13 +10,13 @@ import DepartmentForm, {
 import Categories from '@/app/components/dashboards/institution-admin/organization/category/Categories';
 import Hierarchy from '@/app/components/dashboards/institution-admin/organization/hierarchy/Hierarchy';
 import DepartmentsTable from '@/app/components/dashboards/institution-admin/organization/department/Department-table';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { createDepartment, updateDepartment } from '@/app/lib/institutions.api';
+import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
+import { createDepartment, updateDepartment, getDepartments } from '@/app/lib/institutions.api';
 import Batches from '@/app/components/dashboards/institution-admin/organization/batches/Batches';
 
 const Page = () => {
   const [activeTab, setActiveTab] = useState<
-    'Categories' | 'Departments' | 'Batches' | 'Hierarchy'
+    'Categories' | 'Departments' | 'Batches' | 'Role Hierarchy'
   >('Departments');
   const [departmentView, setDepartmentView] = useState<'list' | 'form'>('list');
   const [categoryView, setCategoryView] = useState<'list' | 'form'>('list');
@@ -33,6 +33,14 @@ const Page = () => {
     (activeTab === 'Batches' && batchView === 'form');
 
   const queryClient = useQueryClient();
+
+  // Fetch departments to get the total count
+  const { data: departmentResponse } = useQuery({
+    queryKey: ['department'],
+    queryFn: getDepartments,
+  });
+
+  const totalDepartments = departmentResponse?.total ?? 0;
 
   const createDepartmentMutation = useMutation({
     mutationFn: createDepartment,
@@ -58,8 +66,8 @@ const Page = () => {
     const payload = {
       name: data.name,
       code: data.code,
-      category_id: data.category_id ? Number(data.category_id) : undefined,
-      hodUserId: data.hodId ? Number(data.hodId) : undefined,
+      category_id: data.category_id ? Number(data.category_id) : null,
+      // hodUserId removed - users can be assigned separately
     };
 
     if (formMode === 'create') {
@@ -94,7 +102,7 @@ const Page = () => {
               <div className="w-full px-4 ">
                 <div className="flex items-center justify-between gap-4 mb-4">
                   <h2 className="hidden sm:block font-semibold text-gray-800 text-sm sm:text-base lg:text-lg">
-                    Total Departments <span>(20)</span>
+                    Total Departments <span>({totalDepartments})</span>
                   </h2>
 
                   <button
@@ -185,7 +193,7 @@ const Page = () => {
 
       {activeTab === 'Categories' && <Categories setCategoryView={setCategoryView} />}
 
-      {activeTab === 'Hierarchy' && (
+      {activeTab === 'Role Hierarchy' && (
         <div className="p-6  rounded-lg bg-white">
           <Hierarchy />
         </div>

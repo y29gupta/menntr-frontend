@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import CategoryCard from './CategoryCard';
 import { CategoryFormData, CategoryApiItem } from './category.types';
 import CategoryForm from './CategoryForm';
-import { getCategories } from '@/app/lib/institutions.api';
+import { getCategories, getCategoryById } from '@/app/lib/institutions.api';
 import { useQuery } from '@tanstack/react-query';
 
 // const categoriesData = [
@@ -110,19 +110,37 @@ export default function Categories({ setCategoryView }: Props) {
           // />
           <CategoryCard
             key={category.id}
-            name={category.name}
-            code={category.code}
-            departments={category.departmentCount}
-            students={0} // API doesn’t give this yet
-            head={category.head?.name ?? '—'}
-            onEdit={() => {
-              setSelectedFormData({
-                id: String(category.id),
-                name: category.name,
-                code: category.code,
-                assignedUserId: category.head?.id ?? '',
-                departments: [], // filled via meta API in form
-              });
+            category={{
+              ...category,
+              departments: category.departmentCount,
+              students: 0, // API doesn't give this yet
+            }}
+            onEdit={async () => {
+              // Fetch full category details including program
+              try {
+                const categoryDetails = await getCategoryById(String(category.id));
+                setSelectedFormData({
+                  id: String(categoryDetails.id),
+                  name: categoryDetails.name,
+                  code: categoryDetails.code,
+                  programs: categoryDetails.program
+                    ? [
+                        {
+                          program_code: categoryDetails.program.program_code,
+                          program_name: categoryDetails.program.program_name,
+                        },
+                      ]
+                    : [],
+                });
+              } catch (error) {
+                // Fallback to basic data if fetch fails
+                setSelectedFormData({
+                  id: String(category.id),
+                  name: category.name,
+                  code: category.code,
+                  programs: [],
+                });
+              }
               setView('edit');
             }}
           />

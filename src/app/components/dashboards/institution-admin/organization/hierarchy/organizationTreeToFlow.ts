@@ -6,8 +6,8 @@ import { InstitutionNode } from "./hierarchy.types"
 const dagreGraph = new dagre.graphlib.Graph()
 dagreGraph.setDefaultEdgeLabel(() => ({}))
 
-const nodeWidth = 260
-const nodeHeight = 90
+const nodeWidth = 280
+const nodeHeight = 150 // Increased to accommodate user list
 
 export function convertTreeToFlow(root: InstitutionNode) {
   const nodes: Node[] = []

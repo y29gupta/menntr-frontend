@@ -1,16 +1,35 @@
 import axios from 'axios';
 import { InstitutionFormValues } from '../institution';
-import { PLAN_CODE_TO_ID } from '../institutions.api';
 import { api } from '../api';
+import { plansApi } from './plans.api';
+
+// Helper function to get plan ID from plan code
+const getPlanIdFromCode = async (planCode: string): Promise<number | null> => {
+  try {
+    const plansResponse = await plansApi.getPlans();
+    const plan = plansResponse.data.find((p) => p.code.toUpperCase() === planCode.toUpperCase());
+    return plan?.id || null;
+  } catch (error) {
+    console.error('Failed to fetch plans:', error);
+    return null;
+  }
+};
 
 export const createInstitution = async (data: InstitutionFormValues) => {
   console.log(data, 'sumi');
+  
+  // Get plan ID from plan code
+  const planId = await getPlanIdFromCode(data.plan_id);
+  if (!planId) {
+    throw new Error(`Plan with code "${data.plan_id}" not found`);
+  }
+  
   const payload = {
     name: data.name,
     code: data.code,
     subdomain: data.subdomain,
     contact_email: data.contact_email,
-    plan_id: PLAN_CODE_TO_ID[data.plan_id],
+    plan_id: planId,
   };
   const res = await api.post(`/institution`, payload); // onboarding new institution
 

@@ -4,7 +4,9 @@ import { CreateBatchPayload } from './batches.types';
 
 export const getBatches = async (): Promise<BatchApiResponse> => {
   const res = await api.get('/organization/batches');
-  return res.data;
+  // Backend returns { meta: {...}, data: [...] }
+  // Extract the data array
+  return res.data.data || [];
 };
 
 export const createBatch = (payload: CreateBatchPayload) =>

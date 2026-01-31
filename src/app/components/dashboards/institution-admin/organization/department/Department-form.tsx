@@ -13,8 +13,8 @@ import { meta } from 'zod/v4/core';
 export const departmentSchema = z.object({
   name: z.string().min(1, 'Department name is required'),
   code: z.string().min(1, 'Department code is required'),
-  category_id: z.string().optional(),
-  hodId: z.string().optional(),
+  category_id: z.string().min(1, 'Parent category is required'), // Mandatory field
+  // hodId removed - users can be assigned separately
 });
 
 export type DepartmentFormValues = z.infer<typeof departmentSchema>;
@@ -41,17 +41,11 @@ const DepartmentForm = ({ mode, defaultValues, onBack, onSubmit }: Props) => {
     queryKey: ['department-meta'],
     queryFn: getDepartmentMeta,
   });
+  
   const Categoryoption = metaData?.categories.map((item) => ({
     label: item.name,
-    value: String(item.id), // ✅ FIX
-  }));
-
-  const AssignHODoption = metaData?.hodUsers.map((item) => ({
-    label: item.name,
-    value: String(item.id), // ✅ FIX
-  }));
-
-  console.log(Categoryoption, 'categoryopt');
+    value: String(item.id),
+  })) || [];
   return (
     <div className="w-full p-4">
       <div className="flex items-center  justify-between mb-4">
@@ -131,32 +125,11 @@ const DepartmentForm = ({ mode, defaultValues, onBack, onSubmit }: Props) => {
                   );
                 }}
               />
+              {errors.category_id && (
+                <p className="text-xs text-red-500 mt-1">{errors.category_id.message}</p>
+              )}
             </div>
 
-            {/* Assign HOD (CUSTOM DROPDOWN UI) */}
-            {/* Assign HOD */}
-            <div>
-              <label className="text-sm text-gray-700 font-medium">Assign HOD</label>
-
-              <Controller
-                name="hodId"
-                control={control}
-                render={({ field }) => (
-                  <FormDropdown
-                    placeholder="Select User"
-                    searchable
-                    searchPlaceholder="Search for Users"
-                    value={field.value}
-                    onChange={field.onChange}
-                    // options={[
-                    //   { label: 'Dr. Rajesh Kumar', value: '1' },
-                    //   { label: 'Dr. Anil Sharma', value: '2' },
-                    // ]}
-                    options={AssignHODoption || []}
-                  />
-                )}
-              />
-            </div>
           </div>
         </div>
       </div>

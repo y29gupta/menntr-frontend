@@ -369,6 +369,11 @@ export const createCategory = async (payload: CreateCategoryPayload) => {
   }
 };
 
+export const getCategoryById = async (categoryId: string) => {
+  const res = await api.get(`/organization/categories/${categoryId}`);
+  return res.data;
+};
+
 export const updateCategory = async (categoryId: string, payload: CreateCategoryPayload) => {
   try {
     const res = await toastApiPromise(api.put(`/organization/categories/${categoryId}`, payload), {
@@ -424,7 +429,9 @@ export const updateDepartment = async (id: number, payload: UpdateDepartmentPayl
 // ----------------------------- hierarchy api --------------------------------
 
 export type HierarchyApiNode = {
+  id: string;
   name: string;
+  roleHierarchyId: number;
   children?: HierarchyApiNode[];
 };
 
@@ -435,4 +442,35 @@ export type HierarchyApiResponse = {
 export const getHierarchy = async (): Promise<HierarchyApiResponse> => {
   const res = await api.get('/organization/hierarchy');
   return res.data;
+};
+
+// Programs API
+export type Program = {
+  id: number;
+  program_code: string;
+  program_name: string;
+  category_role_id?: number;
+};
+
+export const getPrograms = async (category_role_id?: number): Promise<Program[]> => {
+  const params = category_role_id ? { category_role_id } : {};
+  const res = await api.get('/organization/programs', { params });
+  return res.data;
+};
+
+export const createProgram = async (payload: {
+  category_role_id: number;
+  program_code: string;
+  program_name: string;
+}) => {
+  try {
+    const res = await toastApiPromise(api.post('/organization/programs', payload), {
+      pending: 'Creating program...',
+      success: 'Program created successfully',
+    });
+    return res.data;
+  } catch (error) {
+    showApiError(error);
+    throw error;
+  }
 };

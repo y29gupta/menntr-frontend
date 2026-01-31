@@ -35,9 +35,12 @@ export default function BatchesTable({
   //     }
   //   }, [batchResponse?.total, onTotalChange]);
   useEffect(() => {
-    onTotalChange(batchResponse?.length ?? 0);
+    onTotalChange(Array.isArray(batchResponse) ? batchResponse.length : 0);
   }, [batchResponse, onTotalChange]);
-  const tableData: Batch[] = batchResponse ? batchResponse.map(mapApiBatchToBatch) : [];
+  
+  const tableData: Batch[] = Array.isArray(batchResponse) 
+    ? batchResponse.map(mapApiBatchToBatch) 
+    : [];
 
   return (
     <DataTable<Batch>
