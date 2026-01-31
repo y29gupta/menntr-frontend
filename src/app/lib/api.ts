@@ -1,21 +1,29 @@
 import axios from 'axios';
+import { parseApiError } from './api/error';
 
 export const api = axios.create({
-  baseURL: '/api', // e.g. http://localhost:5000
+  baseURL: '/api',
   withCredentials: true,
+  timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
-  }
+  },
 });
 
-// api.interceptors.response.use(
-//   (response) => response,
-//   (error) => {
-//     if (error.response?.status === 401) {
-//       localStorage.clear();
-//       sessionStorage.clear();
-//       // window.location.href = '/login';
-//     }
-//     return Promise.reject(error);
-//   }
-// )
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const parsedError = parseApiError(error);
+
+    // Auth failure handling ONLY
+    if (parsedError.status === 401) {
+      localStorage.clear();
+      sessionStorage.clear();
+
+      // Optional: central redirect
+      // window.location.href = "/login"
+    }
+
+    return Promise.reject(parsedError);
+  }
+);

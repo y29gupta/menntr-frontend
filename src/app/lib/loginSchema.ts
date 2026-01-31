@@ -7,7 +7,7 @@ export const baseSchema = {
 };
 
 export const studentAdminSchema = z.object({
-  institutionCode: z.string().nonempty('Institution code is required'),
+  institution_code: z.string().nonempty('Institution code is required'),
 
   ...baseSchema,
 });
@@ -16,12 +16,10 @@ export const superAdminSchema = z.object({
   ...baseSchema,
 });
 
-
-export const setPasswordSchema = z
-  .object({
-    password: z.string().nonempty('Password is required'),
-    confirmPassword: z.string().nonempty('Confirm password is required'),
-  })
+export const setPasswordSchema = z.object({
+  password: z.string().nonempty('Password is required'),
+  confirmPassword: z.string().nonempty('Confirm password is required'),
+});
 export const forgotPasswordSchema = z.object({
   email: z.string().nonempty('Email is required').email('Enter a valid email'),
 });

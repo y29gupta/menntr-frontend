@@ -1,29 +1,33 @@
-'use client';
+// 'use client';
 
 import Topbar from './components/layout/Topbar';
 import CampusUserCard from './components/layout/CampusUserCard';
 
-import { useRouter } from 'next/navigation';
-import RobotCard from './ui/RobotCard';
+// import { useRouter } from 'next/navigation';
+// import RobotCard from './ui/RobotCard';
+
+import { ROLE_REDIRECT } from './lib/roles';
+import RobotClient from './components/RobotClient';
 
 export default function Page() {
-  const router = useRouter();
+  // const router = useRouter();
 
   return (
     <div
       className="
-        min-h-full
-        w-full
-        max-w-[1366px]
-        mx-auto
-        bg-white
-        px-4
-        sm:px-6
-        md:px-
-        lg:px-20
-        flex
-        flex-col
-        relative
+       
+        min-h-screen
+    w-full
+    max-w-[1366px]
+    mx-auto
+    bg-white
+    px-4
+    sm:px-6
+    lg:px-20
+    flex
+    flex-col
+    relative
+    overflow-y-auto
       "
     >
       {/* CONTENT CONTAINER */}
@@ -42,7 +46,7 @@ export default function Page() {
             pointer-events-none
           "
         >
-          <RobotCard />
+          <RobotClient />
         </div>
 
         {/* CENTER HEADING */}
@@ -82,7 +86,8 @@ export default function Page() {
                 description="Access assessments, results, and placement opportunities."
                 image="/assets/studentIcon.png"
                 buttonText="Continue as Student"
-                onClick={() => router.push('/login?role=student')}
+                // onClick={() => router.push('/login?role=student')}
+                redirect="/login?role=Student"
               />
 
               <CampusUserCard
@@ -91,7 +96,8 @@ export default function Page() {
                 description="Manage campus-wide department and placement workflow."
                 image="/assets/institutionIcon.png"
                 buttonText="Continue as Institution Admin"
-                onClick={() => router.push('/login?role=admin')}
+                // onClick={() => router.push(`/login?role=Institution Admin`)}
+                redirect="/login?role=Institution Admin"
               />
             </div>
 

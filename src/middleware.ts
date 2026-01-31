@@ -4,9 +4,7 @@ import type { NextRequest } from 'next/server';
 function getRoleFromToken(token: string): string | null {
   try {
     const payloadBase64 = token.split('.')[1];
-    const payload = JSON.parse(
-      Buffer.from(payloadBase64, 'base64').toString()
-    );
+    const payload = JSON.parse(Buffer.from(payloadBase64, 'base64').toString());
     return payload?.roles?.[0] ?? null;
   } catch {
     return null;
@@ -14,9 +12,7 @@ function getRoleFromToken(token: string): string | null {
 }
 
 export function middleware(req: NextRequest) {
-  
   const token = req.cookies.get('auth_token')?.value;
-
 
   if (!token) {
     return NextResponse.redirect(new URL(`/`, req.url));
@@ -25,13 +21,15 @@ export function middleware(req: NextRequest) {
   const role = getRoleFromToken(token);
   const pathname = req.nextUrl.pathname;
 
-
   if (pathname.startsWith('/super-admin') && role !== 'Super Admin') {
     return NextResponse.redirect(new URL('/', req.url));
   }
 
-  if (pathname.startsWith('/admin') && role !== 'Admin') {
+  if (pathname.startsWith('/admin') && role !== 'Institution Admin') {
     return NextResponse.redirect(new URL('/', req.url));
+  }
+  if (pathname.startsWith('/admin/dashboard') && role !== 'Institution Admin') {
+    return NextResponse.redirect(new URL('/login?role=Institution Admin', req.url));
   }
 
   if (pathname.startsWith('/student') && role !== 'Student') {
@@ -42,10 +40,7 @@ export function middleware(req: NextRequest) {
     return NextResponse.redirect(new URL('/', req.url));
   }
 
-  if (
-    pathname.startsWith('/procurement-head') &&
-    role !== 'Procurement Head'
-  ) {
+  if (pathname.startsWith('/procurement-head') && role !== 'Procurement Head') {
     return NextResponse.redirect(new URL('/unauthorized', req.url));
   }
 
@@ -59,5 +54,6 @@ export const config = {
     '/student/:path*',
     '/faculty/:path*',
     '/procurement-head/:path*',
+    '/admin',
   ],
 };

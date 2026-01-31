@@ -1,8 +1,16 @@
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap');
 
+
 /* Load Tailwind v4 */
 @import 'tailwindcss';
 
+html,
+body {
+  max-width: 100%;
+   overflow-x: hidden;
+  overflow-y: auto;
+  box-sizing: border-box;
+}
 
 /* Now everything else */
 :root {
@@ -11,6 +19,15 @@
 
   --font-geist-sans: 'Plus Jakarta Sans', sans-serif;
   --font-geist-mono: monospace;
+}
+
+@layer base {
+  button,
+  input,
+  textarea,
+  select {
+    @apply text-inherit;
+  }
 }
 
 @theme inline {
@@ -32,4 +49,68 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-geist-sans);
+}
+
+/* Set Expiry Toggle – AntD Switch override */
+.expiry-switch.ant-switch {
+  width: 36px; /* w-9 */
+  height: 20px; /* h-5 */
+  background-color: #e4e7ec;
+  border: 1px solid #be83df;
+}
+
+.expiry-switch.ant-switch.ant-switch-checked {
+  background-color: #7f56d9;
+  border: 1px solid #be83df;
+}
+
+.expiry-switch.ant-switch .ant-switch-handle {
+  width: 16px;
+  height: 16px;
+  top: 2px;
+  left: 2px;
+}
+
+.expiry-switch.ant-switch.ant-switch-checked .ant-switch-handle {
+  left: calc(100% - 18px);
+}
+
+.ant-picker {
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.ant-picker-focused {
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.no-scrollbar {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE & Edge */
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none; /* Chrome, Safari */
+}
+
+/* Thin scrollbar */
+.scrollbar-thin {
+  scrollbar-width: thin;              /* Firefox */
+  scrollbar-color: #c4b5fd transparent;
+}
+
+/* Chrome, Edge, Safari */
+.scrollbar-thin::-webkit-scrollbar {
+  width: 0px;
+  height: 3px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background-color: #c4b5fd;          /* violet-300 */
+  border-radius: 9999px;
 }

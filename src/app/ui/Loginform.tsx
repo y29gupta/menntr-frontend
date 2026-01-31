@@ -21,23 +21,30 @@ import { ROLE_REDIRECT } from '../lib/roles';
 type LoginFormValues = StudentAdminLogin | SuperAdminLogin;
 // type LoginFormValues = StudentAdminLogin | SuperAdminLogin | SetPasswordForm;
 
-const Loginform = ({ role }: { role: string }) => {
+type LoginFormProps = {
+  role: string;
+  setupToken?: string | null;
+};
+
+const Loginform = ({ role, setupToken }: LoginFormProps) => {
   const navigate = useRouter();
   const searchParams = useSearchParams();
   const expectedRole = searchParams.get('role');
+  console.log(expectedRole, 'role');
 
   const params = useParams();
   const slug = params?.slug as string[] | undefined;
   const isOneTimeLogin = slug?.[0] === 'one-time-login';
+  console.log(params, 'slug');
 
-  const token = searchParams.get('token') || '';
-  const setupEmail = searchParams.get('email') || '';
+  // const token = searchParams.get('token') || '';
+  // const setupEmail = searchParams.get('email') || '';
 
-  const isSuperAdmin = role === 'superadmin';
+  const isSuperAdmin = role === 'Super Admin';
 
   let imageSrc = '/assets/Admin.png';
   if (role === 'student') imageSrc = '/assets/HappyStudent.png';
-  if (role === 'superadmin') imageSrc = '/assets/superadmin.png';
+  if (role === 'Super Admin') imageSrc = '/assets/superadmin.png';
   const resolver = isOneTimeLogin
     ? zodResolver(setPasswordSchema)
     : zodResolver(isSuperAdmin ? superAdminSchema : studentAdminSchema);
@@ -51,48 +58,43 @@ const Loginform = ({ role }: { role: string }) => {
     resolver,
   });
 
-  // const onSubmit = async (data: LoginFormValues) => {
-  //   try {
-  //     const res = await loginUser({ ...data });
-
-  //     const redirectPath = ROLE_REDIRECT[expectedRole as keyof typeof ROLE_REDIRECT];
-
-  //     if (!redirectPath) {
-  //       throw new Error('Invalid role for redirect');
-  //     }
-
-  //     navigate.push(redirectPath);
-  //     alert('successfully logged in to super-admin page');
-  //   } catch (err: any) {
-  //     alert(err?.response?.data?.message || err.message || 'Login failed');
-  //   }
-  // };
-
   const onSubmit = async (data: any) => {
     try {
       if (isOneTimeLogin) {
+        console.log('one time', slug);
         if (data.password !== data.confirmPassword) {
           alert('Passwords do not match');
           return;
         }
+        if (!setupToken) {
+          alert('Invalid or expired setup token');
+          return;
+        }
 
-        const setup = await adminPasswordSetup({
-          // token,
-          // email: setupEmail,
-          password: data.password,
-          confirmPassword: data.confirmPassword,
-        });
+        const setup = await adminPasswordSetup(
+          {
+            // token,
+            // email: setupEmail,
+            password: data.password,
+            confirmPassword: data.confirmPassword,
+          },
+          setupToken
+        );
         if (setup) {
-          navigate.push('/auth/login?role=admin');
+          navigate.push('/');
           return;
         }
       }
 
       const res = await loginUser({ ...data });
+      console.log(res, 'resp');
+      if (res.status == true) {
+        console.log('true');
+        const redirectPath = ROLE_REDIRECT[expectedRole as keyof typeof ROLE_REDIRECT];
+        console.log(redirectPath, 'path');
 
-      const redirectPath = ROLE_REDIRECT[expectedRole as keyof typeof ROLE_REDIRECT];
-
-      navigate.push(redirectPath);
+        navigate.push(redirectPath);
+      }
     } catch (err: any) {
       alert(err?.response?.data?.message || err.message || 'Action failed');
     }
@@ -148,9 +150,9 @@ const Loginform = ({ role }: { role: string }) => {
                 <p className="text-[#0F172A] text-[16px] sm:text-[20px] font-semibold pt-4">
                   {isOneTimeLogin
                     ? 'Institution Admin Setup'
-                    : role === 'student'
+                    : role === 'Student'
                       ? 'Student Login'
-                      : role === 'superadmin'
+                      : role === 'Super Admin'
                         ? 'Super Admin Login'
                         : 'Admin Login'}
                 </p>
@@ -171,9 +173,9 @@ const Loginform = ({ role }: { role: string }) => {
                 <p className="text-[#1A2C50] text-[14px] sm:text-[16px] font-semibold text-center">
                   {isOneTimeLogin
                     ? 'Set your password to activate your account'
-                    : role === 'student'
+                    : role === 'Student'
                       ? 'Enter your student login details'
-                      : role === 'superadmin'
+                      : role === 'Super Admin'
                         ? 'Enter your super admin login details'
                         : 'Enter your admin login details'}
                 </p>
@@ -260,13 +262,13 @@ const Loginform = ({ role }: { role: string }) => {
                       {!isSuperAdmin && (
                         <div className="w-full">
                           <input
-                            {...register('institutionCode' as keyof StudentAdminLogin)}
+                            {...register('institution_code' as keyof StudentAdminLogin)}
                             placeholder="Institution Code"
                             className="w-full border-0 border-b border-gray-300 focus:border-blue-500 py-2 outline-none"
                           />{' '}
-                          {errors.institutionCode && (
+                          {errors.institution_code && (
                             <p className="text-red-500 text-xs mt-1">
-                              {errors.institutionCode.message as string}
+                              {errors.institution_code.message as string}
                             </p>
                           )}
                         </div>

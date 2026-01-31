@@ -1,7 +1,8 @@
 'use client';
 import LogoutIcon from '../components/icons/LogoutIcon';
 
-const Logout = ({ onClick }: { onClick: () => void }) => {
+// const Logout = ({ onClick }: { onClick: () => void }) => {
+const Logout = ({ onClick }: { onClick: (e: React.MouseEvent) => void }) => {
   return (
     <button
       onClick={onClick}

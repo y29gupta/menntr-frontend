@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import clsx from 'clsx';
 import { SIDEBAR_CONFIG } from '@/app/lib/sidebar.config';
-import { Role } from '@/app/lib/roles';
+import { Role, ROLE_TO_SIDEBAR_KEY } from '@/app/lib/roles';
 import CollapseIcon from '../icons/CollapseIcon';
 import ExpandMenuIcon from '../icons/ExpandMenuIcon';
 import MenntrCollapsedIcon from '../icons/MenntrCollapsedIcon';
@@ -17,25 +17,47 @@ type SidebarItem = {
 };
 
 type Props = {
-  role: Role;
+  role: Role | null;
   collapsed: boolean;
   onToggle: () => void;
 };
 
 export default function Sidebar({ role, collapsed, onToggle }: Props) {
   const pathname = usePathname();
-  const menu: readonly SidebarItem[] = SIDEBAR_CONFIG[role as SidebarRole] ?? [];
+  // const menu: readonly SidebarItem[] = SIDEBAR_CONFIG[role as SidebarRole] ?? [];
+
+  const sidebarKey = role ? ROLE_TO_SIDEBAR_KEY[role] : undefined;
+
+  const menu = sidebarKey ? (SIDEBAR_CONFIG[sidebarKey] ?? []) : [];
+  console.log(role, 'role sidebar');
 
   return (
     <>
       <aside
         className={clsx(
-          'h-screen bg-white shadow-[0px_8px_16px_0px_rgba(26,44,80,0.2)] transition-all duration-300 shrink-0 relative z-100  ',
-          collapsed ? 'w-[72px]' : 'w-[300px]'
+          `
+    h-screen bg-white
+    shadow-[0px_8px_16px_0px_rgba(26,44,80,0.2)]
+    z-50
+    fixed inset-y-0 left-0
+    transition-transform duration-300 ease-in-out
+    md:static md:transition-all 
+    `,
+          // Mobile: slide in/out
+          collapsed
+            ? `
+        w-[72px]
+        relative
+      `
+            : `
+        w-[300px]
+        
+        
+      `
         )}
       >
         {/* Logo Section */}
-        <div className={clsx('pt-[30px]', !collapsed && 'px-4 pb-6')}>
+        <div className={clsx('pt-[30px] relative', !collapsed && 'px-4 pb-6')}>
           {!collapsed && (
             <div>
               <img src="/assets/menntrLogo.svg" alt="menntrLogo" className="mb-1" />
@@ -63,7 +85,10 @@ export default function Sidebar({ role, collapsed, onToggle }: Props) {
         {/* Menu */}
         <nav className={clsx('flex flex-col gap-2 px-3 mt-4')}>
           {menu.map((item: SidebarItem) => {
-            const active = pathname === item.path;
+            // const active = pathname === item.path;
+            const basePath = item.path.split('?')[0];
+
+            const active = pathname === basePath || pathname.startsWith(basePath + '/');
 
             return (
               <Link
@@ -71,7 +96,7 @@ export default function Sidebar({ role, collapsed, onToggle }: Props) {
                 href={item.path}
                 className={clsx(
                   'flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition',
-                  active ? 'bg-[#3B82F6] text-white' : 'text-slate-600 hover:bg-slate-100',
+                  active ? 'bg-[#FFEEFF] text-[#7B3AEC]' : 'text-slate-600 hover:bg-slate-100',
                   collapsed && 'justify-center'
                 )}
               >

@@ -27,7 +27,7 @@ export default function SuperAdminPage() {
   });
 
   return (
-    <div className="w-full">
+    <div className="w-full  h-full">
       {view === 'dashboard' && (
         <Dashboard
           onCreateInstitution={() => {

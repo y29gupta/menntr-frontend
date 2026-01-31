@@ -23,7 +23,7 @@ export default function QueryProvider({ children }: { children: React.ReactNode 
       {children}
 
       {/* Devtools only in development */}
-      {process.env.NODE_ENV === 'development' && <ReactQueryDevtools initialIsOpen={false} />}
+      {/* {process.env.NODE_ENV === 'development' && <ReactQueryDevtools initialIsOpen={false} />} */}
     </QueryClientProvider>
   );
 }

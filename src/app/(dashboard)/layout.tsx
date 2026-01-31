@@ -1,30 +1,64 @@
-'use client';
+// // 'use client';
 
-import { useEffect, useState } from 'react';
-import { usePathname } from 'next/navigation';
-import Sidebar from '../components/layout/Sidebar';
+// import { useEffect, useState } from 'react';
+// import { usePathname } from 'next/navigation';
+// import Sidebar from '../components/layout/Sidebar';
+// import { Role } from '../lib/roles';
+
+// import 'reactflow/dist/style.css';
+
+// export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+//   const pathname = usePathname();
+//   const role = pathname.split('/')[1] as Role;
+
+//   // const [collapsed, setCollapsed] = useState(true);
+//   const [collapsed, setCollapsed] = useState<boolean>(() => {
+//     if (typeof window === 'undefined') return true; // SSR safe
+//     return true; // collapsed on initial mount (your requirement)
+//   });
+
+//   // useEffect(() => {
+//   //   const resize = () => {
+//   //     setCollapsed(window.innerWidth < 768);
+//   //   };
+//   //   resize();
+//   //   window.addEventListener('resize', resize);
+//   //   return () => window.removeEventListener('resize', resize);
+//   // }, []);
+
+//   useEffect(() => {
+//     const resize = () => {
+//       setCollapsed(window.innerWidth < 768);
+//     };
+
+//     window.addEventListener('resize', resize);
+//     return () => window.removeEventListener('resize', resize);
+//   }, []);
+
+//   return (
+//     <div className="flex  w-full min-h-screen bg-white ">
+//       {!collapsed && (
+//         <div
+//           className="fixed inset-0 bg-black/40 z-40 md:hidden"
+//           onClick={() => setCollapsed(true)}
+//         />
+//       )}
+
+//       <Sidebar role={role} collapsed={collapsed} onToggle={() => setCollapsed(!collapsed)} />
+
+//       <main className="flex-1 min-w-0 h-screen overflow-y-auto scrollbar-hide p-6 ">
+//         {children}
+//       </main>
+//     </div>
+//   );
+// }
+
+import DashboardShell from '../components/layout/DashboardShell';
+import { getUserRole } from '../lib/auth.server';
 import { Role } from '../lib/roles';
 
-export default function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname();
-  const role = pathname.split('/')[1] as Role;
+export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
+  const role = (await getUserRole()) as Role | null;
 
-  const [collapsed, setCollapsed] = useState(false);
-
-  useEffect(() => {
-    const resize = () => {
-      setCollapsed(window.innerWidth < 768);
-    };
-    resize();
-    window.addEventListener('resize', resize);
-    return () => window.removeEventListener('resize', resize);
-  }, []);
-
-  return (
-    <div className="flex h-screen bg-[#F7F9FC] overflow-hidden">
-      <Sidebar role={role} collapsed={collapsed} onToggle={() => setCollapsed(!collapsed)} />
-
-      <main className="flex-1 overflow-hidden p-6">{children}</main>
-    </div>
-  );
+  return <DashboardShell role={role}>{children}</DashboardShell>;
 }

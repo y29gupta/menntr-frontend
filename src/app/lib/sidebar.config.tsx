@@ -6,7 +6,10 @@ import {
   Users,
   BarChart3,
   BookOpen,
+  UserRound,
+  BookText,
 } from 'lucide-react';
+import StudentIcon from '../components/icons/StudentIcon';
 
 export type SidebarItem = {
   label: string;
@@ -41,30 +44,55 @@ export const SIDEBAR_CONFIG = {
   admin: [
     {
       label: 'Dashboard',
-      path: '/admin',
+      path: '/admin/dashboard',
       icon: <LayoutDashboard size={20} />,
     },
     {
-      label: 'Faculty',
-      path: '/dashboard/admin/faculty',
+      label: 'Organization',
+      path: '/admin/organization',
       icon: <Users size={20} />,
     },
     {
-      label: 'Reports',
-      path: '/admin/reports',
+      label: 'User Management',
+      path: '/admin/user-management',
+      icon: <UserRound />,
+    },
+    {
+      label: 'Student Management',
+      path: '/admin/student-management',
+      icon: <StudentIcon />,
+    },
+    {
+      label: 'Assessment',
+      path: '/admin/assessment?tab=active',
       icon: <BarChart3 size={20} />,
     },
   ],
 
-  student: [
+  Student: [
     {
       label: 'Dashboard',
-      path: '/student',
+      path: '/Student',
       icon: <LayoutDashboard size={20} />,
     },
     {
-      label: 'My Courses',
-      path: '/student/courses',
+      label: 'Assessment',
+      path: '/student/assessment',
+      icon: <BookOpen size={20} />,
+    },
+    {
+      label: 'Assignment',
+      path: '/student/assignment',
+      icon: <BookText size={20} />,
+    },
+    {
+      label: 'placement',
+      path: '/student/placement',
+      icon: <BookOpen size={20} />,
+    },
+    {
+      label: 'Profile',
+      path: '/student/profile',
       icon: <BookOpen size={20} />,
     },
   ],
