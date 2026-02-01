@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import CodeEditor from './CodeEditor';
+import TestResult from './Testresult';
 
 /* 🔹 Dynamic types */
 type TestCase = {
@@ -44,12 +45,21 @@ export default function CodingQuestion() {
   const runCode = () => {
     const returnsSomething = code.includes('return');
 
+    // Simulate multiple test cases
     setResult({
       status: returnsSomething ? 'passed' : 'failed',
       cases: [
         {
           name: 'Sample test case 1',
-          input: 'A String S',
+          input:
+            'This is a very long input string used to aggressively test UI wrapping, overflow, scrolling, and height expansion across different breakpoints, including long file paths like src/app/components/dashboards/student/assessment/attempts/question and repeated descriptive text to increase length.',
+          expected: true,
+          output: returnsSomething ? true : null,
+          passed: returnsSomething,
+        },
+        {
+          name: 'Sample test case 2',
+          input: 'racecar',
           expected: true,
           output: returnsSomething ? true : null,
           passed: returnsSomething,
@@ -59,9 +69,9 @@ export default function CodingQuestion() {
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-full">
-      {/* LEFT : Problem */}
-      <div className="flex flex-col gap-2 text-[16px] font-medium text-[#1A2C50]">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-full min-h-0">
+      {/* LEFT : Problem (static - no scroll) */}
+      <div className="flex flex-col gap-2 text-[16px] font-medium text-[#1A2C50] overflow-hidden">
         <p>{question.description}</p>
 
         <div>
@@ -80,34 +90,17 @@ export default function CodingQuestion() {
         </div>
       </div>
 
-      {/* RIGHT : Editor + Result */}
-      <div className="flex flex-col gap-4 lg:h-full lg:overflow-y-auto">
-        <CodeEditor code={code} setCode={setCode} onRun={runCode} />
-
-        {result.status && (
-          <div className="border rounded-xl p-4 text-sm bg-white">
-            <p
-              className={`font-medium ${
-                result.status === 'passed' ? 'text-green-600' : 'text-red-600'
-              }`}
-            >
-              {result.status === 'passed' ? 'Congratulations' : 'Wrong Answer'}
-            </p>
-
-            <div className="mt-3 space-y-2">
-              {result.cases.map((c) => (
-                <div key={c.name} className="border-t pt-2">
-                  <p className={c.passed ? 'text-green-600' : 'text-red-600'}>
-                    {c.passed ? '✓' : '✗'} {c.name}
-                  </p>
-                  <p>Input: {c.input}</p>
-                  <p>Your Output: {String(c.output)}</p>
-                  <p>Expected Output: {String(c.expected)}</p>
-                </div>
-              ))}
-            </div>
+      {/* RIGHT : Editor + Result (SCROLLABLE) */}
+      <div className="h-full min-h-0 overflow-y-auto pr-2">
+        <div className="flex flex-col gap-4 pb-6">
+          {/* Editor with smaller fixed height */}
+          <div className="h-[250px]">
+            <CodeEditor code={code} setCode={setCode} onRun={runCode} />
           </div>
-        )}
+
+          {/* Result section */}
+          {result.status && <TestResult status={result.status} cases={result.cases} />}
+        </div>
       </div>
     </div>
   );

@@ -13,19 +13,19 @@ type Props = {
 };
 
 export function QuestionRenderer({ currentIndex, setQuestionStatus }: Props) {
-  const questionType: 'mcq' | 'coding' = 'mcq';
+  const questionType: 'mcq' | 'coding' = 'coding';
   const currentQuestion = mcqDummyQuestions[currentIndex];
 
   return (
-    <div className="flex flex-col flex-1 ">
+    <div className="flex flex-col flex-1 min-h-0">
       {/* ───────── Top Center Title ───────── */}
       <div className="relative flex items-center justify-center">
         <span className="text-base font-semibold text-gray-900">
-          {questionType === 'mcq' ? 'MCQ - Single correct answer' : 'Coding - Single problem'}
+          {questionType === 'coding' ? 'MCQ - Single correct answer' : 'Coding - Single problem'}
         </span>
 
         <span className="absolute right-0 text-sm font-semibold text-gray-700">
-          Marks : {questionType === 'mcq' ? 25 : 100}
+          Marks : {questionType === 'coding' ? 25 : 100}
         </span>
       </div>
 
@@ -51,15 +51,15 @@ export function QuestionRenderer({ currentIndex, setQuestionStatus }: Props) {
       <div className="mt-4 border-t border-gray-200" />
 
       {/* ───────── Question Body ───────── */}
-      <div className="mt-4 h-[250px] overflow-auto">
-        {questionType === 'mcq' && (
+      <div className="mt-4 flex-1 min-h-0 overflow-hidden">
+        {/* {questionType === 'coding' && (
           <McqQuestion
             question={currentQuestion}
             questionIndex={currentIndex}
             setQuestionStatus={setQuestionStatus}
           />
-        )}
-        {/* {questionType === 'coding' && <CodingQuestion />} */}
+        )} */}
+        {questionType === 'coding' && <CodingQuestion />}
       </div>
     </div>
   );

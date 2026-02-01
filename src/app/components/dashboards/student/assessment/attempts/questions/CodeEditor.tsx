@@ -20,9 +20,9 @@ export default function CodeEditor({ code, setCode, onRun }: Props) {
   const [language, setLanguage] = useState('python');
 
   return (
-    <div className="border border-[#C3CAD9] rounded-xl bg-white flex flex-col overflow-hidden">
+    <div className="h-full border border-[#C3CAD9] rounded-xl bg-white flex flex-col">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-2">
+      <div className="flex items-center justify-between px-4 py-2 flex-shrink-0">
         <span className="text-[14px] font-medium text-[#1A2C50]">Code Editor</span>
 
         <div className="flex items-center gap-3">
@@ -45,10 +45,10 @@ export default function CodeEditor({ code, setCode, onRun }: Props) {
         </div>
       </div>
 
-      <hr className="text-[#C3CAD9] mx-4 my-1" />
+      <hr className="text-[#C3CAD9] mx-4 my-1 flex-shrink-0" />
 
-      {/* Editor */}
-      <div className="flex-1 min-h-[260px]">
+      {/* Editor - takes remaining space */}
+      <div className="flex-1 min-h-0 overflow-hidden">
         <Editor
           height="100%"
           language={language}
@@ -58,6 +58,8 @@ export default function CodeEditor({ code, setCode, onRun }: Props) {
             minimap: { enabled: false },
             fontSize: 14,
             scrollBeyondLastLine: false,
+            overviewRulerLanes: 0,
+            automaticLayout: true,
           }}
         />
       </div>
