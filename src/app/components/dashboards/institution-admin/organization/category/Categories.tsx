@@ -5,30 +5,6 @@ import CategoryForm from './CategoryForm';
 import { getCategories, getCategoryById } from '@/app/lib/institutions.api';
 import { useQuery } from '@tanstack/react-query';
 
-// const categoriesData = [
-//   {
-//     name: 'Engineering',
-//     departments: 5,
-//     students: 900,
-//     head: 'Dr. Ram Shankar',
-//     code: 'Eng',
-//   },
-//   {
-//     name: 'Agriculture',
-//     departments: 2,
-//     students: 300,
-//     head: 'Dr. Haritha',
-//     code: 'Eng',
-//   },
-//   {
-//     name: 'Management',
-//     departments: 3,
-//     students: 500,
-//     head: 'Dr. Mathew',
-//     code: 'Eng',
-//   },
-// ];
-
 type Props = {
   setCategoryView: (view: 'list' | 'form') => void;
 };

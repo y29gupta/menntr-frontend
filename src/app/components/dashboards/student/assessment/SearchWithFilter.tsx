@@ -7,6 +7,8 @@ type SearchWithFilterProps = {
   onSearchChange: (value: string) => void;
   onToggleFilters: () => void;
   placeholder?: string;
+  filterOpen?: boolean;
+  filterModal?: React.ReactNode;
 };
 
 export default function SearchWithFilter({
@@ -14,10 +16,12 @@ export default function SearchWithFilter({
   onSearchChange,
   onToggleFilters,
   placeholder = 'Search for assessments',
+  filterOpen,
+  filterModal,
 }: SearchWithFilterProps) {
   return (
     <div className="flex flex-col sm:flex-row gap-3 mb-4">
-      {/* Search Input */}
+      {/* Search */}
       <div className="relative flex-1">
         <Search className="absolute left-3 top-2.5 text-gray-400 w-4 h-4" />
         <input
@@ -29,14 +33,19 @@ export default function SearchWithFilter({
         />
       </div>
 
-      {/* Filter Button */}
-      <button
-        onClick={onToggleFilters}
-        className="flex items-center gap-2 px-4 py-2 border border-purple-500 text-purple-600 rounded-lg text-sm hover:bg-purple-50"
-      >
-        <Filter className="w-4 h-4" />
-        Filter
-      </button>
+      {/* Filter button + anchor */}
+      <div className="relative">
+        <button
+          onClick={onToggleFilters}
+          className="flex items-center gap-2 px-4 py-2 border border-purple-500 text-purple-600 rounded-lg text-sm hover:bg-purple-50"
+        >
+          <Filter className="w-4 h-4" />
+          Filter
+        </button>
+
+        {/* Modal renders HERE */}
+        {filterOpen && filterModal}
+      </div>
     </div>
   );
 }

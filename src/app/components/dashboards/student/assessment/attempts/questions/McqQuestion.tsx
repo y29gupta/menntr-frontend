@@ -39,36 +39,38 @@
 //     </div>
 //   );
 // }
-
 type Props = {
-  question: {
-    id: number;
-    options: string[];
-  };
-  questionIndex: number;
-  setQuestionStatus: React.Dispatch<any>;
+  question: any;
+  selectedOptions: number[];
+  onSelectOption: (ids: number[]) => void;
 };
 
-export default function McqQuestion({ question, questionIndex, setQuestionStatus }: Props) {
+export default function McqQuestion({ question, selectedOptions, onSelectOption }: Props) {
+  console.log(question, 'ques');
   return (
     <div className="space-y-3">
-      {question.options.map((opt, idx) => (
+      {question.options.map((opt: any, idx: any) => (
         <label key={idx} className="flex items-center gap-3 cursor-pointer">
           <input
             type="radio"
-            name={`q-${question.id}`}
+            name={`q-${question.question_id}`}
             className="h-4 w-4 accent-purple-600"
-            onChange={() =>
-              setQuestionStatus((prev: any) => ({
-                ...prev,
-                [questionIndex]: {
-                  ...prev[questionIndex],
-                  attempted: true,
-                },
-              }))
-            }
+            // onChange={() =>
+            //   setQuestionStatus((prev: any) => ({
+            //     ...prev,
+            //     [questionIndex]: {
+            //       ...prev[questionIndex],
+            //       attempted: true,
+            //     },
+            //   }))
+            // }
+            checked={selectedOptions.includes(Number(opt.id))}
+            onChange={() => onSelectOption([Number(opt.id)])}
           />
-          <span className="text-sm text-gray-700">{opt}</span>
+          <span className="text-sm text-gray-700">
+            {' '}
+            {opt.label}. {opt.text}
+          </span>
         </label>
       ))}
     </div>

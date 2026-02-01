@@ -10,13 +10,17 @@ type Props = {
   total: number;
   currentIndex: number;
   statusMap: Record<number, StepStatus>;
+  onStepClick: (index: number) => void; // ✅ ADD
 };
 
 const VISIBLE_COUNT = 20;
 const SHIFT_COUNT = 5;
 
-export default function AssessmentStepper({ total, currentIndex, statusMap }: Props) {
+export default function AssessmentStepper({ total, currentIndex, statusMap, onStepClick }: Props) {
   const [windowStart, setWindowStart] = useState(0);
+  useEffect(() => {
+    setWindowStart(0);
+  }, [total]);
 
   const maxWindowStart = Math.max(0, total - VISIBLE_COUNT);
   const windowEnd = Math.min(windowStart + VISIBLE_COUNT, total);
@@ -29,7 +33,7 @@ export default function AssessmentStepper({ total, currentIndex, statusMap }: Pr
     } else if (currentIndex >= windowEnd) {
       setWindowStart(Math.min(currentIndex - VISIBLE_COUNT + 1, maxWindowStart));
     }
-  }, [currentIndex, windowStart, windowEnd, maxWindowStart]);
+  }, [currentIndex, windowStart, maxWindowStart]);
 
   /* 🔹 MANUAL PAGINATION (ARROWS) */
   const goPrevWindow = () => {
@@ -38,6 +42,12 @@ export default function AssessmentStepper({ total, currentIndex, statusMap }: Pr
 
   const goNextWindow = () => {
     setWindowStart((prev) => Math.min(prev + SHIFT_COUNT, maxWindowStart));
+  };
+
+  const handleStepClick = (index: number) => {
+    if (index > currentIndex) return; // ❌ block forward jump
+    // parent should control currentIndex
+    // emit event instead of setting here
   };
 
   return (
@@ -57,7 +67,12 @@ export default function AssessmentStepper({ total, currentIndex, statusMap }: Pr
         <div className="flex items-center">
           {Array.from({ length: windowEnd - windowStart }, (_, idx) => windowStart + idx).map(
             (i) => {
-              const status = statusMap[i];
+              const status = statusMap[i] ?? {
+                attempted: false,
+                visited: false,
+                review: false,
+              };
+
               const isCurrent = i === currentIndex;
 
               /* ---------- CIRCLE STYLE ---------- */
@@ -82,7 +97,15 @@ export default function AssessmentStepper({ total, currentIndex, statusMap }: Pr
               /* ---------- LINE STYLE ---------- */
               let lineStyle = 'bg-[#E5E7EB]';
 
-              if (status.attempted) {
+              // if (status.attempted) {
+              //   lineStyle = 'bg-[#22C55E]';
+              // } else if (status.visited) {
+              //   lineStyle = 'bg-[#F97316]';
+              // }
+
+              if (status.review) {
+                lineStyle = 'bg-[#7C3AED]'; // 🔴 review priority
+              } else if (status.attempted) {
                 lineStyle = 'bg-[#22C55E]';
               } else if (status.visited) {
                 lineStyle = 'bg-[#F97316]';
@@ -100,6 +123,10 @@ export default function AssessmentStepper({ total, currentIndex, statusMap }: Pr
                     )}
 
                     <div
+                      onClick={() => {
+                        if (i <= currentIndex) onStepClick(i);
+                      }}
+                      role="button"
                       className={`h-8 w-8 rounded-full flex items-center justify-center text-sm font-medium ${circleStyle}`}
                     >
                       {i + 1}

@@ -2,7 +2,12 @@ import RobotClient from '@/app/components/RobotClient';
 import Timer from './Timer';
 import { X } from 'lucide-react';
 
-export default function AssessmentHeader() {
+type Props = {
+  durationMinutes?: number;
+  onTimeUp: () => void;
+};
+
+export default function AssessmentHeader({ durationMinutes, onTimeUp }: Props) {
   return (
     <div className="bg-[#F7F6FB]   flex items-center justify-between  w-full py-4">
       {/* <RobotClient /> */}
@@ -13,7 +18,7 @@ export default function AssessmentHeader() {
         </div>
       </div>
       <div className="">
-        <Timer />
+        <Timer durationMinutes={durationMinutes} onTimeUp={onTimeUp} />
       </div>
     </div>
   );

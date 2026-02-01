@@ -9,5 +9,5 @@ type PageProps = {
 };
 
 export default function Page({ params }: PageProps) {
-  return <AssessmentAttempt assessmentId={params.assessmentId} />;
+  return <AssessmentAttempt />;
 }

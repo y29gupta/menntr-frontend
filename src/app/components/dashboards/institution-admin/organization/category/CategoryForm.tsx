@@ -3,7 +3,13 @@
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { categorySchema, CategoryFormValues } from './category.schema';
-import { createCategory, updateCategory, getPrograms, createProgram, Program } from '@/app/lib/institutions.api';
+import {
+  createCategory,
+  updateCategory,
+  getPrograms,
+  createProgram,
+  Program,
+} from '@/app/lib/institutions.api';
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { CreateCategoryPayload } from './category.types';
 import { useState, useEffect } from 'react';
@@ -15,7 +21,6 @@ type Props = {
   onCancel: () => void;
   onSubmitSuccess: () => void;
 };
-
 
 export default function CategoryForm({ mode, defaultValues, onCancel, onSubmitSuccess }: Props) {
   const form = useForm<CategoryFormValues>({
@@ -49,7 +54,12 @@ export default function CategoryForm({ mode, defaultValues, onCancel, onSubmitSu
 
   // When editing, if defaultValues has a program, find its ID in allPrograms
   useEffect(() => {
-    if (mode === 'edit' && defaultValues?.programs && defaultValues.programs.length > 0 && allPrograms.length > 0) {
+    if (
+      mode === 'edit' &&
+      defaultValues?.programs &&
+      defaultValues.programs.length > 0 &&
+      allPrograms.length > 0
+    ) {
       const program = defaultValues.programs[0];
       const matchingProgram = allPrograms.find(
         (p) => p.program_code === program.program_code && p.program_name === program.program_name
@@ -82,13 +92,13 @@ export default function CategoryForm({ mode, defaultValues, onCancel, onSubmitSu
 
   const handleAddNewProgram = () => {
     if (!newProgramCode.trim() || !newProgramName.trim()) return;
-    
+
     // If a program already exists, replace it instead of adding
     if (fields.length > 0) {
       remove(0);
       setSelectedProgramIds([]);
     }
-    
+
     // For now, we'll add it to the form directly
     // In create mode, it will be created when category is created
     // In edit mode, we need category_role_id, so we'll create it immediately
@@ -154,7 +164,7 @@ export default function CategoryForm({ mode, defaultValues, onCancel, onSubmitSu
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="flex  px-4 pt-4 flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <button
           type="button"
           onClick={onCancel}
@@ -185,160 +195,160 @@ export default function CategoryForm({ mode, defaultValues, onCancel, onSubmitSu
       </div>
 
       {/* Card */}
-      <div className="w-full rounded-2xl border-[#C3CAD9] border bg-background p-4 sm:p-6 flex flex-col gap-6 sm:gap-7">
-        {/* Name */}
-        <div className="flex flex-col gap-3 sm:gap-4">
-          <label className="text-sm sm:text-[16px] text-[#0F172A] font-medium">Category Name</label>
-          <input
-            {...register('name')}
-            placeholder="Enter Category Name"
-            className="w-full border-b py-2 sm:py-2.5 outline-none bg-transparent border-[#C3CAD9]"
-          />
-          {formState.errors.name && (
-            <p className="text-xs text-red-500">{formState.errors.name.message}</p>
-          )}
-        </div>
-
-        {/* Code */}
-        <div className="flex flex-col gap-3 sm:gap-4">
-          <label className="text-sm sm:text-[16px] text-[#0F172A] font-medium">Category Code</label>
-          <input
-            {...register('code')}
-            placeholder="Enter Category Code"
-            className="w-full border-b py-2 sm:py-2.5 outline-none bg-transparent border-[#C3CAD9]"
-          />
-          {formState.errors.code && (
-            <p className="text-xs text-red-500">{formState.errors.code.message}</p>
-          )}
-        </div>
-
-        {/* Program (only one per category) */}
-        <div className="flex flex-col gap-3 sm:gap-4">
-          <label className="text-sm sm:text-[16px] text-[#0F172A] font-medium">
-            Program <span className="text-xs text-gray-500">(Optional - One per category)</span>
-          </label>
-          
-          {/* Dropdown for existing programs */}
-          <div className="flex gap-2">
-            <select
-              onChange={(e) => {
-                if (e.target.value) {
-                  handleSelectProgram(Number(e.target.value));
-                  e.target.value = '';
-                }
-              }}
-              disabled={fields.length > 0}
-              className="flex-1 border-b py-2 sm:py-2.5 outline-none bg-transparent border-[#C3CAD9] disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <option value="">Select a program...</option>
-              {allPrograms
-                .filter((p) => !selectedProgramIds.includes(p.id))
-                .map((program) => (
-                  <option key={program.id} value={program.id}>
-                    {program.program_name} ({program.program_code})
-                  </option>
-                ))}
-            </select>
-            <button
-              type="button"
-              onClick={() => setShowNewProgramForm(!showNewProgramForm)}
-              disabled={fields.length > 0}
-              className="px-4 py-2 border border-[#C3CAD9] rounded-lg hover:bg-gray-50 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <Plus className="w-4 h-4" />
-              Add New
-            </button>
+      <div className="px-4">
+        <div className="w-full rounded-2xl border-[#C3CAD9] border bg-background p-4 sm:p-6 flex flex-col gap-6 sm:gap-7">
+          {/* Name */}
+          <div className="flex flex-col gap-3 sm:gap-4">
+            <label className="text-sm sm:text-[16px] text-[#0F172A] font-medium">
+              Category Name
+            </label>
+            <input
+              {...register('name')}
+              placeholder="Enter Category Name"
+              className="w-full border-b py-2 sm:py-2.5 outline-none bg-transparent border-[#C3CAD9]"
+            />
+            {formState.errors.name && (
+              <p className="text-xs text-red-500">{formState.errors.name.message}</p>
+            )}
           </div>
 
-          {/* New Program Form */}
-          {showNewProgramForm && (
-            <div className="border border-[#C3CAD9] rounded-lg p-4 space-y-3">
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={newProgramCode}
-                  onChange={(e) => setNewProgramCode(e.target.value)}
-                  placeholder="Program Code (e.g., btech)"
-                  className="flex-1 border-b py-2 outline-none bg-transparent border-[#C3CAD9]"
-                />
-                <input
-                  type="text"
-                  value={newProgramName}
-                  onChange={(e) => setNewProgramName(e.target.value)}
-                  placeholder="Program Name (e.g., B-TECH)"
-                  className="flex-1 border-b py-2 outline-none bg-transparent border-[#C3CAD9]"
-                />
-                <button
-                  type="button"
-                  onClick={handleAddNewProgram}
-                  disabled={!newProgramCode.trim() || !newProgramName.trim() || createProgramMutation.isPending}
-                  className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Add
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowNewProgramForm(false);
-                    setNewProgramCode('');
-                    setNewProgramName('');
-                  }}
-                  className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
-          )}
+          {/* Code */}
+          <div className="flex flex-col gap-3 sm:gap-4">
+            <label className="text-sm sm:text-[16px] text-[#0F172A] font-medium">
+              Category Code
+            </label>
+            <input
+              {...register('code')}
+              placeholder="Enter Category Code"
+              className="w-full border-b py-2 sm:py-2.5 outline-none bg-transparent border-[#C3CAD9]"
+            />
+            {formState.errors.code && (
+              <p className="text-xs text-red-500">{formState.errors.code.message}</p>
+            )}
+          </div>
 
-          {/* Selected Program (only one) */}
-          {fields.length > 0 && (
-            <div className="mt-2">
-              {fields.map((field, index) => (
-                <div
-                  key={field.id}
-                  className="flex items-center justify-between p-3 border border-[#C3CAD9] rounded-lg"
-                >
-                  <div className="flex-1">
-                    <span className="font-medium">{field.program_name}</span>
-                    <span className="text-sm text-gray-500 ml-2">
-                      ({field.program_code})
-                    </span>
-                  </div>
+          {/* Program (only one per category) */}
+          <div className="flex flex-col gap-3 sm:gap-4">
+            <label className="text-sm sm:text-[16px] text-[#0F172A] font-medium">
+              Program <span className="text-xs text-gray-500">(Optional - One per category)</span>
+            </label>
+
+            {/* Dropdown for existing programs */}
+            <div className="flex gap-2">
+              <select
+                onChange={(e) => {
+                  if (e.target.value) {
+                    handleSelectProgram(Number(e.target.value));
+                    e.target.value = '';
+                  }
+                }}
+                disabled={fields.length > 0}
+                className="flex-1 border-b py-2 sm:py-2.5 outline-none bg-transparent border-[#C3CAD9] disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <option value="">Select a program...</option>
+                {allPrograms
+                  .filter((p) => !selectedProgramIds.includes(p.id))
+                  .map((program) => (
+                    <option key={program.id} value={program.id}>
+                      {program.program_name} ({program.program_code})
+                    </option>
+                  ))}
+              </select>
+              <button
+                type="button"
+                onClick={() => setShowNewProgramForm(!showNewProgramForm)}
+                disabled={fields.length > 0}
+                className="px-4 py-2 border border-[#C3CAD9] rounded-lg hover:bg-gray-50 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <Plus className="w-4 h-4" />
+                Add New
+              </button>
+            </div>
+
+            {/* New Program Form */}
+            {showNewProgramForm && (
+              <div className="border border-[#C3CAD9] rounded-lg p-4 space-y-3">
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={newProgramCode}
+                    onChange={(e) => setNewProgramCode(e.target.value)}
+                    placeholder="Program Code (e.g., btech)"
+                    className="flex-1 border-b py-2 outline-none bg-transparent border-[#C3CAD9]"
+                  />
+                  <input
+                    type="text"
+                    value={newProgramName}
+                    onChange={(e) => setNewProgramName(e.target.value)}
+                    placeholder="Program Name (e.g., B-TECH)"
+                    className="flex-1 border-b py-2 outline-none bg-transparent border-[#C3CAD9]"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleAddNewProgram}
+                    disabled={
+                      !newProgramCode.trim() ||
+                      !newProgramName.trim() ||
+                      createProgramMutation.isPending
+                    }
+                    className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Add
+                  </button>
                   <button
                     type="button"
                     onClick={() => {
-                      remove(index);
-                      // Remove from selectedProgramIds if it was from dropdown
-                      const program = allPrograms.find(
-                        (p) => p.program_code === field.program_code
-                      );
-                      if (program) {
-                        setSelectedProgramIds([]);
-                      }
+                      setShowNewProgramForm(false);
+                      setNewProgramCode('');
+                      setNewProgramName('');
                     }}
-                    className="p-1 text-red-500 hover:bg-red-50 rounded"
+                    className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
                   >
-                    <X className="w-4 h-4" />
+                    Cancel
                   </button>
-                  <input
-                    type="hidden"
-                    {...register(`programs.${index}.program_code`)}
-                  />
-                  <input
-                    type="hidden"
-                    {...register(`programs.${index}.program_name`)}
-                  />
                 </div>
-              ))}
-            </div>
-          )}
+              </div>
+            )}
 
-          {formState.errors.programs && (
-            <p className="text-xs text-red-500">
-              {formState.errors.programs.message}
-            </p>
-          )}
+            {/* Selected Program (only one) */}
+            {fields.length > 0 && (
+              <div className="mt-2">
+                {fields.map((field, index) => (
+                  <div
+                    key={field.id}
+                    className="flex items-center justify-between p-3 border border-[#C3CAD9] rounded-lg"
+                  >
+                    <div className="flex-1">
+                      <span className="font-medium">{field.program_name}</span>
+                      <span className="text-sm text-gray-500 ml-2">({field.program_code})</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        remove(index);
+                        // Remove from selectedProgramIds if it was from dropdown
+                        const program = allPrograms.find(
+                          (p) => p.program_code === field.program_code
+                        );
+                        if (program) {
+                          setSelectedProgramIds([]);
+                        }
+                      }}
+                      className="p-1 text-red-500 hover:bg-red-50 rounded"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                    <input type="hidden" {...register(`programs.${index}.program_code`)} />
+                    <input type="hidden" {...register(`programs.${index}.program_name`)} />
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {formState.errors.programs && (
+              <p className="text-xs text-red-500">{formState.errors.programs.message}</p>
+            )}
+          </div>
         </div>
       </div>
     </form>

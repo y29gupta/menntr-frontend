@@ -7,12 +7,25 @@ import Image from 'next/image';
 
 type Props = {
   currentIndex: number;
-  setQuestionStatus: React.Dispatch<any>;
+  question: any;
+  onSelectOption: (ids: number[]) => void;
+  selectedOptions: number[];
+
+  onToggleReview: (index: number) => void; // ✅ ADD
+  isReviewed: boolean;
 };
 
-export function QuestionRenderer({ currentIndex, setQuestionStatus }: Props) {
+export function QuestionRenderer({
+  currentIndex,
+  question,
+  onSelectOption,
+  selectedOptions,
+
+  onToggleReview,
+  isReviewed,
+}: Props) {
   const questionType: 'mcq' | 'coding' = 'mcq';
-  const currentQuestion = mcqDummyQuestions[currentIndex];
+  // const currentQuestion = mcqDummyQuestions[currentIndex];
 
   return (
     <div className="flex flex-col flex-1 ">
@@ -23,7 +36,8 @@ export function QuestionRenderer({ currentIndex, setQuestionStatus }: Props) {
         </span>
 
         <span className="absolute right-0 text-sm font-semibold text-gray-700">
-          Marks : {questionType === 'mcq' ? 25 : 100}
+          {/* Marks : {questionType === 'mcq' ? 25 : 100} */}
+          Marks : {question?.marks ?? 0}
         </span>
       </div>
 
@@ -34,14 +48,24 @@ export function QuestionRenderer({ currentIndex, setQuestionStatus }: Props) {
           <h3 className="font-medium text-[#6C768A] text-[16px] mb-1">
             Question {currentIndex + 1}
           </h3>
-          <p className="text-[16px] font-medium text-[#1A2C50]">{currentQuestion.question}</p>
+          <p className="text-[16px] font-medium text-[#1A2C50]"> {question?.question_text}</p>
         </div>
 
         {/* Right */}
         <div className="flex items-center gap-3">
           <DifficultyBadge difficulty="easy" />
           {/* <MarkForReview /> */}
-          <Image src="/assets/flagIcon.svg" width={40} height={30} alt="flag" />
+          {/* <Image src="/assets/flagIcon.svg" width={40} height={30} alt="flag" /> */}
+          <Image
+            src="/assets/flagIcon.svg"
+            width={40}
+            height={30}
+            alt="flag"
+            onClick={() => onToggleReview(currentIndex)}
+            className={`cursor-pointer ${
+              isReviewed ? 'filter hue-rotate-[310deg] saturate-150' : ''
+            }`}
+          />
         </div>
       </div>
 
@@ -52,9 +76,9 @@ export function QuestionRenderer({ currentIndex, setQuestionStatus }: Props) {
       <div className="mt-4 h-[250px] overflow-auto">
         {questionType === 'mcq' && (
           <McqQuestion
-            question={currentQuestion}
-            questionIndex={currentIndex}
-            setQuestionStatus={setQuestionStatus}
+            question={question}
+            selectedOptions={selectedOptions}
+            onSelectOption={onSelectOption}
           />
         )}
         {/* {questionType === 'coding' && <CodingQuestion />} */}

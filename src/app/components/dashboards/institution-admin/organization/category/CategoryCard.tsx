@@ -13,11 +13,10 @@ export default function CategoryCard({ category, onEdit }: Props) {
   const { name, departmentCount, assignedUsers, code } = category;
   const departments = category.departments ?? departmentCount;
   const students = category.students ?? 0;
-  
+
   // Display assigned users (from user_roles table)
-  const assignedUsersText = assignedUsers.length > 0
-    ? assignedUsers.map(u => u.name).join(', ')
-    : '—';
+  const assignedUsersText =
+    assignedUsers?.length > 0 ? assignedUsers.map((u) => u.name).join(', ') : '—';
 
   return (
     <div className="bg-white border border-gray-200 rounded-2xl p-4 shadow-sm">
