@@ -1,14 +1,8 @@
 'use client';
 
-import { useState } from 'react';
 import AssessmentHeaders from '@/app/components/dashboards/student/assessment/assessmentHeaders';
-import AssessmentStepModal from '@/app/ui/modals/AssessmentStepModal';
 
-export default function AssessmentStartPage() {
-  const [checked, setChecked] = useState(false);
-
-  const [openModal, setOpenModal] = useState(false);
-
+export default function AssessmentUpcomingPage() {
   return (
     <div className="min-h-screen">
       <AssessmentHeaders />
@@ -35,8 +29,8 @@ export default function AssessmentStartPage() {
 
           {/* Status */}
           <div className="flex flex-col items-end gap-2 sm:gap-3">
-            <div className="bg-yellow-100 text-yellow-700 text-xs px-3 py-1 rounded-lg font-medium">
-              On-Going
+            <div className="bg-purple-100 text-purple-700 text-xs px-3 py-1 rounded-lg font-medium">
+              Upcoming
             </div>
 
             <p className="text-xs text-slate-500">
@@ -89,7 +83,7 @@ export default function AssessmentStartPage() {
           </ul>
         </div>
 
-        {/* ================= EVALUATION ================= */}
+        {/* ================= UPCOMING FOOTER ================= */}
         <div className="bg-[#FAFBFC] border border-gray-200 rounded-xl p-5 mt-5">
           <h3 className="text-sm font-semibold text-gray-800">Evaluation & Results</h3>
 
@@ -97,63 +91,15 @@ export default function AssessmentStartPage() {
 
           <p className="text-sm text-gray-600 mb-4">
             MCQ answers will be evaluated automatically after submission. Coding answers will be
-            evaluated after all test cases are executed.
+            evaluated after all test cases are executed. Results may take some time depending on
+            question complexity.
           </p>
 
-          {/* ================= CHECKBOX ================= */}
-
-          <label className="flex items-start gap-2 text-sm text-gray-800 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={checked}
-              onChange={(e) => setChecked(e.target.checked)}
-              className="
-                mt-[3px]
-                peer relative h-4 w-4 appearance-none rounded border border-gray-300
-                checked:border-transparent
-                checked:bg-[linear-gradient(90deg,#904BFF_0%,#C053C2_100%)]
-                checked:after:content-['✔']
-                checked:after:absolute
-                checked:after:inset-0
-                checked:after:flex
-                checked:after:items-center
-                checked:after:justify-center
-                checked:after:text-[11px]
-                checked:after:text-white
-              "
-            />
-
-            <span className="font-semibold leading-tight">
-              I have read and understood the assessment instructions
-            </span>
-          </label>
-
-          {/* ================= GO NEXT BUTTON ================= */}
-          <div className="flex justify-center mt-6">
-            <button
-              disabled={!checked}
-              /* ✅ OPEN MODAL WHEN CLICK */
-              onClick={() => setOpenModal(true)}
-              className="
-                w-full sm:w-auto
-                rounded-full
-                bg-gradient-to-r from-[#904BFF] to-[#C053C2]
-                px-6 py-2.5
-                text-sm font-medium
-                text-white!
-                hover:opacity-90
-                transition
-                disabled:opacity-40
-              "
-            >
-              Go next
-            </button>
+          <div className="flex justify-center">
+            <p className="text-sm font-medium text-red-500">Assessment not started yet</p>
           </div>
         </div>
       </div>
-
-      {/* ================= STEP MODAL ================= */}
-      <AssessmentStepModal open={openModal} onClose={() => setOpenModal(false)} />
     </div>
   );
 }

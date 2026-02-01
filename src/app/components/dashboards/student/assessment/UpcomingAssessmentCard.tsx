@@ -1,6 +1,7 @@
 'use client';
 
 import { FaCalendarAlt } from 'react-icons/fa';
+import { useRouter } from 'next/navigation';
 
 type UpcomingAssessmentCardProps = {
   title: string;
@@ -17,6 +18,7 @@ export default function UpcomingAssessmentCard({
   time,
   duration,
 }: UpcomingAssessmentCardProps) {
+  const router = useRouter();
   return (
     <div
       className="
@@ -53,6 +55,7 @@ export default function UpcomingAssessmentCard({
           transition
           hover:bg-purple-50!
         "
+        onClick={() => router.push('/student/assessment/upcoming')}
       >
         View Details
       </button>
