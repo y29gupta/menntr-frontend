@@ -145,7 +145,7 @@ function DataTable<T extends RowData>({
           </tbody>
         </table>
       </div>
-      <div className="flex justify-end items-center gap-3 mt-3 text-xs sm:text-sm">
+      {/* <div className="flex justify-end items-center gap-3 mt-3 text-xs sm:text-sm">
         <button
           className="px-3 py-1 border rounded disabled:opacity-30"
           onClick={onPreviousPage}
@@ -164,6 +164,77 @@ function DataTable<T extends RowData>({
           disabled={!canNextPage}
         >
           Next
+        </button>
+      </div> */}
+      <div className="flex justify-center items-center gap-2 mt-3 text-xs sm:text-sm select-none text-gray-600">
+        {/* First */}
+        <button
+          onClick={() => {
+            if (!canPreviousPage) return;
+            while (currentPage > 1) onPreviousPage();
+          }}
+          disabled={!canPreviousPage}
+          className="px-1 disabled:opacity-30"
+        >
+          «
+        </button>
+
+        {/* Prev */}
+        <button
+          onClick={onPreviousPage}
+          disabled={!canPreviousPage}
+          className="px-1 disabled:opacity-30"
+        >
+          ‹
+        </button>
+
+        {/* Pages */}
+        {Array.from({ length: pageCount }, (_, i) => i + 1)
+          .filter((page) => {
+            return page === 1 || page === pageCount || Math.abs(page - currentPage) <= 2;
+          })
+          .map((page, index, arr) => {
+            const prev = arr[index - 1];
+            const showDots = prev && page - prev > 1;
+
+            return (
+              <span key={page} className="flex items-center gap-2">
+                {showDots && <span className="px-1">…</span>}
+                <button
+                  onClick={() => {
+                    if (page === currentPage) return;
+                    const diff = page - currentPage;
+                    const action = diff > 0 ? onNextPage : onPreviousPage;
+                    for (let i = 0; i < Math.abs(diff); i++) action();
+                  }}
+                  className={`w-7 h-7 flex items-center justify-center rounded-full
+                    ${
+                      page === currentPage
+                        ? 'bg-purple-100 text-purple-600 font-medium'
+                        : 'hover:text-purple-600'
+                    }`}
+                >
+                  {page}
+                </button>
+              </span>
+            );
+          })}
+
+        {/* Next */}
+        <button onClick={onNextPage} disabled={!canNextPage} className="px-1 disabled:opacity-30">
+          ›
+        </button>
+
+        {/* Last */}
+        <button
+          onClick={() => {
+            if (!canNextPage) return;
+            while (currentPage < pageCount) onNextPage();
+          }}
+          disabled={!canNextPage}
+          className="px-1 disabled:opacity-30"
+        >
+          »
         </button>
       </div>
     </>

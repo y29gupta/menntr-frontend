@@ -1,7 +1,10 @@
 'use client';
 
+import { useMemo, useState } from 'react';
 import AssessmentCard, { AssessmentStatus } from './AssessmentCard';
 import EmptyAssessmentState from './EmptyAssessmentState';
+import SearchWithFilter from './SearchWithFilter';
+import OngoingAssessmentFilterModal from '@/app/ui/modals/OngoingAssessmentFilterModal';
 
 type Assessment = {
   id: number;
@@ -49,17 +52,15 @@ const assessments: Assessment[] = [
   },
 ];
 
-export function useOngoingAssessments() {
-  return {
-    assessments,
-    isEmpty: assessments.length === 0,
-  };
-}
-
 export default function OngoingAssessments() {
-  const { assessments, isEmpty } = useOngoingAssessments();
+  const [search, setSearch] = useState('');
+  const [showFilters, setShowFilters] = useState(false);
 
-  if (isEmpty) {
+  const filteredData = useMemo(() => {
+    return assessments.filter((a) => a.title.toLowerCase().includes(search.toLowerCase()));
+  }, [search]);
+
+  if (filteredData.length === 0) {
     return (
       <EmptyAssessmentState
         imageSrc="/assets/empty-ongoing-assessment.svg"
@@ -70,16 +71,30 @@ export default function OngoingAssessments() {
   }
 
   return (
-    <div className="space-y-4">
-      {assessments.map((assessment) => (
-        <AssessmentCard
-          key={assessment.id}
-          title={assessment.title}
-          type={assessment.type}
-          duration={assessment.duration}
-          status={assessment.status}
+    <>
+      <div className="w-130">
+        <SearchWithFilter
+          value={search}
+          onSearchChange={(v) => {
+            console.log('🔍 Ongoing search:', v);
+            setSearch(v);
+          }}
+          onToggleFilters={() => setShowFilters((p) => !p)}
+          filterOpen={showFilters}
+          filterModal={
+            <OngoingAssessmentFilterModal
+              onApply={() => setShowFilters(false)}
+              onClose={() => setShowFilters(false)}
+            />
+          }
         />
-      ))}
-    </div>
+      </div>
+
+      <div className="space-y-4">
+        {filteredData.map((assessment) => (
+          <AssessmentCard key={assessment.id} {...assessment} />
+        ))}
+      </div>
+    </>
   );
 }

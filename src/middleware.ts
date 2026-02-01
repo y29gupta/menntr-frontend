@@ -32,7 +32,7 @@ export function middleware(req: NextRequest) {
     return NextResponse.redirect(new URL('/login?role=Institution Admin', req.url));
   }
 
-  if (pathname.startsWith('/student') && role !== 'Student') {
+  if (pathname.startsWith('/student/dashboard') && role !== 'Student') {
     return NextResponse.redirect(new URL('/', req.url));
   }
 

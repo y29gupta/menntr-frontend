@@ -34,7 +34,7 @@ export default function BatchForm({ mode, batchId, onBack, editRow }: Props) {
     watch,
     register,
     handleSubmit,
-    reset, // ✅ ADD
+    reset,
     formState: { errors },
   } = useForm<BatchFormValues>({
     resolver: zodResolver(batchSchema),
@@ -269,10 +269,10 @@ export default function BatchForm({ mode, batchId, onBack, editRow }: Props) {
                         type="button"
                         key={item.value}
                         onClick={() => field.onChange(item.value)}
-                        className={` px-4 py-1.5 rounded-full border text-sm font-medium ${
+                        className={` px-4 py-1.5 rounded-full border text-sm font-light ${
                           field.value === item.value
                             ? 'border-purple-500 !text-purple-600 bg-purple-50'
-                            : 'border-gray-300 text-gray-500'
+                            : 'border-[#C3CAD9] !text-[#3D465C]'
                         }`}
                       >
                         <span className="flex justify-center items-center gap-2">
@@ -300,10 +300,10 @@ export default function BatchForm({ mode, batchId, onBack, editRow }: Props) {
                         type="button"
                         key={item}
                         onClick={() => field.onChange(item)}
-                        className={`px-4 py-1.5 rounded-full border text-sm font-medium ${
+                        className={`px-4 py-1.5 rounded-full border text-sm font-light ${
                           field.value === item
                             ? 'border-purple-500 !text-purple-600 bg-purple-50'
-                            : 'border-gray-300 text-gray-500'
+                            : 'border-[#C3CAD9] text-[#3D465C]'
                         }`}
                       >
                         <span className="flex items-center gap-2">
@@ -350,7 +350,7 @@ export default function BatchForm({ mode, batchId, onBack, editRow }: Props) {
 
             onBack();
           })}
-          className="px-6 py-2.5 rounded-full text-sm font-medium text-white
+          className="px-6 py-2.5 rounded-full text-sm font-medium !text-white
           bg-[linear-gradient(90deg,#904BFF_0%,#C053C2_100%)]"
         >
           {mode === 'edit' ? 'Update Batch' : 'Add Batch'}

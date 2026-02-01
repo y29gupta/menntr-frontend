@@ -1,5 +1,6 @@
 import { ColumnDef } from '@tanstack/react-table';
 import { Pencil, Trash2 } from 'lucide-react';
+import { BatchApiData } from './batches.types';
 
 /* ================= TYPES ================= */
 
@@ -13,23 +14,6 @@ export type Batch = {
   };
   category: string;
   faculties: string[];
-  academic_year: string;
-  students: number;
-  status: 'Active' | 'Inactive';
-};
-export type BatchApiData = {
-  id: number;
-  name: string;
-  category: string | null;
-  department: {
-    id: number;
-    name: string;
-  };
-  coordinator?: {
-    id: string;
-    name: string;
-  } | null;
-
   academic_year: string;
   students: number;
   status: 'Active' | 'Inactive';
