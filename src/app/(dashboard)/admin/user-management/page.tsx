@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Search, Filter, Upload } from 'lucide-react';
 import { useForm, FormProvider } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { showApiError, showSuccess } from '@/app/ui/apiToast';
 
 import ManagementTable from '@/app/components/dashboards/institution-admin/user-management/ManagementTable';
 import ProfileForm, {
@@ -30,6 +31,7 @@ type UserFormData = {
     roleDepartment?: string;
     roleBatch?: string;
     roleId?: number;
+    batchIds?: number[]; // For faculty batch assignments
     permissionIds?: number[];
     selectedModules: string[];
     userRoleAndManagement: string[];
@@ -73,9 +75,25 @@ const Page = () => {
     },
   });
 
-  const permissionForm = useForm({
+  const permissionForm = useForm<{
+    roleHierarchy?: string;
+    roleCategory?: string;
+    roleDepartment?: string;
+    roleBatch?: string;
+    roleId?: number;
+    batchIds?: number[];
+    selectedModules: string[];
+    userRoleAndManagement: string[];
+    organizationStructure: string[];
+    studentManagement: string[];
+    assessmentManagement: string[];
+    reportAndAnalytics: string[];
+  }>({
     defaultValues: {
+      roleHierarchy: undefined,
+      roleCategory: undefined,
       roleId: undefined,
+      batchIds: [],
       selectedModules: [],
       userRoleAndManagement: [],
       organizationStructure: [],
@@ -91,6 +109,135 @@ const Page = () => {
     },
   });
 
+  /* ---------- FETCH USER FOR EDIT ---------- */
+  const { data: userEditData, isLoading: isLoadingUser } = useQuery({
+    queryKey: ['user-edit', formData.id],
+    queryFn: async () => {
+      if (!formData.id || formMode !== 'edit') return null;
+      const res = await fetch(`/api/users/${formData.id}/edit`, {
+        credentials: 'include',
+      });
+      if (!res.ok) throw new Error('Failed to fetch user data');
+      return res.json();
+    },
+    enabled: formMode === 'edit' && !!formData.id && view === 'form',
+  });
+
+  /* ---------- PREFILL FORM DATA WHEN EDIT DATA IS LOADED ---------- */
+  useEffect(() => {
+    if (userEditData && formMode === 'edit') {
+      const { user, role, permissions, batchIds = [] } = userEditData;
+
+      // Prefill profile form
+      profileForm.reset({
+        firstName: user.firstName || '',
+        lastName: user.lastName || '',
+        email: user.email || '',
+        mobile: '', // API doesn't return mobile
+      });
+
+      // Fetch modules to map codes to IDs
+      fetch('/api/institutionsadmin/modules', { credentials: 'include' })
+        .then((res) => res.json())
+        .then((modulesData) => {
+          const modules = modulesData?.data || [];
+          const moduleCodeToIdMap = new Map<string, number>();
+          modules.forEach((m: any) => {
+            moduleCodeToIdMap.set(m.code, m.id);
+          });
+
+          // Extract selected modules from permissions tree - ONLY modules with checked permissions
+          // Build modulePermissions map and collect modules that have at least one checked permission
+          const newModulePermissions: Record<string, number[]> = {};
+          const modulesWithPermissions = new Set<string>();
+          
+          permissions.forEach((module: any) => {
+            const moduleId = moduleCodeToIdMap.get(module.moduleCode);
+            if (!moduleId) return;
+            
+            const allPermissionIds: number[] = [];
+            
+            module.features.forEach((feature: any) => {
+              feature.permissions.forEach((perm: any) => {
+                if (perm.checked) {
+                  allPermissionIds.push(perm.permissionId);
+                }
+              });
+            });
+            
+            // Only include module if it has at least one checked permission
+            if (allPermissionIds.length > 0) {
+              newModulePermissions[String(moduleId)] = allPermissionIds;
+              modulesWithPermissions.add(module.moduleCode);
+            }
+          });
+          
+          // Map module codes to IDs - only for modules that have checked permissions
+          const selectedModuleIds = Array.from(modulesWithPermissions)
+            .map((code: string) => moduleCodeToIdMap.get(code))
+            .filter((id: number | undefined): id is number => id !== undefined)
+            .map((id: number) => String(id));
+
+          // Prefill permission form with role hierarchy, role category, role ID, and batch IDs
+          // First set roleHierarchy and roleCategory, then roleId will be set automatically by useEffect
+          permissionForm.reset({
+            roleHierarchy: role?.roleHierarchyId ? String(role.roleHierarchyId) : undefined,
+            roleCategory: role?.name || undefined,
+            roleId: role?.id || undefined,
+            batchIds: batchIds || [],
+            selectedModules: selectedModuleIds,
+            userRoleAndManagement: [],
+            organizationStructure: [],
+            studentManagement: [],
+            assessmentManagement: [],
+            reportAndAnalytics: [],
+          });
+          
+          // Manually set values to ensure they're set even if reset doesn't work
+          if (role?.roleHierarchyId) {
+            permissionForm.setValue('roleHierarchy', String(role.roleHierarchyId));
+          }
+          if (role?.name) {
+            permissionForm.setValue('roleCategory', role.name);
+          }
+          if (role?.id) {
+            permissionForm.setValue('roleId', role.id);
+          }
+          if (batchIds && batchIds.length > 0) {
+            permissionForm.setValue('batchIds', batchIds);
+          }
+
+          // Set module permissions
+          setModulePermissions(newModulePermissions);
+
+          // Update formData
+          setFormData({
+            id: Number(user.id),
+            status: user.status,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            email: user.email,
+            permissions: {
+              roleId: role?.id,
+              roleHierarchy: role?.roleHierarchyId ? String(role.roleHierarchyId) : undefined,
+              roleCategory: (role?.name as CategoryKey) || undefined,
+              batchIds: batchIds || [],
+              selectedModules: selectedModuleIds,
+              permissionIds: Object.values(newModulePermissions).flat(),
+              userRoleAndManagement: [],
+              organizationStructure: [],
+              studentManagement: [],
+              assessmentManagement: [],
+              reportAndAnalytics: [],
+            },
+          });
+        })
+        .catch((error) => {
+          console.error('Failed to fetch modules for mapping:', error);
+        });
+    }
+  }, [userEditData, formMode, profileForm, permissionForm]);
+
   /* ---------- TANSTACK MUTATION ---------- */
 
   const createUserMutation = useMutation({
@@ -100,11 +247,11 @@ const Page = () => {
       lastName?: string;
       password: string;
       roleId?: number;
+      batchIds?: number[];
       permissionIds: number[];
     }) => {
       const res = await fetch(
-        `/institutionsadmin/create-user`,
-
+        `/api/institutionsadmin/create-user`,
         {
           method: 'POST',
           headers: {
@@ -118,23 +265,117 @@ const Page = () => {
       );
 
       if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.message || 'Failed to create user');
+        let errorMessage = 'Failed to create user';
+        try {
+          const err = await res.json();
+          // Backend returns { error: '...' } for 409, or { message: '...' } for other errors
+          errorMessage = err.error || err.message || errorMessage;
+          
+          // Provide more specific error messages based on status code
+          if (res.status === 409) {
+            errorMessage = err.error || 'A user with this email already exists. Please use a different email address.';
+          } else if (res.status === 400) {
+            errorMessage = err.message || err.error || 'Invalid request. Please check your input and try again.';
+          } else if (res.status === 403) {
+            errorMessage = err.message || err.error || 'You do not have permission to perform this action.';
+          } else if (res.status === 500) {
+            errorMessage = 'Server error. Please try again later or contact support.';
+          }
+        } catch (parseError) {
+          // If JSON parsing fails, use status-based message
+          if (res.status === 409) {
+            errorMessage = 'A user with this email already exists. Please use a different email address.';
+          } else if (res.status >= 500) {
+            errorMessage = 'Server error. Please try again later.';
+          }
+        }
+        throw new Error(errorMessage);
       }
 
       return res.json();
     },
 
     onSuccess: () => {
-      alert('✅ User created successfully');
+      showSuccess('User created successfully');
       setView('list');
       setStep(1);
+      // Clear permissions only after successful creation
       setModulePermissions({});
+      // Reset form data
+      setFormData({});
+      profileForm.reset();
+      permissionForm.reset();
+      credentialsForm.reset();
     },
 
     onError: (error: any) => {
       console.error('❌ CREATE USER ERROR:', error);
-      alert(error.message || '❌ Failed to create user');
+      // Use toast notification for better UX
+      showApiError(error);
+    },
+  });
+
+  const updateUserMutation = useMutation({
+    mutationFn: async (payload: {
+      firstName?: string;
+      lastName?: string;
+      roleId?: number;
+      batchIds?: number[];
+      permissionIds: number[];
+    }) => {
+      if (!formData.id) throw new Error('User ID is required for update');
+      
+      const res = await fetch(`/api/users/${formData.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          payload,
+        }),
+      });
+
+      if (!res.ok) {
+        let errorMessage = 'Failed to update user';
+        try {
+          const err = await res.json();
+          errorMessage = err.error || err.message || errorMessage;
+          
+          if (res.status === 400) {
+            errorMessage = err.message || err.error || 'Invalid request. Please check your input and try again.';
+          } else if (res.status === 403) {
+            errorMessage = err.message || err.error || 'You do not have permission to perform this action.';
+          } else if (res.status === 404) {
+            errorMessage = 'User not found.';
+          } else if (res.status === 500) {
+            errorMessage = 'Server error. Please try again later or contact support.';
+          }
+        } catch (parseError) {
+          if (res.status >= 500) {
+            errorMessage = 'Server error. Please try again later.';
+          }
+        }
+        throw new Error(errorMessage);
+      }
+
+      return res.json();
+    },
+
+    onSuccess: () => {
+      showSuccess('User updated successfully');
+      setView('list');
+      setStep(1);
+      setModulePermissions({});
+      setFormData({});
+      profileForm.reset();
+      permissionForm.reset();
+      credentialsForm.reset();
+    },
+
+    onError: (error: any) => {
+      console.error('❌ UPDATE USER ERROR:', error);
+      showApiError(error);
     },
   });
 
@@ -198,29 +439,14 @@ const Page = () => {
             onGlobalFilterChange={setSearch}
             showColumnFilters={showColumnFilters}
             onEdit={(user) => {
-              const [firstName = '', lastName = ''] = user.name.split(' ');
-
               setFormMode('edit');
               setFormData({
-                id: user.id,
+                id: Number(user.id),
                 status: user.status as any,
-                firstName,
-                lastName,
-                permissions: {
-                  roleHierarchy: roleNormalize[user.role],
-                  roleCategory: user.Department as CategoryKey,
-                  selectedModules: [],
-                  userRoleAndManagement: [],
-                  organizationStructure: [],
-                  studentManagement: [],
-                  assessmentManagement: [],
-                  reportAndAnalytics: [],
-                },
               });
-
-              profileForm.reset({ firstName, lastName });
               setStep(1);
               setView('form');
+              // User data will be fetched via useQuery and prefilled in useEffect
             }}
           />
         </>
@@ -251,6 +477,7 @@ const Page = () => {
                     ...p,
                     permissions: {
                       ...permissionValues,
+                      roleCategory: permissionValues.roleCategory as CategoryKey | undefined,
                       permissionIds: Object.values(modulePermissions).flat(),
                     },
                   }));
@@ -268,22 +495,27 @@ const Page = () => {
                 mode={formMode}
                 onBack={() => setStep(2)}
                 onSubmit={() => {
-                  createUserMutation.mutate({
-                    email: formData.email,
-                    firstName: formData.firstName,
-                    lastName: formData.lastName,
-                    password: 'sample@123',
-                    roleId: formData.permissions?.roleId,
-                    permissionIds: formData.permissions?.permissionIds ?? [],
-                  });
-                  console.log('🚀 FINAL USER PAYLOAD:', {
-                    email: formData.email,
-                    firstName: formData.firstName,
-                    lastName: formData.lastName,
-                    password: 'sample@123',
-                    roleId: formData.permissions?.roleId,
-                    permissionIds: formData.permissions?.permissionIds ?? [],
-                  });
+                  if (formMode === 'edit') {
+                    // Update existing user
+                    updateUserMutation.mutate({
+                      firstName: formData.firstName,
+                      lastName: formData.lastName,
+                      roleId: formData.permissions?.roleId,
+                      batchIds: formData.permissions?.batchIds ?? [],
+                      permissionIds: formData.permissions?.permissionIds ?? [],
+                    });
+                  } else {
+                    // Create new user
+                    createUserMutation.mutate({
+                      email: formData.email,
+                      firstName: formData.firstName,
+                      lastName: formData.lastName,
+                      password: 'sample@123',
+                      roleId: formData.permissions?.roleId,
+                      batchIds: formData.permissions?.batchIds ?? [],
+                      permissionIds: formData.permissions?.permissionIds ?? [],
+                    });
+                  }
                 }}
               />
             </FormProvider>

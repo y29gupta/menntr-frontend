@@ -12,7 +12,9 @@ type Props = {
 const CategorySelector = ({ selectedCategory, register, categories }: Props) => {
   return (
     <div className="mb-6">
-      <h4 className="mb-2 text-sm font-medium text-gray-700">Role Category</h4>
+      <h4 className="mb-2 text-sm font-medium text-gray-700">
+        Assign Role <span className="text-red-500">*</span>
+      </h4>
 
       <div className="flex flex-wrap gap-2">
         {categories.map((cat) => {
