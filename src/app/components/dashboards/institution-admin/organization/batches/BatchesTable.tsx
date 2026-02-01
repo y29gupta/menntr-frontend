@@ -5,7 +5,8 @@ import { useQuery } from '@tanstack/react-query';
 // import { getBatches } from '@/app/lib/institutions.api';
 import { Batch, BatchApiResponse, batchesColumns, mapApiBatchToBatch } from './batches.columns';
 import { getBatches } from './batches.service';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { BatchListResponse } from './batches.types';
 
 type Props = {
   globalFilter: string;
@@ -24,20 +25,38 @@ export default function BatchesTable({
   onDelete,
   onTotalChange,
 }: Props) {
-  const { data: batchResponse, isLoading } = useQuery<BatchApiResponse>({
-    queryKey: ['batches'],
-    queryFn: getBatches,
+  // const { data: batchResponse, isLoading } = useQuery<BatchApiResponse>({
+  //   queryKey: ['batches'],
+  //   queryFn: getBatches,
+  // });
+
+  const [page, setPage] = useState(1);
+  const limit = 10;
+
+  const { data, isLoading } = useQuery<BatchListResponse>({
+    queryKey: ['batches', page, globalFilter],
+    queryFn: () =>
+      getBatches(page, limit, {
+        search: globalFilter,
+      }),
+    placeholderData: (previousData) => previousData,
   });
 
-  //   useEffect(() => {
-  //     if (batchResponse?.total !== undefined) {
-  //       onTotalChange(batchResponse.total ? batchResponse.total : dummyBatches.length);
-  //     }
-  //   }, [batchResponse?.total, onTotalChange]);
+  // useEffect(() => {
+  //   onTotalChange(batchResponse?.length ?? 0);
+  // }, [batchResponse, onTotalChange]);
+
+  // const tableData: Batch[] = batchResponse ? batchResponse.map(mapApiBatchToBatch) : [];
+
+  const tableData: Batch[] = data?.data?.map(mapApiBatchToBatch) ?? [];
+
   useEffect(() => {
-    onTotalChange(batchResponse?.length ?? 0);
-  }, [batchResponse, onTotalChange]);
-  const tableData: Batch[] = batchResponse ? batchResponse.map(mapApiBatchToBatch) : [];
+    if (data?.meta?.totalCount !== undefined) {
+      onTotalChange(data.meta.totalCount);
+    }
+  }, [data?.meta?.totalCount, onTotalChange]);
+
+  if (isLoading) return null;
 
   return (
     <DataTable<Batch>

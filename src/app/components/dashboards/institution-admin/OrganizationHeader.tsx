@@ -1,11 +1,11 @@
 import OrganizationIcon from '../../icons/OrganizationIcon';
 
 type Props = {
-  activeTab: 'Categories' | 'Departments' | 'Batches' | 'Hierarchy';
+  activeTab: 'Categories' | 'Departments' | 'Batches' | 'Role Hierarchy';
   onTabChange: (tab: Props['activeTab']) => void;
 };
 
-const tabs: Props['activeTab'][] = ['Categories', 'Departments', 'Batches', 'Hierarchy'];
+const tabs: Props['activeTab'][] = ['Categories', 'Departments', 'Batches', 'Role Hierarchy'];
 
 export default function OrganizationHeader({ activeTab, onTabChange }: Props) {
   return (

@@ -8,7 +8,7 @@ export const institutionSchema = z.object({
 
   contact_email: z.string().min(1, 'Contact email is required').email('Invalid email address'),
 
-  plan_id: z.enum(['BASIC', 'PREMIUM']),
+  plan_id: z.string().min(1, 'Plan is required'),
 });
 
 export type InstitutionFormValues = z.infer<typeof institutionSchema>;

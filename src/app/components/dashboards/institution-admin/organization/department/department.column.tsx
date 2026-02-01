@@ -41,15 +41,15 @@ export type DepartmentApiResponse = {
 export type CreateDepartmentPayload = {
   name: string;
   code: string;
-  categoryId?: number;
-  hodUserId?: number;
+  category_id?: number | null;
+  // hodUserId removed - users can be assigned separately
 };
 
 export type UpdateDepartmentPayload = {
-  name: string;
-  code: string;
-  categoryId?: number;
-  hodUserId?: number;
+  name?: string;
+  code?: string;
+  category_id?: number | null;
+  // hodUserId removed
 };
 
 // export const mapApiDepartmentToDepartment = (apiData: DepartmentApiData): Department => ({

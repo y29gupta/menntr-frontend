@@ -1,11 +1,23 @@
 import CardEditIcon from '../../../../icons/CardEditIcon';
-import { CategoryListItem } from './category.types';
+import { CategoryApiItem } from './category.types';
 
-type Props = CategoryListItem & {
+type Props = {
+  category: CategoryApiItem & {
+    departments?: number;
+    students?: number;
+  };
   onEdit: () => void;
 };
 
-export default function CategoryCard({ name, departments, students, head, code, onEdit }: Props) {
+export default function CategoryCard({ category, onEdit }: Props) {
+  const { name, departmentCount, assignedUsers, code } = category;
+  const departments = category.departments ?? departmentCount;
+  const students = category.students ?? 0;
+
+  // Display assigned users (from user_roles table)
+  const assignedUsersText =
+    assignedUsers?.length > 0 ? assignedUsers.map((u) => u.name).join(', ') : '—';
+
   return (
     <div className="bg-white border border-gray-200 rounded-2xl p-4 shadow-sm">
       {/* Header */}
@@ -24,7 +36,9 @@ export default function CategoryCard({ name, departments, students, head, code, 
 
       {/* Footer */}
       <div className="flex justify-between items-center mt-4">
-        <p className="text-sm font-medium text-gray-700">{head}</p>
+        <p className="text-sm font-medium text-gray-700" title={assignedUsersText}>
+          {assignedUsersText}
+        </p>
         <span className="text-xs bg-gray-100 px-3 py-1 font-semibold rounded-lg text-gray-600">
           Code: {code}
         </span>

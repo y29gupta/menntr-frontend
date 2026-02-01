@@ -13,6 +13,7 @@ type AssessmentCardProps = {
 };
 
 export default function AssessmentCard({ title, type, duration, status }: AssessmentCardProps) {
+  // const router = useRouter();
   const isPending = status.kind === 'pending';
 
   const router = useRouter();
@@ -59,7 +60,8 @@ export default function AssessmentCard({ title, type, duration, status }: Assess
             hover:opacity-90
             transition
           "
-          onClick={() => router.push(`/student/assessment/${2}`)}
+          // onClick={() => router.push(`/student/assessment/${2}`)}
+          onClick={() => router.push('/student/assessment/start')}
         >
           Take Assessment
         </button>

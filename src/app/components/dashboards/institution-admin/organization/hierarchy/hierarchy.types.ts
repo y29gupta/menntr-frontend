@@ -29,18 +29,26 @@ export type User = {
   email: string
 }
 
+export type FacultyNode = {
+  id: string
+  type: "faculty"
+  name: string
+  users: User[]
+}
+
 export type DepartmentNode = {
   id: string
   type: "department"
   name: string
-  hod: User | null
+  users: User[]
+  children?: FacultyNode[]
 }
 
 export type CategoryNode = {
   id: string
   type: "category"
   name: string
-  head: User | null
+  users: User[]
   children: DepartmentNode[]
 }
 
@@ -48,5 +56,6 @@ export type InstitutionNode = {
   id: string
   type: "institution"
   name: string
+  users: User[]
   children: CategoryNode[]
 }

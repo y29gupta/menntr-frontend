@@ -14,21 +14,26 @@ export interface CategoryApiItem {
   name: string;
   code: string;
   departmentCount: number;
+  assignedUsers: {
+    id: string;
+    name: string;
+    email: string;
+  }[];
   head: {
     id: string;
     name: string;
     email: string;
-  };
+  } | null; // For backward compatibility
 }
 
 
 // Used ONLY for add/edit form
 export type CategoryFormData = {
-    id?: string;
+  id?: string;
   name: string;
   code: string;
-  assignedUserId: string;
-  departments?: string[];
+  programs?: Array<{ program_code: string; program_name: string }>;
+  // assignedUserId and departments removed - users can be assigned separately
 };
 
 export type UserOption = {
@@ -71,6 +76,13 @@ export type DepartmentMetaResponse = {
 export type CreateCategoryPayload = {
   name: string;
   code: string;
-  headUserId: number;
-  departmentIds: number[];
+  programs?: Array<{ program_code: string; program_name: string }>;
+  // headUserId and departmentIds removed
+};
+
+export type Program = {
+  id: number;
+  program_code: string;
+  program_name: string;
+  category_role_id?: number;
 };
