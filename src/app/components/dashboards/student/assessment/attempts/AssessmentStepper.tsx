@@ -82,16 +82,21 @@ export default function AssessmentStepper({ total, currentIndex, statusMap, onSt
                 circleStyle = 'bg-[#22C55E] text-white';
               }
 
+              // if (status.visited && !status.attempted) {
+              //   circleStyle = 'bg-white border border-[#F97316] text-[#F97316]';
+              // }
               if (status.visited && !status.attempted) {
-                circleStyle = 'bg-white border border-[#F97316] text-[#F97316]';
+                circleStyle =
+                  'bg-white border-2 border-[#F97316] ring-2 ring-[#F97316]/30 text-[#F97316]';
               }
 
               if (status.review) {
-                circleStyle = 'bg-white border border-[#7C3AED] text-[#7C3AED]';
+                circleStyle =
+                  'bg-white border-2 border-[#F97316] ring-2 ring-[#F97316]/30 text-[#F97316]';
               }
 
               if (isCurrent) {
-                circleStyle = 'bg-white border border-[#2563EB] text-[#2563EB]';
+                circleStyle = 'bg-white border border-[#7939E8] text-[#7939E8]';
               }
 
               /* ---------- LINE STYLE ---------- */
@@ -104,7 +109,7 @@ export default function AssessmentStepper({ total, currentIndex, statusMap, onSt
               // }
 
               if (status.review) {
-                lineStyle = 'bg-[#7C3AED]'; // 🔴 review priority
+                lineStyle = 'bg-[#F97316]';
               } else if (status.attempted) {
                 lineStyle = 'bg-[#22C55E]';
               } else if (status.visited) {
@@ -118,8 +123,12 @@ export default function AssessmentStepper({ total, currentIndex, statusMap, onSt
               return (
                 <div key={i} className="flex items-center">
                   <div className="relative">
+                    {status.review && (
+                      <span className="absolute -top-3 left-3 h-2 w-2 rounded-full bg-red-500 z-10" />
+                    )}
+
                     {isCurrent && (
-                      <div className="absolute inset-[-4px] rounded-full border-2 border-dashed border-[#2563EB]" />
+                      <div className="absolute inset-[-4px] rounded-full border-2 border-dashed border-[#7939E8]" />
                     )}
 
                     <div

@@ -24,7 +24,6 @@ export default function Categories({ setCategoryView }: Props) {
     queryFn: () => getCategories(institutionId),
     enabled: !!institutionId,
   });
-  console.log(categories, 'category list');
 
   useEffect(() => {
     setCategoryView(view === 'list' ? 'list' : 'form');

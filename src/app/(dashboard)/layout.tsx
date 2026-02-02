@@ -53,12 +53,36 @@
 //   );
 // }
 
+// import DashboardShell from '../components/layout/DashboardShell';
+// import { getUserRole } from '../lib/auth.server';
+// import { Role } from '../lib/roles';
+
+// export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
+//   // const role = (await getUserRole()) as Role | null;
+
+//   const role = await getUserRole();
+
+//   return <DashboardShell role={role}>{children}</DashboardShell>;
+// }
+
 import DashboardShell from '../components/layout/DashboardShell';
 import { getUserRole } from '../lib/auth.server';
 import { Role } from '../lib/roles';
 
+const ROLE_VALUES: readonly Role[] = [
+  'Student',
+  'Institution Admin',
+  'faculty',
+  'procurement-head',
+  'Super Admin',
+];
+
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const role = (await getUserRole()) as Role | null;
+  const roleFromToken = await getUserRole();
+
+  const role: Role | null = ROLE_VALUES.includes(roleFromToken as Role)
+    ? (roleFromToken as Role)
+    : null;
 
   return <DashboardShell role={role}>{children}</DashboardShell>;
 }

@@ -31,11 +31,11 @@ export function QuestionRenderer({
     <div className="flex flex-col flex-1 ">
       {/* ───────── Top Center Title ───────── */}
       <div className="relative flex items-center justify-center">
-        <span className="text-base font-semibold text-gray-900">
+        <span className="text-xl font-semibold !text-[#1A2C50]">
           {questionType === 'mcq' ? 'MCQ - Single correct answer' : 'Coding - Single problem'}
         </span>
 
-        <span className="absolute right-0 text-sm font-semibold text-gray-700">
+        <span className="absolute right-0  text-[16px] font-semibold !text-[#1A2C50]">
           {/* Marks : {questionType === 'mcq' ? 25 : 100} */}
           Marks : {question?.marks ?? 0}
         </span>
@@ -57,7 +57,7 @@ export function QuestionRenderer({
           {/* <MarkForReview /> */}
           {/* <Image src="/assets/flagIcon.svg" width={40} height={30} alt="flag" /> */}
           <Image
-            src="/assets/flagIcon.svg"
+            src={isReviewed ? '/assets/flaggedIcon.svg' : '/assets/flagIcon.svg'}
             width={40}
             height={30}
             alt="flag"
