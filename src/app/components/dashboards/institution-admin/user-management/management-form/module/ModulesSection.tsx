@@ -127,12 +127,12 @@
 // ============================================
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import ModuleSelector from '../selectors/ModuleSelector';
 import { SetPermissionsModal } from '@/app/ui/modals/SetPermissionsModal';
 import ModulesGrid from './ModulesGrid';
-import { fetchModules } from '@/app/lib/api/fetchModules';
+import { fetchModules, fetchModuleFeatures } from '@/app/lib/api/fetchModules';
 import type { Module, Feature } from '@/app/lib/api/fetchModules';
 
 type Props = {
@@ -163,6 +163,67 @@ const ModulesSection = ({
   });
 
   const modules: Module[] = data?.data || [];
+
+  // Automatically fetch and save default permissions for all selected modules/features
+  useEffect(() => {
+    if (!roleId || selectedModules.length === 0 || modules.length === 0) return;
+
+    const fetchDefaultsForModules = async () => {
+      const selectedModuleIds = selectedModules.map(id => parseInt(id));
+      const selectedModulesData = modules.filter(m => selectedModuleIds.includes(m.id));
+
+      // Fetch default permissions for all features in all selected modules
+      for (const module of selectedModulesData) {
+        // Skip if we already have permissions for this module (to avoid re-fetching)
+        if (modulePermissions[String(module.id)]?.length > 0) {
+          continue;
+        }
+
+        try {
+          // Fetch features for this module
+          const featuresRes = await fetchModuleFeatures(module.id);
+          const features: Feature[] = featuresRes?.data || [];
+
+          if (features.length === 0) continue;
+
+          // Fetch default permissions for each feature
+          const allModulePermissions: number[] = [];
+          
+          await Promise.all(
+            features.map(async (feature) => {
+              try {
+                const res = await fetch(
+                  `/api/institutionsadmin/features/permissions/${feature.code}?roleId=${roleId}`,
+                  { credentials: 'include' }
+                );
+                if (res.ok) {
+                  const data = await res.json();
+                  const defaults = data.defaultSelectedPermissions || [];
+                  allModulePermissions.push(...defaults);
+                }
+              } catch (error) {
+                console.error(`Error fetching defaults for feature ${feature.code}:`, error);
+              }
+            })
+          );
+
+          // Save to modulePermissions (only if we got permissions)
+          if (allModulePermissions.length > 0) {
+            const uniquePermissions = [...new Set(allModulePermissions)];
+            setModulePermissions((prev) => ({
+              ...prev,
+              [String(module.id)]: uniquePermissions,
+            }));
+          }
+        } catch (error) {
+          console.error(`Error fetching defaults for module ${module.id}:`, error);
+        }
+      }
+    };
+
+    fetchDefaultsForModules();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedModules.join(','), roleId]);
 
   if (isLoading) {
     return (
@@ -225,6 +286,7 @@ const ModulesSection = ({
         <ModulesGrid
           selectedModules={selectedModules}
           modules={modules}
+          roleId={roleId}
           onOpenPermissions={handleOpenPermissions}
         />
       )}

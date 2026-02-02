@@ -8,6 +8,9 @@ import {
   BookOpen,
   UserRound,
   BookText,
+  ShieldCheck,
+  FileText,
+  ClipboardList,
 } from 'lucide-react';
 import StudentIcon from '../components/icons/StudentIcon';
 
@@ -15,6 +18,7 @@ export type SidebarItem = {
   label: string;
   path: string;
   icon: React.ReactNode;
+  disabled?: boolean;
 };
 
 export const SIDEBAR_CONFIG = {
@@ -29,16 +33,60 @@ export const SIDEBAR_CONFIG = {
       path: '/super-admin/institutions',
       icon: <Building2 size={20} />,
     },
+    // 🔶 UPCOMING FEATURES (as per Figma)
     {
       label: 'License Management',
       path: '/super-admin/licenses',
       icon: <Settings size={20} />,
+      disabled: true,
+    },
+    {
+      label: 'Procurement Requests',
+      path: '/super-admin/procurement',
+      icon: <ClipboardList size={20} />,
+      disabled: true,
     },
     {
       label: 'System Health',
       path: '/super-admin/system-health',
       icon: <Activity size={20} />,
+      disabled: true,
     },
+    {
+      label: 'Feature Usage Analytics',
+      path: '/super-admin/feature-usage',
+      icon: <BarChart3 size={20} />,
+      disabled: true,
+    },
+    {
+      label: 'Role Management (RBAC)',
+      path: '/super-admin/rbac',
+      icon: <ShieldCheck size={20} />,
+      disabled: true,
+    },
+    {
+      label: 'Reports',
+      path: '/super-admin/reports',
+      icon: <FileText size={20} />,
+      disabled: true,
+    },
+    {
+      label: 'Settings',
+      path: '/super-admin/settings',
+      icon: <Settings size={20} />,
+      disabled: true,
+    },
+
+    // {
+    //   label: 'License Management',
+    //   path: '/super-admin/licenses',
+    //   icon: <Settings size={20} />,
+    // },
+    // {
+    //   label: 'System Health',
+    //   path: '/super-admin/system-health',
+    //   icon: <Activity size={20} />,
+    // },
   ],
 
   admin: [

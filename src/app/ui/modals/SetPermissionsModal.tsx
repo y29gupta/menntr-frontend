@@ -177,7 +177,7 @@
 
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Feature } from '@/app/lib/api/fetchModules';
 
@@ -202,6 +202,7 @@ export const SetPermissionsModal = ({
 }) => {
   const [selectedFeature, setSelectedFeature] = useState<Feature | null>(null);
   const [selectedPermissions, setSelectedPermissions] = useState<number[]>([]);
+  const [featurePermissionsMap, setFeaturePermissionsMap] = useState<Record<string, number[]>>({});
 
   // Initialize selected feature from passed features
   useEffect(() => {
@@ -210,34 +211,206 @@ export const SetPermissionsModal = ({
     }
   }, [open, selectedFeatures]);
 
+  // Fetch default permissions for ALL features when modal opens (so they're included even if user doesn't switch features)
+  useEffect(() => {
+    if (!open || !roleId || selectedFeatures.length === 0) return;
+
+    const fetchDefaultsForAllFeatures = async () => {
+      // Get existing permissions grouped by feature
+      // We need to determine which permissions belong to which feature
+      // For now, fetch defaults for features that don't have stored permissions yet
+      for (const feature of selectedFeatures) {
+        // Skip if we already have permissions stored for this feature
+        if (featurePermissionsMap[feature.code] !== undefined) {
+          continue;
+        }
+
+        try {
+          const res = await fetch(
+            `/api/institutionsadmin/features/permissions/${feature.code}?roleId=${roleId}`,
+            { credentials: 'include' }
+          );
+          if (res.ok) {
+            const data = await res.json();
+            const defaults = data.defaultSelectedPermissions || [];
+            
+            // Store defaults in the map (even if empty array, to mark as fetched)
+            setFeaturePermissionsMap((prev) => ({
+              ...prev,
+              [feature.code]: defaults,
+            }));
+          }
+        } catch (error) {
+          console.error(`Error fetching defaults for feature ${feature.code}:`, error);
+        }
+      }
+    };
+
+    fetchDefaultsForAllFeatures();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, roleId, selectedFeatures.map(f => f.code).join(',')]);
+
   // Fetch permissions for the selected feature
   const { data: permissionResponse, isLoading: loadingPermissions } = useQuery({
-    enabled: !!selectedFeature,
+    enabled: !!selectedFeature && open && !!roleId, // Only fetch if roleId is available
     queryKey: ['permissions-by-feature', selectedFeature?.code, roleId],
     queryFn: async () => {
+      if (!roleId) {
+        throw new Error('Role ID is required');
+      }
       const res = await fetch(
         `/api/institutionsadmin/features/permissions/${selectedFeature?.code}?roleId=${roleId}`,
         { credentials: 'include' }
       );
-      return res.json();
+      if (!res.ok) {
+        throw new Error('Failed to fetch permissions');
+      }
+      const data = await res.json();
+      console.log('Permission Response:', { 
+        featureCode: selectedFeature?.code, 
+        roleId, 
+        defaults: data.defaultSelectedPermissions,
+        allPermissions: data.allPermissions?.length 
+      });
+      return data;
     },
   });
 
   const permissions = permissionResponse?.allPermissions ?? [];
   const defaultSelectedPermissions = permissionResponse?.defaultSelectedPermissions ?? [];
 
-  // Initialize permissions
+  // Initialize permissions when modal opens or feature changes
   useEffect(() => {
-    if (open && defaultSelectedPermissions.length > 0) {
-      setSelectedPermissions(defaultSelectedPermissions);
+    if (!open || !selectedFeature || !permissionResponse || permissions.length === 0 || !roleId) return;
+
+    const featureKey = selectedFeature.code;
+    const featurePermissionIds = permissions.map((p: any) => p.id);
+    
+    // If we have stored permissions for this feature, use them
+    // But if stored permissions are empty and we have defaults, use defaults instead
+    const storedPermissions = featurePermissionsMap[featureKey];
+    if (storedPermissions !== undefined) {
+      // If stored permissions exist (even if empty), use them
+      // But if they're empty and we have defaults, prefer defaults
+      if (storedPermissions.length > 0 || defaultSelectedPermissions.length === 0) {
+        setSelectedPermissions(storedPermissions);
+        return;
+      }
+      // If stored is empty but we have defaults, fall through to set defaults
     }
-  }, [open, defaultSelectedPermissions]);
+    
+    // Otherwise, start with default permissions from API (role defaults)
+    // existingPermissions contains all permissions selected for the module, 
+    // but we need to filter for this specific feature
+    const existingForThisFeature = existingPermissions.filter((id) => 
+      featurePermissionIds.includes(id)
+    );
+    
+    // By default, select default permissions from API (role defaults)
+    // Merge with any existing permissions for this feature
+    const merged = existingForThisFeature.length > 0 
+      ? [...new Set([...defaultSelectedPermissions, ...existingForThisFeature])]
+      : [...defaultSelectedPermissions]; // Always use defaults
+    
+    // Always set permissions (even if empty, defaults will be empty array)
+    setSelectedPermissions(merged);
+    // Store in map
+    setFeaturePermissionsMap((prev) => ({
+      ...prev,
+      [featureKey]: merged,
+    }));
+  }, [open, selectedFeature?.code, permissionResponse, defaultSelectedPermissions.join(','), permissions.length]);
+
+  // Update stored permissions when user changes selection
+  useEffect(() => {
+    if (selectedFeature) {
+      setFeaturePermissionsMap((prev) => ({
+        ...prev,
+        [selectedFeature.code]: selectedPermissions,
+      }));
+    }
+  }, [selectedPermissions, selectedFeature]);
+
+  // Handle feature change - restore stored permissions or defaults
+  const handleFeatureChange = (feature: Feature) => {
+    setSelectedFeature(feature);
+    const featureKey = feature.code;
+    
+    if (featurePermissionsMap[featureKey] && featurePermissionsMap[featureKey].length > 0) {
+      setSelectedPermissions(featurePermissionsMap[featureKey]);
+    } else {
+      // Fetch defaults for new feature (will be set in useEffect above)
+      setSelectedPermissions([]);
+    }
+  };
+
+  // Restore to default permissions for current feature
+  // "Default" means role default permissions from API
+  const handleRestoreToDefault = () => {
+    if (!selectedFeature || !permissionResponse) return;
+    // Restore to role default permissions
+    setSelectedPermissions(defaultSelectedPermissions);
+    setFeaturePermissionsMap((prev) => ({
+      ...prev,
+      [selectedFeature.code]: defaultSelectedPermissions,
+    }));
+  };
+
+  // Save permissions before closing (auto-save on close)
+  const savePermissions = () => {
+    if (moduleName && selectedFeature) {
+      // Save current feature's permissions before aggregating
+      const currentMap = {
+        ...featurePermissionsMap,
+        [selectedFeature.code]: selectedPermissions,
+      };
+      
+      // Aggregate all permissions from all features in this module
+      const allModulePermissions = Object.values(currentMap).flat();
+      const uniquePermissions = [...new Set(allModulePermissions)];
+      onConfirm(moduleName, uniquePermissions);
+    }
+  };
+
+  // Reset state when modal closes
+  const handleClose = (skipSave = false) => {
+    // Auto-save permissions when closing (if not explicitly skipped)
+    if (!skipSave) {
+      savePermissions();
+    }
+    // Don't reset featurePermissionsMap - we want to keep it for when user reopens
+    // Only reset selectedFeature and selectedPermissions
+    setSelectedFeature(null);
+    setSelectedPermissions([]);
+    onClose();
+  };
 
   if (!open || !moduleName) return null;
 
+  // Show message if roleId is missing
+  if (!roleId) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center sm:items-center justify-center">
+        <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => handleClose(true)} />
+        <div className="relative bg-white w-full max-w-[95vw] sm:max-w-[640px] rounded-2xl p-6 m-5 shadow-xl flex flex-col border border-[#C2C9D8]">
+          <h2 className="text-base sm:text-lg font-semibold mb-4">Set Permissions — {moduleName}</h2>
+          <div className="text-center py-8">
+            <p className="text-red-500 mb-4">Please select a role first before setting permissions.</p>
+            <button
+              onClick={() => handleClose(true)}
+              className="px-6 py-2 rounded-full text-sm font-medium border border-gray-300 hover:bg-gray-50"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="fixed inset-0 z-50 flex items-center sm:items-center justify-center">
-      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => handleClose()} />
 
       <div className="relative bg-white w-full max-w-[95vw] sm:max-w-[640px] md:max-w-[780px] rounded-2xl p-4 sm:p-6 m-5 shadow-xl flex flex-col border border-[#C2C9D8]">
         <h2 className="text-base sm:text-lg font-semibold mb-4">Set Permissions — {moduleName}</h2>
@@ -256,7 +429,7 @@ export const SetPermissionsModal = ({
                   return (
                     <li
                       key={f.id}
-                      onClick={() => setSelectedFeature(f)}
+                      onClick={() => handleFeatureChange(f)}
                       className={`px-3 py-2 rounded-lg cursor-pointer transition-colors ${
                         active
                           ? 'bg-purple-50 text-purple-600 font-medium'
@@ -273,7 +446,17 @@ export const SetPermissionsModal = ({
 
           {/* RIGHT: PERMISSIONS */}
           <div className="sm:col-span-2 border rounded-xl p-4 md:min-h-[40vh] lg:min-h-[40vh] border border-[#C2C9D8]">
-            <h4 className="text-sm font-medium mb-3">Permissions</h4>
+            <div className="flex items-center justify-between mb-3">
+              <h4 className="text-sm font-medium">Permissions</h4>
+              <button
+                type="button"
+                onClick={handleRestoreToDefault}
+                className="text-xs text-purple-600 hover:text-purple-700 underline disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={!permissionResponse || defaultSelectedPermissions.length === 0}
+              >
+                Restore to Default
+              </button>
+            </div>
 
             {loadingPermissions ? (
               <div className="text-gray-500">Loading permissions…</div>
@@ -290,15 +473,19 @@ export const SetPermissionsModal = ({
                     action_type: string;
                   }) => {
                     const selected = selectedPermissions.includes(p.id);
+                    const isDefault = defaultSelectedPermissions.includes(p.id);
 
                     return (
                       <label
                         key={p.id}
-                        className={`flex items-center gap-2 px-4 py-2 rounded-full cursor-pointer text-sm transition-all ${
+                        className={`flex items-center gap-2 px-4 py-2 rounded-full cursor-pointer text-sm transition-all relative ${
                           selected
-                            ? 'bg-purple-100 text-purple-700 border border-purple-300'
+                            ? isDefault
+                              ? 'bg-purple-100 text-purple-700 border-2 border-purple-400'
+                              : 'bg-purple-100 text-purple-700 border border-purple-300'
                             : 'bg-gray-100 text-gray-600 border border-gray-200 hover:border-purple-300'
                         }`}
+                        title={isDefault ? 'Default permission' : ''}
                       >
                         <input
                           type="checkbox"
@@ -314,6 +501,9 @@ export const SetPermissionsModal = ({
                         />
                         {selected && <span>✓</span>}
                         {p.name}
+                        {isDefault && selected && (
+                          <span className="ml-1 text-xs text-purple-500">(default)</span>
+                        )}
                       </label>
                     );
                   }
@@ -327,14 +517,17 @@ export const SetPermissionsModal = ({
 
         <div className="flex flex-col sm:flex-row justify-between gap-3">
           <button
-            onClick={onClose}
+            onClick={() => handleClose(true)} // Skip saving on Cancel
             className="w-full sm:flex-1 border border-gray-300 rounded-full py-2 text-sm font-medium hover:bg-gray-50 transition-colors"
           >
             Cancel
           </button>
 
           <button
-            onClick={() => moduleName && onConfirm(moduleName, selectedPermissions)}
+            onClick={() => {
+              savePermissions();
+              handleClose(true); // Skip auto-save since we just saved
+            }}
             className="w-full sm:flex-1 rounded-full py-2 text-sm font-medium text-white bg-[linear-gradient(90deg,#904BFF,#C053C2)] hover:opacity-90 transition-opacity"
           >
             Confirm

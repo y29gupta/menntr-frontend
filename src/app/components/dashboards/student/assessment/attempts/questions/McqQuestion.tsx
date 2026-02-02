@@ -46,11 +46,15 @@ type Props = {
 };
 
 export default function McqQuestion({ question, selectedOptions, onSelectOption }: Props) {
-  console.log(question, 'ques');
   return (
     <div className="space-y-3">
       {question.options.map((opt: any, idx: any) => (
-        <label key={idx} className="flex items-center gap-3 cursor-pointer">
+        <label
+          key={idx}
+          className={`flex items-center gap-3 cursor-pointer ${
+            selectedOptions.includes(Number(opt.id)) ? 'text-[#7939E8]' : 'text-[#6C768A]'
+          }`}
+        >
           <input
             type="radio"
             name={`q-${question.question_id}`}
@@ -67,7 +71,7 @@ export default function McqQuestion({ question, selectedOptions, onSelectOption 
             checked={selectedOptions.includes(Number(opt.id))}
             onChange={() => onSelectOption([Number(opt.id)])}
           />
-          <span className="text-sm text-gray-700">
+          <span className="text-sm font-semibold text-[16px] ">
             {' '}
             {opt.label}. {opt.text}
           </span>

@@ -165,9 +165,9 @@ const Page = () => {
                   category_id: selectedDepartment?.category.id
                     ? String(selectedDepartment.category.id)
                     : undefined,
-                  hodId: selectedDepartment?.hodUserId
-                    ? String(selectedDepartment.hodUserId)
-                    : undefined,
+                  // hodId: selectedDepartment?.hodUserId
+                  //   ? String(selectedDepartment.hodUserId)
+                  //   : undefined,
                 }}
                 onBack={() => setDepartmentView('list')}
                 // onSubmit={(data) => {
