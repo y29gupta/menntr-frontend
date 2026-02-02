@@ -208,14 +208,8 @@ import AssessmentStepModal from '@/app/ui/modals/AssessmentStepModal';
 import { useParams } from 'next/navigation';
 
 export default function AssessmentStartPage() {
-  /* =========================
-     CHECKBOX STATE
-  ========================= */
   const [checked, setChecked] = useState(false);
 
-  /* =========================
-     MODAL OPEN STATE
-  ========================= */
   const [openModal, setOpenModal] = useState(false);
   const params = useParams();
 
