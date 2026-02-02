@@ -33,10 +33,12 @@ const ModulesGrid = ({
   selectedModules,
   modules,
   onOpenPermissions,
+  roleId,
 }: {
   selectedModules: string[];
   modules: Module[];
   onOpenPermissions: (module: Module, features: Feature[]) => void;
+  roleId?: number;
 }) => {
   return (
     <div
@@ -49,6 +51,7 @@ const ModulesGrid = ({
           <ModuleCard
             key={m.id}
             module={m}
+            roleId={roleId}
             onSetPermissions={(features: Feature[]) => onOpenPermissions(m, features)}
           />
         ))}

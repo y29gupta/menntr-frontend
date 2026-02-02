@@ -116,9 +116,11 @@ import { useState, useEffect } from "react";
 const ModuleCard = ({
   module,
   onSetPermissions,
+  roleId,
 }: {
   module: Module;
   onSetPermissions: (selectedFeatures: Feature[]) => void;
+  roleId?: number;
 }) => {
   const { data, isLoading, isError } = useQuery({
     queryKey: ["features", module.id],
@@ -127,10 +129,60 @@ const ModuleCard = ({
 
   const features: Feature[] = data?.data || [];
   const [selected, setSelected] = useState<number[]>([]);
+  const [featuresWithDefaults, setFeaturesWithDefaults] = useState<Set<number>>(new Set());
 
+  // Use feature IDs as dependency instead of the array itself to avoid infinite loops
+  const featureIds = features.map((f) => f.id).join(',');
+
+  // Fetch default permissions for each feature to determine which ones should be selected
   useEffect(() => {
-    setSelected([]);
-  }, [features]);
+    if (features.length === 0) {
+      setSelected([]);
+      return;
+    }
+
+    // By default, select all features
+    const allFeatureIds = features.map((f) => f.id);
+    setSelected(allFeatureIds);
+
+    // If roleId is available, check each feature for default permissions
+    if (!roleId) {
+      return;
+    }
+
+    // Check each feature for default permissions and uncheck those without defaults
+    const checkFeaturesForDefaults = async () => {
+      const featuresToKeep = new Set<number>();
+
+      await Promise.all(
+        features.map(async (feature) => {
+          try {
+            const res = await fetch(
+              `/api/institutionsadmin/features/permissions/${feature.code}?roleId=${roleId}`,
+              { credentials: 'include' }
+            );
+            if (res.ok) {
+              const data = await res.json();
+              // Keep feature if it has default permissions
+              if (data.defaultSelectedPermissions && data.defaultSelectedPermissions.length > 0) {
+                featuresToKeep.add(feature.id);
+              }
+            }
+          } catch (error) {
+            console.error(`Error checking defaults for feature ${feature.code}:`, error);
+            // On error, keep the feature selected (fail-safe)
+            featuresToKeep.add(feature.id);
+          }
+        })
+      );
+
+      // Update selected to only include features with default permissions
+      setSelected(Array.from(featuresToKeep));
+      setFeaturesWithDefaults(featuresToKeep);
+    };
+
+    checkFeaturesForDefaults();
+  }, [featureIds, roleId]);
 
   const toggleSelectAll = () => {
     if (selected.length === features.length) {
