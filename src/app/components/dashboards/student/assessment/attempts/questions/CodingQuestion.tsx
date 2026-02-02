@@ -70,8 +70,8 @@ export default function CodingQuestion() {
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-full min-h-0">
-      {/* LEFT : Problem (static - no scroll) */}
-      <div className="flex flex-col gap-2 text-[16px] font-medium text-[#1A2C50] overflow-hidden">
+      {/* LEFT : Problem (scrollable if content overflows) */}
+      <div className="flex flex-col gap-2 text-[16px] font-medium text-[#1A2C50] overflow-y-auto pr-2">
         <p>{question.description}</p>
 
         <div>
@@ -90,14 +90,13 @@ export default function CodingQuestion() {
         </div>
       </div>
 
-      {/* RIGHT : Editor + Result (SCROLLABLE) */}
+      {/* RIGHT : Editor + Result (BOTH SCROLL TOGETHER) */}
       <div className="h-full min-h-0 overflow-y-auto pr-2">
-        <div className="flex flex-col gap-4 pb-6">
-          <div className="h-[250px]">
+        <div className="flex flex-col gap-4">
+          <div className="h-[300px] flex-shrink-0">
             <CodeEditor code={code} setCode={setCode} onRun={runCode} />
           </div>
 
-          {/* Result section */}
           {result.status && <TestResult status={result.status} cases={result.cases} />}
         </div>
       </div>

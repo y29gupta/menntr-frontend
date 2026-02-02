@@ -220,26 +220,26 @@ export default function AssessmentAttempt() {
 
   return (
     <>
-      <div className="max-h-screen pb-6  px-12  bg-[#F7F6FB] flex flex-col">
+      <div className="h-screen pb-6 px-12 bg-[#F7F6FB] flex flex-col">
         <AssessmentHeader durationMinutes={runtime?.duration_minutes} onTimeUp={submitAssessment} />
 
-        <div className="px-6  mt-6">
+        <div className="px-6 mt-6 flex-shrink-0">
           <AssessmentStepper
             total={runtime?.total_questions ?? 0}
             currentIndex={currentIndex}
             statusMap={questionStatus}
             onStepClick={(index) => {
-              if (index > currentIndex) return; // safety (also enforced in stepper)
+              if (index > currentIndex) return;
               setCurrentIndex(index);
               questionStartTimeRef.current = Date.now();
             }}
           />
         </div>
 
-        <div className="flex-1    mt-6">
+        <div className="flex-1 mt-6 min-h-0 mb-6">
           <div
             className="bg-white border border-[#FFFFFF80] rounded-2xl shadow-[0px_0px_8px_0px_rgba(15,23,42,0.15)]
-                  p-6 flex flex-col w-full"
+                p-6 flex flex-col w-full h-full"
           >
             <QuestionRenderer
               currentIndex={currentIndex}
@@ -261,7 +261,7 @@ export default function AssessmentAttempt() {
           </div>
         </div>
 
-        <div className="mt-6">
+        <div className="flex-shrink-0">
           <AssessmentFooter
             currentIndex={currentIndex}
             total={runtime?.total_questions ?? 0}

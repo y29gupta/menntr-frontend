@@ -75,7 +75,7 @@ export function QuestionRenderer({
       <div className="mt-4 border-t border-gray-200" />
 
       {/* ───────── Question Body ───────── */}
-      <div className="mt-4 flex-1 min-h-0 overflow-y-auto">
+      <div className="mt-4 flex-1 min-h-0">
         {/* {questionType === 'coding' && (
           <McqQuestion
             question={question}
