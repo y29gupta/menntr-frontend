@@ -1,4 +1,5 @@
 'use client';
+import { useRouter } from 'next/navigation';
 
 type CompletedAssessmentCardProps = {
   title: string;
@@ -14,6 +15,7 @@ export default function CompletedAssessmentCard({
   status,
 }: CompletedAssessmentCardProps) {
   const isResultPublished = status === 'RESULT_PUBLISHED';
+   const router = useRouter();
 
   return (
     <div
@@ -62,6 +64,7 @@ export default function CompletedAssessmentCard({
               !text-purple-500
               hover:bg-purple-50
             "
+             onClick={() => router.push('/student/assessment/completed')}
           >
             View Details
           </button>
