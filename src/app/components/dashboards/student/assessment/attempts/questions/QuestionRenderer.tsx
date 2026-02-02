@@ -26,7 +26,7 @@ export function QuestionRenderer({
   onToggleReview,
   isReviewed,
 }: Props) {
-  const questionType: 'mcq' | 'coding' = 'coding';
+  const questionType: 'mcq' | 'coding' = 'mcq';
   // const currentQuestion = mcqDummyQuestions[currentIndex];
 
   return (
@@ -34,7 +34,7 @@ export function QuestionRenderer({
       {/* ───────── Top Center Title ───────── */}
       <div className="relative flex items-center justify-center">
         <span className="text-xl font-semibold !text-[#1A2C50]">
-          {questionType === 'coding' ? 'MCQ - Single correct answer' : 'Coding - Single problem'}
+          {questionType === 'mcq' ? 'MCQ - Single correct answer' : 'Coding - Single problem'}
         </span>
 
         <span className="absolute right-0  text-[16px] font-semibold !text-[#1A2C50]">
@@ -50,7 +50,7 @@ export function QuestionRenderer({
           <h3 className="font-medium text-[#6C768A] text-[16px] mb-1">
             Question {currentIndex + 1}
           </h3>
-          <p className="text-[16px] font-medium text-[#1A2C50]"> {question?.question_text}</p>
+          <p className="text-[16px] font-medium !text-[#1A2C50]"> {question?.question_text}</p>
         </div>
 
         {/* Right */}
@@ -76,14 +76,16 @@ export function QuestionRenderer({
 
       {/* ───────── Question Body ───────── */}
       <div className="mt-4 flex-1 min-h-0 overflow-y-auto">
-        {/* {questionType === 'coding' && (
-          <McqQuestion
-            question={question}
-            selectedOptions={selectedOptions}
-            onSelectOption={onSelectOption}
-          />
+        {/* {questionType === 'mcq' && (
+          <div className="mt-4 flex-1 min-h-[250px] overflow-y-auto">
+            <McqQuestion
+              question={question}
+              selectedOptions={selectedOptions}
+              onSelectOption={onSelectOption}
+            />
+          </div>
         )} */}
-        {questionType === 'coding' && <CodingQuestion />}
+        {questionType === 'mcq' && <CodingQuestion />}
       </div>
     </div>
   );
