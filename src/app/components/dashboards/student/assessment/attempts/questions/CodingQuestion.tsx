@@ -93,7 +93,6 @@ export default function CodingQuestion() {
       {/* RIGHT : Editor + Result (SCROLLABLE) */}
       <div className="h-full min-h-0 overflow-y-auto pr-2">
         <div className="flex flex-col gap-4 pb-6">
-          {/* Editor with smaller fixed height */}
           <div className="h-[250px]">
             <CodeEditor code={code} setCode={setCode} onRun={runCode} />
           </div>

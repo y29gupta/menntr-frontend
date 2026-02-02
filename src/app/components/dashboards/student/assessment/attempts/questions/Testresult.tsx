@@ -48,8 +48,8 @@ export default function TestResult({ status, cases }: Props) {
               ${
                 activeTab === index
                   ? testCase.passed
-                    ? 'border-[#22C55E] text-[#22C55E]'
-                    : 'border-[#EF4444] text-[#EF4444]'
+                    ? 'border-[#22C55E] text-[#22C55E]!'
+                    : 'border-[#EF4444] text-[#EF4444]!'
                   : 'border-transparent text-[#6C768A] hover:text-[#1A2C50]'
               }
             `}

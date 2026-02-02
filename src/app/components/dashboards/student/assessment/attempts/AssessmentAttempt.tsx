@@ -212,14 +212,15 @@ export default function AssessmentAttempt() {
 
   const submitAssessment = () => {
     console.log('Submitted answers', questionStatus);
-    setTimeUp(true);
+    // setTimeUp(true);
+    router.replace(`/student/assessment/${assessmentId}/preview`);
   };
 
   if (runtimeLoading || questionLoading) return null;
 
   return (
     <>
-      <div className="min-h-screen pb-6 pt-12  px-12  bg-[#F7F6FB] flex flex-col">
+      <div className="max-h-screen pb-6  px-12  bg-[#F7F6FB] flex flex-col">
         <AssessmentHeader durationMinutes={runtime?.duration_minutes} onTimeUp={submitAssessment} />
 
         <div className="px-6  mt-6">
