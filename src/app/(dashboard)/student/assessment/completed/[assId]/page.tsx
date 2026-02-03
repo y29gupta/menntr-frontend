@@ -1,13 +1,64 @@
 'use client';
 
+import { useParams, useRouter } from 'next/navigation';
+import { useQuery } from '@tanstack/react-query';
+
 import AssessmentHeaders from '@/app/components/dashboards/student/assessment/assessmentHeaders';
 
+/* ================= API ================= */
+
+async function fetchAssessment(assId: string) {
+  const res = await fetch(`/api/student/assessments/${assId}`, {
+    credentials: 'include',
+  });
+
+  if (!res.ok) throw new Error('Failed to fetch assessment');
+  return res.json();
+}
+
+/* ================= DATE FORMAT ================= */
+
+function formatAssignedDate(dateString: string) {
+  const date = new Date(dateString);
+  const day = date.getDate();
+  const year = date.getFullYear();
+  const month = date.toLocaleString('en-US', { month: 'long' });
+
+  const suffix =
+    day % 10 === 1 && day !== 11
+      ? 'st'
+      : day % 10 === 2 && day !== 12
+        ? 'nd'
+        : day % 10 === 3 && day !== 13
+          ? 'rd'
+          : 'th';
+
+  return `${day}${suffix} ${month} ${year}`;
+}
+
+/* ================= PAGE ================= */
+
 export default function AssessmentCompletedPage() {
+  const { assId } = useParams<{ assId: string }>();
+  const router = useRouter();
+
+  const { data, isLoading } = useQuery({
+    queryKey: ['completed-assessment', assId],
+    queryFn: () => fetchAssessment(assId),
+    enabled: !!assId,
+  });
+
+  if (isLoading || !data) return null;
+
+  const showViewDetails =
+    data.attempt_status === 'submitted' || data.attempt_status === 'evaluated';
+
+  const showViewResult = data.attempt_status === 'evaluated';
+
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen w-full">
       <AssessmentHeaders />
 
-      {/* ================= MAIN CARD ================= */}
       <div
         className="
           bg-white
@@ -19,29 +70,32 @@ export default function AssessmentCompletedPage() {
       >
         {/* ================= TOP ROW ================= */}
         <div className="flex justify-between items-start flex-wrap gap-3">
-          {/* Go Back */}
           <div className="mt-2 sm:mt-4">
-            <button className="text-sm flex items-center gap-2 font-medium text-gray-600 hover:text-gray-900">
+            <button
+              className="text-sm flex items-center gap-2 font-medium text-gray-600 hover:text-gray-900"
+              onClick={() => router.back()}
+            >
               <img src="/Go-back.svg" alt="goback" />
               Go back
             </button>
           </div>
 
-          {/* Status */}
           <div className="flex flex-col items-end gap-2 sm:gap-3">
             <div className="bg-green-100 text-green-700 text-xs px-3 py-1 rounded-lg font-medium">
               Completed
             </div>
 
             <p className="text-xs text-slate-500">
-              Assigned on :<span className="font-medium text-slate-500 ml-1">21st June 2025</span>
+              Assigned on :
+              <span className="font-medium text-slate-500 ml-1">
+                {formatAssignedDate(data.timing.start_time)}
+              </span>
             </p>
           </div>
         </div>
-
         {/* ================= TITLE ================= */}
         <div className="flex flex-col mt-3">
-          <p className="text-base sm:text-lg text-slate-800 font-medium">Mid-Term Coding Test</p>
+          <p className="text-base sm:text-lg text-slate-800 font-medium">{data.title}</p>
 
           <p className="flex flex-wrap items-center text-[12px] text-slate-500 mt-1">
             <span>Data Structures</span>
@@ -51,7 +105,6 @@ export default function AssessmentCompletedPage() {
             <span>Section A</span>
           </p>
         </div>
-
         {/* ================= OVERVIEW ================= */}
         <div className="bg-[#FAFBFC] border border-gray-200 rounded-xl p-5 mt-5">
           <h3 className="text-sm font-semibold text-gray-800">Assessment Overview</h3>
@@ -59,15 +112,14 @@ export default function AssessmentCompletedPage() {
           <div className="h-px bg-gray-200 mt-3 mb-4" />
 
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-            <OverviewItem label="Duration" value="120 minutes" />
-            <OverviewItem label="Assessment Type" value="MCQ + Coding" />
-            <OverviewItem label="Total Questions" value="30" />
-            <OverviewItem label="MCQ Questions" value="25 (25 marks)" />
-            <OverviewItem label="Coding Questions" value="5 (75 marks)" />
-            <OverviewItem label="Total Marks" value="100" />
+            <OverviewItem label="Duration" value={`${data.overview.duration_minutes} minutes`} />
+            <OverviewItem label="Assessment Type" value={data.overview.assessment_type} />
+            <OverviewItem label="Total Questions" value={String(data.overview.total_questions)} />
+            <OverviewItem label="MCQ Questions" value={String(data.overview.mcq_questions)} />
+            <OverviewItem label="Coding Questions" value={String(data.overview.coding_questions)} />
+            <OverviewItem label="Total Marks" value={String(data.overview.total_marks)} />
           </div>
         </div>
-
         {/* ================= RULES ================= */}
         <div className="bg-[#FAFBFC] border border-gray-200 rounded-xl p-5 mt-5">
           <h3 className="text-sm font-semibold text-gray-800">Assessment Rules</h3>
@@ -75,44 +127,44 @@ export default function AssessmentCompletedPage() {
           <div className="h-px bg-gray-200 mt-3 mb-4" />
 
           <ul className="space-y-3 text-sm text-gray-700">
-            <Rule text="You can attempt this assessment only once." />
-            <Rule text="The timer will start immediately after you begin." />
-            <Rule text="Do not refresh or close the browser during the assessment." />
-            <Rule text="Your responses are saved automatically." />
-            <Rule text="The assessment will be submitted automatically when time ends." />
+            {data.rules.map((rule: string, i: number) => (
+              <Rule key={i} text={rule} />
+            ))}
           </ul>
         </div>
-
         {/* ================= COMPLETED FOOTER ================= */}
+
         <div className="bg-[#FAFBFC] border border-gray-200 rounded-xl p-5 mt-5">
           <h3 className="text-sm font-semibold text-gray-800">Evaluation & Results</h3>
 
           <div className="h-px bg-gray-200 mt-3 mb-4" />
 
           <p className="text-sm text-gray-600 mb-6">
-            MCQ answers will be evaluated automatically after submission. Coding answers will be
-            evaluated after all test cases are executed. Results may take some time depending on
-            question complexity.
+            {data.evaluation.mcq}
+            <br />
+            {data.evaluation.coding}
           </p>
 
-          {/* ACTION BUTTONS */}
           <div className="flex justify-center gap-4 flex-wrap">
+            {/* ✅ ALWAYS SHOWN */}
             <button
               className="
-                px-6 py-2.5
-                rounded-full
-                text-sm font-medium
-                text-purple-600!
-                border border-purple-300
-                hover:bg-purple-50
-                transition
-              "
+              px-6 py-2.5
+              rounded-full
+              text-sm font-medium
+              text-purple-600!
+              border border-purple-300
+              hover:bg-purple-50
+              transition
+            "
             >
-              view result
+              View Submission
             </button>
 
-            <button
-              className="
+            {/* ✅ ONLY FOR EVALUATED */}
+            {data.attempt_status === 'evaluated' && (
+              <button
+                className="
                 px-6 py-2.5
                 rounded-full
                 text-sm font-medium
@@ -121,9 +173,10 @@ export default function AssessmentCompletedPage() {
                 hover:opacity-90
                 transition
               "
-            >
-              View Details
-            </button>
+              >
+                View Results
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -131,9 +184,7 @@ export default function AssessmentCompletedPage() {
   );
 }
 
-/* =========================================================
-   SMALL REUSABLE COMPONENTS
-========================================================= */
+/* ================= HELPERS ================= */
 
 function OverviewItem({ label, value }: { label: string; value: string }) {
   return (

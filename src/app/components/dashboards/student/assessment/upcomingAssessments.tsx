@@ -62,14 +62,11 @@ function formatTime(startTime: string): string {
 /* ================= API ================= */
 
 async function fetchUpcomingAssessments(): Promise<ApiAssessment[]> {
-  const res = await fetch(
-    '/api/student/assessments?status=upcoming',
-    { credentials: 'include' }
-  );
+  const res = await fetch('/api/student/assessments?status=upcoming', {
+    credentials: 'include',
+  });
 
-  if (!res.ok) {
-    throw new Error('Failed to fetch upcoming assessments');
-  }
+  if (!res.ok) throw new Error('Failed to fetch upcoming assessments');
 
   const data = await res.json();
   return data.assessments;
@@ -101,9 +98,7 @@ export default function UpcomingAssessments() {
   }, [data]);
 
   const filteredData = useMemo(() => {
-    return mappedAssessments.filter((a) =>
-      a.title.toLowerCase().includes(search.toLowerCase())
-    );
+    return mappedAssessments.filter((a) => a.title.toLowerCase().includes(search.toLowerCase()));
   }, [search, mappedAssessments]);
 
   if (!isLoading && filteredData.length === 0) {
@@ -136,10 +131,7 @@ export default function UpcomingAssessments() {
       <div className="space-y-4">
         {isLoading &&
           [...Array(3)].map((_, i) => (
-            <div
-              key={i}
-              className="h-24 rounded-xl bg-gray-100 animate-pulse"
-            />
+            <div key={i} className="h-24 rounded-xl bg-gray-100 animate-pulse" />
           ))}
 
         {filteredData.map((assessment) => (

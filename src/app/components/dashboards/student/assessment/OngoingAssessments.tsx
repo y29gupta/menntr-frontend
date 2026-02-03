@@ -1,4 +1,3 @@
-
 'use client';
 import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
@@ -19,7 +18,7 @@ type ApiAssessment = {
 };
 
 type Assessment = {
-  id: string;
+  assId: string;
   title: string;
   type: string;
   duration: string;
@@ -76,7 +75,7 @@ export default function OngoingAssessments() {
     if (!data) return [];
 
     return data.map((a) => ({
-      id: a.id,
+      assId: a.id,
       title: a.title,
       type: a.type,
       duration: `${a.duration_minutes} min`,
@@ -127,7 +126,7 @@ export default function OngoingAssessments() {
           ))}
 
         {filteredData.map((assessment) => (
-          <AssessmentCard key={assessment.id} {...assessment} />
+          <AssessmentCard key={assessment.assId} {...assessment} />
         ))}
 
         {isError && <p className="text-sm text-red-500">Failed to load assessments</p>}

@@ -21,9 +21,7 @@ type CompletedAssessmentItem = {
   title: string;
   type: string;
   submittedOn: string;
-  status?: 'UNDER_EVALUATION' | 'RESULT_PUBLISHED';
-  showViewResult: boolean;
-  showViewDetails: boolean;
+  attemptStatus: 'submitted' | 'evaluated' | 'not_started';
 };
 
 function formatDate(date: string | null): string {
@@ -37,7 +35,9 @@ function formatDate(date: string | null): string {
 }
 
 async function fetchCompletedAssessments(): Promise<ApiAssessment[]> {
-  const res = await fetch('/api/student/assessments?status=completed', { credentials: 'include' });
+  const res = await fetch('/api/student/assessments?status=completed', {
+    credentials: 'include',
+  });
 
   const data = await res.json();
   return data.assessments;
@@ -55,37 +55,13 @@ export default function CompletedAssessment() {
   const mappedAssessments: CompletedAssessmentItem[] = useMemo(() => {
     if (!data) return [];
 
-    return data.map((a) => {
-      let status: CompletedAssessmentItem['status'];
-      let showViewResult = false;
-      let showViewDetails = false;
-
-      if (a.attempt_status === 'submitted') {
-        status = 'UNDER_EVALUATION';
-        showViewDetails = true;
-      }
-
-      if (a.attempt_status === 'evaluated') {
-        status = 'RESULT_PUBLISHED';
-        showViewResult = true;
-        showViewDetails = true;
-      }
-
-      if (a.attempt_status === 'not_started') {
-        status = undefined;
-        showViewDetails = true;
-      }
-
-      return {
-        id: a.id,
-        title: a.title,
-        type: a.type,
-        submittedOn: formatDate(a.end_time),
-        status,
-        showViewResult,
-        showViewDetails,
-      };
-    });
+    return data.map((a) => ({
+      id: a.id,
+      title: a.title,
+      type: a.type,
+      submittedOn: formatDate(a.end_time),
+      attemptStatus: a.attempt_status,
+    }));
   }, [data]);
 
   const filteredData = useMemo(() => {
