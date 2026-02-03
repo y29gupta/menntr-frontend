@@ -49,6 +49,23 @@ function DataTable<T extends RowData>({
     meta,
   });
 
+  const jumpPages = (steps: number, direction: 'next' | 'prev') => {
+    if (steps <= 0) return;
+
+    let remaining = steps;
+
+    const step = () => {
+      if (remaining <= 0) return;
+
+      direction === 'next' ? onNextPage() : onPreviousPage();
+      remaining--;
+
+      requestAnimationFrame(step);
+    };
+
+    requestAnimationFrame(step);
+  };
+
   return (
     <>
       <div className="w-full h-full overflow-auto scrollbar-thin">
@@ -166,12 +183,12 @@ function DataTable<T extends RowData>({
           Next
         </button>
       </div> */}
-      <div className="flex justify-center items-center gap-2 mt-3 text-xs sm:text-sm select-none text-gray-600">
+      <div className="flex justify-center items-center gap-2 mt-8 text-xs sm:text-sm select-none text-gray-600">
         {/* First */}
         <button
           onClick={() => {
             if (!canPreviousPage) return;
-            while (currentPage > 1) onPreviousPage();
+            jumpPages(currentPage - 1, 'prev');
           }}
           disabled={!canPreviousPage}
           className="px-1 disabled:opacity-30"
@@ -204,13 +221,13 @@ function DataTable<T extends RowData>({
                   onClick={() => {
                     if (page === currentPage) return;
                     const diff = page - currentPage;
-                    const action = diff > 0 ? onNextPage : onPreviousPage;
-                    for (let i = 0; i < Math.abs(diff); i++) action();
+
+                    jumpPages(Math.abs(diff), diff > 0 ? 'next' : 'prev');
                   }}
-                  className={`w-7 h-7 flex items-center justify-center rounded-full
+                  className={`w-7 h-7 p-2 gap-8 flex items-center justify-center rounded-[64px]
                     ${
                       page === currentPage
-                        ? 'bg-purple-100 text-purple-600 font-medium'
+                        ? 'bg-purple-100 text-[#7B3AEC] font-extrabold'
                         : 'hover:text-purple-600'
                     }`}
                 >
@@ -229,10 +246,10 @@ function DataTable<T extends RowData>({
         <button
           onClick={() => {
             if (!canNextPage) return;
-            while (currentPage < pageCount) onNextPage();
+            jumpPages(pageCount - currentPage, 'next');
           }}
           disabled={!canNextPage}
-          className="px-1 disabled:opacity-30"
+          className="px-1 disabled:opacity-30 font-bold "
         >
           »
         </button>

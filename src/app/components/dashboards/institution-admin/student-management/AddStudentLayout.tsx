@@ -6,12 +6,14 @@ import ProfileImageUploader from '@/app/ui/ProfileImageUploader';
 import CreateStudentForm from './createStudent/CreateStudentForm';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-
+import { StudentFormValues } from './student.types';
 type Props = {
-  onBack: () => void;
+  mode?: 'create' | 'edit';
+  studentId?: string;
+  defaultValues?: StudentFormValues;
 };
 
-export default function AddStudentLayout() {
+export default function AddStudentLayout({ mode = 'create', defaultValues }: Props) {
   const [profileImage, setProfileImage] = useState<File | null>(null);
   const router = useRouter();
 
@@ -34,9 +36,10 @@ export default function AddStudentLayout() {
       {/* Form */}
       <div className="mt-8">
         <CreateStudentForm
-          mode="create"
+          mode={mode}
           onCancel={() => router.push('/admin/student-management')}
-          defaultValues={{}}
+          defaultValues={defaultValues}
+          // onCancel={() => router.push('/admin/student-management')}
         />
       </div>
     </div>

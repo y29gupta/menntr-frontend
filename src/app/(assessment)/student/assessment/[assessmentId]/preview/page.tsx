@@ -1,15 +1,40 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import PrevSubmit from '@/app/components/dashboards/student/assessment/attempts/PrevSubmit';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { assessmentApi } from '@/app/components/dashboards/student/assessment/attempts/assessment.service';
 
 export default function Page() {
   const router = useRouter();
   const [showPrevSubmit, setShowPrevSubmit] = useState(true);
+  const params = useParams();
+
+  const assessmentId = typeof params.assessmentId === 'string' ? params.assessmentId : '';
+
+  const { data, isLoading } = useQuery({
+    queryKey: ['submit-preview', assessmentId],
+    queryFn: () => assessmentApi.getSubmitPreview(assessmentId),
+    enabled: !!assessmentId,
+  });
+
+  const submitMutation = useMutation({
+    mutationFn: () => assessmentApi.submitAssessment(assessmentId),
+
+    onSuccess: (res) => {
+      // store submit response for submit screen
+      sessionStorage.setItem('assessment-submit-response', JSON.stringify(res));
+
+      // redirect to submit screen
+      router.replace(`/student/assessment/${assessmentId}/submit`);
+    },
+  });
+
+  if (isLoading || !data) return null;
 
   const submitAssessment = () => {
-    router.replace('/student/assessment/35/submit');
+    submitMutation.mutate();
   };
 
   return (
@@ -20,14 +45,14 @@ export default function Page() {
           onTimeUp={submitAssessment}
           onGoBack={() => {
             setShowPrevSubmit(false);
-            router.push('/student/assessment/35');
+            router.push(`/student/assessment/${assessmentId}`);
           }}
           onSubmitNow={submitAssessment}
           stats={{
             attended: 25,
-            answered: 17,
-            unanswered: 8,
-            timeTaken: '25 mins',
+            answered: data.attended,
+            unanswered: data.unanswered,
+            timeTaken: `${data.time_taken_minutes} mins`,
           }}
         />
       )}

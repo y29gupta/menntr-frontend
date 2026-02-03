@@ -1,4 +1,5 @@
 import { api } from '@/app/lib/api';
+import { SubmitAssessmentResponse, SubmitPreviewResponse } from './assessment.types';
 
 export type StartAssessmentResponse = {
   success: boolean;
@@ -67,6 +68,34 @@ export const assessmentApi = {
       payload
     );
   },
+
+  getSubmitPreview: async (assessmentId: string): Promise<SubmitPreviewResponse> => {
+    const res = await api.get(
+      `/student/assessments/${assessmentId}/submit-preview`
+    );
+    return res.data;
+  },
+
+  submitAssessment: async (assessmentId: string): Promise<SubmitAssessmentResponse> => {
+    const res = await api.post(
+      `/student/assessments/${assessmentId}/submit`
+    );
+    return res.data;
+  },
+  submitFeedback: (
+  assessmentId: string,
+  payload: {
+    overall_rating: number;
+    flow_rating: string;
+    comments: string;
+  }
+) => {
+  return api.post(
+    `/student/assessments/${assessmentId}/feedback`,
+    payload
+  );
+},
+
 };
 
 

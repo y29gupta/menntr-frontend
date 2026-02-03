@@ -125,79 +125,82 @@ export default function AssessmentAttempt() {
   //   };
   // }, []);
 
+  const saveCurrentAnswer = async () => {
+    if (!currentQuestion) return;
+
+    const selectedOptions = selectedOptionsMap[currentIndex] ?? [];
+    const timeTakenSeconds = Math.floor((Date.now() - questionStartTimeRef.current) / 1000);
+
+    await saveAnswerMutation.mutateAsync({
+      assessment_question_id: currentQuestion.assessment_question_id,
+      question_id: currentQuestion.question_id,
+      selected_option_ids: selectedOptions, // empty allowed
+      time_taken_seconds: timeTakenSeconds,
+    });
+
+    setQuestionStatus((prev) => ({
+      ...prev,
+      [currentIndex]: {
+        ...prev[currentIndex],
+        attempted: selectedOptions.length > 0,
+        visited: true,
+      },
+    }));
+  };
+
   /* ================= Navigation ================= */
+
   // const goNext = async () => {
   //   if (!currentQuestion) return;
 
+  //   const selectedOptions = selectedOptionsMap[currentIndex] ?? [];
+  //   const isAttempted = selectedOptions.length > 0;
+
   //   try {
   //     const timeTakenSeconds = Math.floor((Date.now() - questionStartTimeRef.current) / 1000);
-  //     console.log(currentIndex, 'index', currentQuestion);
+
+  //     // 🔹 Save answer (empty array allowed)
   //     await saveAnswerMutation.mutateAsync({
   //       assessment_question_id: currentQuestion.assessment_question_id,
   //       question_id: currentQuestion.question_id,
-  //       selected_option_ids: selectedOptionsMap[currentIndex] ?? [],
+  //       selected_option_ids: selectedOptions,
   //       time_taken_seconds: timeTakenSeconds,
   //     });
 
-  //     setQuestionStatus((prev) => ({
-  //       ...prev,
-  //       [currentIndex]: {
-  //         ...prev[currentIndex],
-  //         attempted: true,
-  //       },
-  //       [currentIndex + 1]: {
-  //         ...prev[currentIndex + 1],
+  //     setQuestionStatus((prev) => {
+  //       const next = { ...prev };
+
+  //       const selectedOptions = selectedOptionsMap[currentIndex] ?? [];
+  //       const isAttempted = selectedOptions.length > 0;
+
+  //       // ✅ Update CURRENT question
+  //       next[currentIndex] = {
+  //         ...next[currentIndex],
+  //         attempted: isAttempted,
   //         visited: true,
-  //       },
-  //     }));
+  //       };
+
+  //       // ✅ Update NEXT question ONLY if it exists
+  //       if (next[currentIndex + 1]) {
+  //         next[currentIndex + 1] = {
+  //           ...next[currentIndex + 1],
+  //           visited: true,
+  //         };
+  //       }
+
+  //       return next;
+  //     });
 
   //     setCurrentIndex((i) => i + 1);
+  //     questionStartTimeRef.current = Date.now();
   //   } catch {
   //     message.error('Failed to save answer');
   //   }
   // };
 
   const goNext = async () => {
-    if (!currentQuestion) return;
-
-    const selectedOptions = selectedOptionsMap[currentIndex] ?? [];
-    const isAttempted = selectedOptions.length > 0;
-
     try {
-      const timeTakenSeconds = Math.floor((Date.now() - questionStartTimeRef.current) / 1000);
-
-      // 🔹 Save answer (empty array allowed)
-      await saveAnswerMutation.mutateAsync({
-        assessment_question_id: currentQuestion.assessment_question_id,
-        question_id: currentQuestion.question_id,
-        selected_option_ids: selectedOptions,
-        time_taken_seconds: timeTakenSeconds,
-      });
-
-      setQuestionStatus((prev) => {
-        const next = { ...prev };
-
-        const selectedOptions = selectedOptionsMap[currentIndex] ?? [];
-        const isAttempted = selectedOptions.length > 0;
-
-        // ✅ Update CURRENT question
-        next[currentIndex] = {
-          ...next[currentIndex],
-          attempted: isAttempted,
-          visited: true,
-        };
-
-        // ✅ Update NEXT question ONLY if it exists
-        if (next[currentIndex + 1]) {
-          next[currentIndex + 1] = {
-            ...next[currentIndex + 1],
-            visited: true,
-          };
-        }
-
-        return next;
-      });
-
+      await saveCurrentAnswer();
       setCurrentIndex((i) => i + 1);
       questionStartTimeRef.current = Date.now();
     } catch {
@@ -209,37 +212,39 @@ export default function AssessmentAttempt() {
     if (currentIndex === 0) return;
     setCurrentIndex((i) => i - 1);
   };
-
-  const submitAssessment = () => {
-    console.log('Submitted answers', questionStatus);
-    // setTimeUp(true);
-    router.replace(`/student/assessment/${assessmentId}/preview`);
+  const submitAssessment = async () => {
+    try {
+      await saveCurrentAnswer();
+      router.replace(`/student/assessment/${assessmentId}/preview`);
+    } catch {
+      message.error('Failed to save answer');
+    }
   };
 
   if (runtimeLoading || questionLoading) return null;
 
   return (
     <>
-      <div className="max-h-screen pb-6  px-12  bg-[#F7F6FB] flex flex-col">
+      <div className="h-screen pb-6 px-12 bg-[#F7F6FB] flex flex-col">
         <AssessmentHeader durationMinutes={runtime?.duration_minutes} onTimeUp={submitAssessment} />
 
-        <div className="px-6  mt-6">
+        <div className="px-6 mt-6 flex-shrink-0">
           <AssessmentStepper
             total={runtime?.total_questions ?? 0}
             currentIndex={currentIndex}
             statusMap={questionStatus}
             onStepClick={(index) => {
-              if (index > currentIndex) return; // safety (also enforced in stepper)
+              if (index > currentIndex) return;
               setCurrentIndex(index);
               questionStartTimeRef.current = Date.now();
             }}
           />
         </div>
 
-        <div className="flex-1    mt-6">
+        <div className="flex-1 mt-6 min-h-0 mb-6">
           <div
             className="bg-white border border-[#FFFFFF80] rounded-2xl shadow-[0px_0px_8px_0px_rgba(15,23,42,0.15)]
-                  p-6 flex flex-col w-full"
+                p-6 flex flex-col w-full h-full"
           >
             <QuestionRenderer
               currentIndex={currentIndex}
@@ -261,7 +266,7 @@ export default function AssessmentAttempt() {
           </div>
         </div>
 
-        <div className="mt-6">
+        <div className="flex-shrink-0">
           <AssessmentFooter
             currentIndex={currentIndex}
             total={runtime?.total_questions ?? 0}

@@ -75,17 +75,15 @@ export function QuestionRenderer({
       <div className="mt-4 border-t border-gray-200" />
 
       {/* ───────── Question Body ───────── */}
-      <div className="mt-4 flex-1 min-h-0 overflow-y-auto">
-        {/* {questionType === 'mcq' && (
-          <div className="mt-4 flex-1 min-h-[250px] overflow-y-auto">
-            <McqQuestion
-              question={question}
-              selectedOptions={selectedOptions}
-              onSelectOption={onSelectOption}
-            />
-          </div>
-        )} */}
-        {questionType === 'mcq' && <CodingQuestion />}
+      <div className="mt-4 flex-1 min-h-0">
+        {questionType === 'mcq' && (
+          <McqQuestion
+            question={question}
+            selectedOptions={selectedOptions}
+            onSelectOption={onSelectOption}
+          />
+        )}
+        {/* {questionType === 'mcq' && <CodingQuestion />} */}
       </div>
     </div>
   );

@@ -18,7 +18,7 @@ import { createAssessmentSchema, CreateAssessmentForm, stepOneSchema } from './s
 // import StepFour from './steps/StepFour';
 import { QueryClient, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { assessmentApi } from '../assessment.service';
-import { QuestionType } from '@/app/utils/questionType';
+// import { QuestionType } from '@/app/utils/questionType';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import ConfirmModal from '@/app/ui/modals/ConfirmModal';
@@ -36,19 +36,19 @@ export default function CreateAssessment({ mode = 'create', editAssessmentId }: 
   const [tags, setTags] = useState<string[] | undefined>();
   const [durationMinutes, setDurationMinutes] = useState<number | undefined>();
 
-  const [activeQuestionType, setActiveQuestionType] = useState<QuestionType | null>(null);
+  // const [activeQuestionType, setActiveQuestionType] = useState<QuestionType | null>(null);
 
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [deleteQuestionId, setDeleteQuestionId] = useState<string | null>(null);
 
-  const [assessmentId, setAssessmentId] = useState<string | null>(null);
+  const [assessmentId, setAssessmentId] = useState<string>('');
   const [isHydrated, setIsHydrated] = useState(false);
 
   const isEdit = mode === 'edit';
 
-  const closeQuestionModal = () => {
-    setActiveQuestionType(null);
-  };
+  // const closeQuestionModal = () => {
+  //   setActiveQuestionType(null);
+  // };
 
   const router = useRouter();
 
@@ -76,11 +76,11 @@ export default function CreateAssessment({ mode = 'create', editAssessmentId }: 
     staleTime: 1 * 60 * 1000, // performance
   });
 
-  const questionTypes = form.watch('questionType'); // comes from Step One meta API
+  // const questionTypes = form.watch('questionType'); // comes from Step One meta API
 
-  const openQuestionModal = (type: QuestionType) => {
-    setActiveQuestionType(type);
-  };
+  // const openQuestionModal = (type: QuestionType) => {
+  //   setActiveQuestionType(type);
+  // };
 
   const queryClient = useQueryClient();
 
@@ -109,7 +109,7 @@ export default function CreateAssessment({ mode = 'create', editAssessmentId }: 
 
       category: values.category,
       assessment_type: values.AssessmentType.toLowerCase(),
-      question_type: values.questionType.toLowerCase(),
+      // question_type: values.questionType.toLowerCase(),
     };
   };
   const buildUpdatePayload = (values: CreateAssessmentForm) => {
@@ -123,7 +123,7 @@ export default function CreateAssessment({ mode = 'create', editAssessmentId }: 
 
       category: values.category,
       assessment_type: values.AssessmentType,
-      question_type: values.questionType,
+      // question_type: values.questionType,
     };
   };
 
@@ -144,9 +144,9 @@ export default function CreateAssessment({ mode = 'create', editAssessmentId }: 
       { shouldDirty: false }
     );
 
-    form.setValue('questionType', toTitleCase(assessmentResponse.metadata?.question_type) ?? '', {
-      shouldDirty: false,
-    });
+    // form.setValue('questionType', toTitleCase(assessmentResponse.metadata?.question_type) ?? '', {
+    //   shouldDirty: false,
+    // });
 
     // store non-form fields for UPDATE
     setInstructions(assessmentResponse.instructions);
@@ -163,60 +163,31 @@ export default function CreateAssessment({ mode = 'create', editAssessmentId }: 
     setIsHydrated(true);
   }, [isEdit, assessmentResponse, isHydrated, form]);
 
-  // const handleStepOneNext = async () => {
-  //   const isValid = await form.trigger([
-  //     'title',
-  //     // 'description',
-  //     'category',
-  //     'AssessmentType',
-  //     'questionType',
-  //   ]);
-
-  //   if (!isValid) return;
-  //   const values = form.getValues();
-
-  //   // const res = await createAssessmentMutation.mutateAsync({
-  //   //   // feature_id: 5,
-  //   //   duration_minutes: 30,
-  //   //   tags: ['verbal', 'english'],
-
-  //   //   title: values.title,
-  //   //   description: values.description,
-  //   //   category: values.category,
-  //   //   assessment_type: values.AssessmentType.toLowerCase(),
-  //   //   question_type: values.questionType.toLowerCase(),
-  //   // });
-
-  //   // setAssessmentId(res.id);
-  //   setAssessmentId('31');
-  //   setStep(2);
-  // };
-
   const handleStepOneNext = async () => {
-    const isValid = await form.trigger(['title', 'category', 'AssessmentType', 'questionType']);
+    const isValid = await form.trigger(['title', 'category', 'AssessmentType']);
 
     if (!isValid) return;
 
     const values = form.getValues();
 
     try {
-      if (isEdit && assessmentId) {
-        const payload = buildUpdatePayload(values);
+      // if (isEdit && assessmentId) {
+      //   const payload = buildUpdatePayload(values);
 
-        await updateAssessmentMutation.mutateAsync({
-          assessmentId,
-          payload,
-        });
+      //   await updateAssessmentMutation.mutateAsync({
+      //     assessmentId,
+      //     payload,
+      //   });
 
-        message.success('Assessment updated successfully');
-      } else {
-        const payload = buildCreatePayload(values);
+      //   message.success('Assessment updated successfully');
+      // } else {
+      //   const payload = buildCreatePayload(values);
 
-        const res = await createAssessmentMutation.mutateAsync(payload);
-        setAssessmentId(res.id);
+      //   const res = await createAssessmentMutation.mutateAsync(payload);
+      //   setAssessmentId(res.id);
 
-        message.success('Assessment created successfully');
-      }
+      //   message.success('Assessment created successfully');
+      // }
 
       // SAME FLOW
       setStep(2);
@@ -228,15 +199,15 @@ export default function CreateAssessment({ mode = 'create', editAssessmentId }: 
   const handleStepTwoNext = async () => {
     const isValid = await form.trigger(['institutionCategory', 'department', 'batches']);
 
-    if (!isValid || !assessmentId) return;
+    // if (!isValid || !assessmentId) return;
     // if (!isValid) return;
 
     const { batches } = form.getValues();
 
-    await updateAudienceMutation.mutateAsync({
-      assessmentId,
-      batchIds: batches.map((id) => Number(id)),
-    });
+    // await updateAudienceMutation.mutateAsync({
+    //   assessmentId,
+    //   batchIds: batches.map((id) => Number(id)),
+    // });
 
     setStep(3);
   };
@@ -297,8 +268,8 @@ export default function CreateAssessment({ mode = 'create', editAssessmentId }: 
             onBack={() => setStep(2)}
             onNext={handleStepThreeNext}
             onCancel={handleCancel}
-            onAddMCQ={() => setStep(4)}
-            questionTypes={questionTypes}
+            // onAddMCQ={() => setStep(4)}
+            // questionTypes={questionTypes}
             assessmentId={assessmentId}
           />
         )}
@@ -307,10 +278,10 @@ export default function CreateAssessment({ mode = 'create', editAssessmentId }: 
             onBack={() => setStep(3)}
             onCancel={handleCancel}
             assessmentId={assessmentId!}
-            questionTypes={questionTypes}
-            activeQuestionType={activeQuestionType}
-            onSelectQuestionType={openQuestionModal}
-            onCloseModal={closeQuestionModal}
+            // questionTypes={questionTypes}
+            // activeQuestionType={activeQuestionType}
+            // onSelectQuestionType={openQuestionModal}
+            // onCloseModal={closeQuestionModal}
             onDeleteQuestion={(id) => {
               setDeleteQuestionId(id);
               setDeleteModalOpen(true);

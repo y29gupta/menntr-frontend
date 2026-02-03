@@ -77,19 +77,26 @@ export const studentColumns: ColumnDef<StudentApi>[] = [
   },
   {
     header: 'Actions',
-    cell: () => (
-      <div className="flex items-center gap-3">
-        <Image
-          width={16}
-          height={16}
-          src="/assets/performanceIcon.svg"
-          alt="performanceIcon"
-          onClick={(e) => e.stopPropagation()}
-        />
-        <Image width={18} height={18} src="/assets/deleteIcon.svg" alt="deleteIcon" />
-        {/* <Pencil size={16} className="cursor-pointer text-gray-500 hover:text-gray-700" /> */}
-        {/* <Trash size={16} className="cursor-pointer text-gray-500 hover:text-gray-700" /> */}
-      </div>
-    ),
+    cell: ({ row }) => {
+      const router = useRouter();
+      const studentId = row.original.id;
+
+      return (
+        <div className="flex items-center gap-3">
+          <Image
+            width={16}
+            height={16}
+            src="/assets/performanceIcon.svg"
+            alt="performanceIcon"
+            onClick={(e) => {
+              e.stopPropagation();
+              router.push(`/admin/student-management/${studentId}/edit-student`);
+            }}
+          />
+
+          <Image width={18} height={18} src="/assets/deleteIcon.svg" alt="deleteIcon" />
+        </div>
+      );
+    },
   },
 ];

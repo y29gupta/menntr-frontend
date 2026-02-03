@@ -1,17 +1,32 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import AssessmentHeader from './AssessmentHeader';
-import { useRouter } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import Congratulation from '@/app/components/icons/Congratulation';
+import { SubmitAssessmentResponse } from './assessment.types';
 
 export default function SubmissionScreen() {
   const router = useRouter();
+  const params = useParams();
+  const assessmentId = typeof params.assessmentId === 'string' ? params.assessmentId : '';
+
+  const [submitResult, setSubmitResult] = useState<SubmitAssessmentResponse | null>(null);
+
+  useEffect(() => {
+    const stored = sessionStorage.getItem('assessment-submit-response');
+
+    if (stored) {
+      setSubmitResult(JSON.parse(stored));
+      sessionStorage.removeItem('assessment-submit-response');
+    }
+  }, []);
+
   const handleDone = async () => {
     if (document.fullscreenElement) {
       await document.exitFullscreen().catch(() => {});
     }
-    router.push('/student/assessment');
+    router.push(`/student/assessment/${assessmentId}/feedback`);
   };
 
   return (
@@ -39,7 +54,7 @@ export default function SubmissionScreen() {
                   strokeLinejoin="round"
                 />
               </svg>{' '}
-              Assessment Submitted Successfully
+              {submitResult?.message ?? 'Assessment Submitted Successfully'}
             </div>
 
             {/* Points */}
@@ -53,9 +68,14 @@ export default function SubmissionScreen() {
 
             {/* Stats */}
             <div className="rounded-xl border border-[#CBD5FF] bg-[#FBFCFF] grid grid-cols-3 overflow-hidden py-4">
-              <Stat label="Attended Questions" value="25" />
-              <Stat label="Unanswered" value="8" />
-              <Stat label="Time Taken" value="25 mins" />
+              <Stat label="Attended Questions" value={submitResult?.submission.attended ?? '0'} />
+
+              <Stat label="Unanswered" value={submitResult?.submission.unanswered ?? '0'} />
+
+              <Stat
+                label="Time Taken"
+                value={`${submitResult?.submission.time_taken_minutes ?? 0} mins`}
+              />
             </div>
 
             {/* Button */}
@@ -74,7 +94,7 @@ export default function SubmissionScreen() {
   );
 }
 
-function Stat({ label, value }: { label: string; value: string }) {
+function Stat({ label, value }: { label: string; value: number | string }) {
   return (
     <div className="flex flex-col justify-center px-8 border-r border-[#CBD5FF] last:border-r-0">
       <span className="text-xs text-gray-500">{label}</span>
