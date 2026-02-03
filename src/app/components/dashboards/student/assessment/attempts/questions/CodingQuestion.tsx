@@ -1,100 +1,128 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import CodeEditor from './CodeEditor';
 import TestResult from './Testresult';
+import { assessmentApi } from '../assessment.service';
+import { useQueryClient } from '@tanstack/react-query';
 
-/* 🔹 Dynamic types */
 type TestCase = {
   name: string;
   input: string;
-  expected: boolean;
-  output: boolean | null;
+  expected: string;
+  output: string | null;
   passed: boolean;
 };
 
 type CodingQuestionData = {
-  id: number;
+  assessment_question_id: string;
+  question_id: string;
+  title: string;
   description: string;
-  input: string;
-  output: string;
   constraints: string;
-  starterCode: string;
+  examples: {
+    input: string;
+    output: string;
+  }[];
+  supported_languages: string[];
+  previous_code: string | null;
 };
 
-export default function CodingQuestion() {
-  /* 🔹 This will later come from API */
-  const question: CodingQuestionData = {
-    id: 3,
-    description: 'Write a function that checks whether a string is a palindrome.',
-    input: 'A string s',
-    output: 'Return true if palindrome, else false',
-    constraints: '1 ≤ length of s ≤ 10⁵',
-    starterCode: `def isPalindrome(s):
-    # write code here`,
-  };
+type Props = {
+  question: CodingQuestionData;
+  onSubmitSuccess: () => void;
+};
 
-  const [code, setCode] = useState(question.starterCode);
+export default function CodingQuestion({ question, onSubmitSuccess }: Props) {
+  const [code, setCode] = useState(question.previous_code ?? '');
+
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    setCode(question.previous_code ?? '');
+  }, [question.question_id]);
 
   const [result, setResult] = useState<{
     status: 'passed' | 'failed' | null;
     cases: TestCase[];
   }>({ status: null, cases: [] });
 
-  /* 🔹 Fake judge (replace with backend later) */
-  const runCode = () => {
-    const returnsSomething = code.includes('return');
-
-    // Simulate multiple test cases
-    setResult({
-      status: returnsSomething ? 'passed' : 'failed',
-      cases: [
-        {
-          name: 'Sample test case 1',
-          input:
-            'This is a very long input string used to aggressively test UI wrapping, overflow, scrolling, and height expansion across different breakpoints, including long file paths like src/app/components/dashboards/student/assessment/attempts/question and repeated descriptive text to increase length.',
-          expected: true,
-          output: returnsSomething ? true : null,
-          passed: returnsSomething,
-        },
-        {
-          name: 'Sample test case 2',
-          input: 'racecar',
-          expected: true,
-          output: returnsSomething ? true : null,
-          passed: returnsSomething,
-        },
-      ],
+  const runCode = async () => {
+    const res = await assessmentApi.runCodingAnswer('36', {
+      question_id: Number(question.question_id),
+      language: 'python',
+      source_code: code,
     });
+
+    const data = res.data;
+
+    setResult({
+      status: data.status === 'accepted' ? 'passed' : 'failed',
+      cases: question.examples.map((ex, idx) => ({
+        name: `Sample test case ${idx + 1}`,
+        input: ex.input,
+        expected: ex.output,
+        output: data.outputs?.[idx] ?? null,
+        passed: data.outputs?.[idx] === ex.output,
+      })),
+    });
+  };
+
+  const submitCode = async () => {
+    await assessmentApi.saveCodingAnswer('36', {
+      question_id: Number(question.question_id),
+      language: 'python',
+      source_code: code,
+    });
+
+    queryClient.invalidateQueries({
+      queryKey: ['assessment-question'],
+    });
+
+    onSubmitSuccess();
   };
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-full min-h-0">
-      {/* LEFT : Problem (scrollable if content overflows) */}
+      {/* LEFT */}
       <div className="flex flex-col gap-2 text-[16px] font-medium text-[#1A2C50] overflow-y-auto pr-2">
         <p>{question.description}</p>
 
         <div>
           <p className="text-[#6C768A]">Input:</p>
-          <p>{question.input}</p>
+          {question.examples.map((ex, idx) => (
+            <pre key={idx} className="mt-1 text-sm bg-[#F7F9FC] p-2 rounded whitespace-pre-wrap">
+              {ex.input}
+            </pre>
+          ))}
         </div>
 
         <div>
           <p className="text-[#6C768A]">Output:</p>
-          <p>{question.output}</p>
+          {question.examples.map((ex, idx) => (
+            <pre key={idx} className="mt-1 text-sm bg-[#F7F9FC] p-2 rounded whitespace-pre-wrap">
+              {ex.output}
+            </pre>
+          ))}
         </div>
 
         <div>
           <p className="text-[#6C768A]">Constraints:</p>
-          <p>{question.constraints}</p>
+          <pre className="whitespace-pre-wrap">{question.constraints}</pre>
         </div>
       </div>
 
-      {/* RIGHT : Editor + Result (BOTH SCROLL TOGETHER) */}
+      {/* RIGHT */}
       <div className="h-full min-h-0 overflow-y-auto pr-2">
         <div className="flex flex-col gap-4">
           <div className="h-[300px] flex-shrink-0">
-            <CodeEditor code={code} setCode={setCode} onRun={runCode} />
+            <CodeEditor
+              code={code}
+              setCode={setCode}
+              onRun={runCode}
+              onSubmit={submitCode}
+              supportedLanguages={question.supported_languages}
+            />
           </div>
 
           {result.status && <TestResult status={result.status} cases={result.cases} />}

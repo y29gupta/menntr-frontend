@@ -25,6 +25,7 @@ export default function AssessmentAttempt() {
   const [selectedOptionsMap, setSelectedOptionsMap] = useState<Record<number, number[]>>({});
   const [timeUp, setTimeUp] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
+  const [codingAttemptedMap, setCodingAttemptedMap] = useState<Record<number, boolean>>({});
 
   const fullscreenLockRef = useRef(false);
 
@@ -47,6 +48,8 @@ export default function AssessmentAttempt() {
     },
     enabled: !!assessmentId,
   });
+
+  console.log(runtime, 'runtime');
 
   const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -161,33 +164,35 @@ export default function AssessmentAttempt() {
     if (!currentQuestion) return;
 
     const selectedOptions = selectedOptionsMap[currentIndex] ?? [];
-    const isAttempted = selectedOptions.length > 0;
+
+    const isMcq = currentQuestion.type === 'single_correct';
+    const isCoding = currentQuestion.type === 'coding';
+
+    const isAttempted = isMcq
+      ? selectedOptions.length > 0
+      : questionStatus[currentIndex]?.attempted === true;
 
     try {
       const timeTakenSeconds = Math.floor((Date.now() - questionStartTimeRef.current) / 1000);
 
-      // 🔹 Save answer (empty array allowed)
-      await saveAnswerMutation.mutateAsync({
-        assessment_question_id: currentQuestion.assessment_question_id,
-        question_id: currentQuestion.question_id,
-        selected_option_ids: selectedOptions,
-        time_taken_seconds: timeTakenSeconds,
-      });
+      if (isMcq) {
+        await saveAnswerMutation.mutateAsync({
+          assessment_question_id: currentQuestion.assessment_question_id,
+          question_id: currentQuestion.question_id,
+          selected_option_ids: selectedOptions,
+          time_taken_seconds: timeTakenSeconds,
+        });
+      }
 
       setQuestionStatus((prev) => {
         const next = { ...prev };
 
-        const selectedOptions = selectedOptionsMap[currentIndex] ?? [];
-        const isAttempted = selectedOptions.length > 0;
-
-        // ✅ Update CURRENT question
         next[currentIndex] = {
           ...next[currentIndex],
           attempted: isAttempted,
           visited: true,
         };
 
-        // ✅ Update NEXT question ONLY if it exists
         if (next[currentIndex + 1]) {
           next[currentIndex + 1] = {
             ...next[currentIndex + 1],
@@ -253,6 +258,16 @@ export default function AssessmentAttempt() {
                   [index]: {
                     ...prev[index],
                     review: !prev[index].review,
+                    visited: true,
+                  },
+                }));
+              }}
+              onCodingAttempted={(index) => {
+                setQuestionStatus((prev) => ({
+                  ...prev,
+                  [index]: {
+                    ...prev[index],
+                    attempted: true,
                     visited: true,
                   },
                 }));
