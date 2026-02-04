@@ -6,21 +6,24 @@ type HandleCheatArgs = {
   attemptId: number;
   reason: string;
   recorder: {
-    getBufferedBlob: (seconds: number) => Promise<Blob>;
+    // getBufferedBlob: (seconds: number) => Promise<Blob>;
+    getFinalBlob: () => Promise<Blob>;
   };
   videoElement: HTMLVideoElement;
-};
+}
 
 export async function handleCheat({ attemptId, reason, recorder, videoElement }: HandleCheatArgs) {
   console.log('🚨 Cheat:', reason);
 
   await videoElement.play().catch(() => {});
 
-  const videoBlob = await recorder.getBufferedBlob(15);
+  const videoBlob = await recorder.getFinalBlob();
   const imageBlob = await takeScreenshot(videoElement);
-console.log('🎥 Video size:', videoBlob.size);
-console.log('📸 Image size:', imageBlob.size);
-  if (videoBlob.size < 50_000) return;
+  console.log('🎥 Video size:', videoBlob.size);
+  console.log('📸 Image size:', imageBlob.size);
+  if (videoBlob.size < 50_000) {
+    throw new Error('Video too small');
+  }
 
   const [videoSas, imageSas] = await Promise.all([
     api.post('/proctoring/sas', { attemptId, fileType: 'video' }).then((r) => r.data),
@@ -39,5 +42,3 @@ console.log('📸 Image size:', imageBlob.size);
     imagePath: imageSas.blobPath,
   });
 }
-
-

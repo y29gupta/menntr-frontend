@@ -6,8 +6,8 @@ export async function uploadToAzure(sasUrl: string, blob: Blob) {
   await axios.put(sasUrl, blob, {
     headers: {
       'x-ms-blob-type': 'BlockBlob',
-      'Content-Type': blob.type,
-      'Content-Length':blob.size,
+      'Content-Type': 'video/webm',
+    //   'Content-Length':blob.size,
     },
   });
 
