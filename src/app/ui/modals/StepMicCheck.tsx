@@ -63,7 +63,6 @@ export default function StepMicCheck({ micStatus, setMicStatus }: Props) {
       const startAt = Date.now() + GRACE_TIME;
       const endAt = startAt + LISTEN_TIME;
 
-      // 🎯 Tuned thresholds (normal voice friendly)
       const VOICE_THRESHOLD = 0.018;
       const PEAK_THRESHOLD = 0.12;
       const REQUIRED_FRAMES = 6;
@@ -95,7 +94,6 @@ export default function StepMicCheck({ micStatus, setMicStatus }: Props) {
 
         const rms = Math.sqrt(sum / buffer.length);
 
-        // 🎤 Voice detection logic
         if (rms > VOICE_THRESHOLD && peak > PEAK_THRESHOLD) {
           activeFrames++;
         } else {

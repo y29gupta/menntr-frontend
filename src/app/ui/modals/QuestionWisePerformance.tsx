@@ -1,113 +1,110 @@
 'use client';
 
-import { useState } from 'react';
-import { Controller, useForm } from 'react-hook-form';
+import QuestionPerformance from '@/app/components/dashboards/institution-admin/assessment/performance/performance-section/QuestionPerformance';
+import { CodingQuestionCard } from '@/app/components/dashboards/institution-admin/assessment/performance/student-performance/CodingQuestionCard';
+import { MCQQuestionCard } from '@/app/components/dashboards/institution-admin/assessment/performance/student-performance/MCQQuestionCard';
 
-import FormDropdown from '@/app/ui/FormDropdown';
-import { CandidatePerformance } from '@/app/components/dashboards/institution-admin/assessment/performance/performance-section/CandidatePerformance.columns';
-import HighestAvgDepartmentCard from '@/app/components/dashboards/institution-admin/dashboard/HighestAvgDepartmentCard';
-import PerformanceTabs from '@/app/components/dashboards/institution-admin/assessment/performance/PerformanceTabs';
-import Reponses from '@/app/components/dashboards/institution-admin/assessment/performance/student-performance/Reponses';
-import ProctoringInsights from '@/app/components/dashboards/institution-admin/assessment/performance/student-performance/Insights';
+/* ================= LOCAL TYPES ================= */
 
-type ReportTab = 'responses' | 'proctoring';
+type Difficulty = 'Easy' | 'Medium' | 'Hard';
+type QuestionType = 'MCQ' | 'CODING';
 
-const attemptOptions = [
-  { label: 'Attempt 1', value: '1' },
-  { label: 'Attempt 2', value: '2' },
+export interface QuestionReport {
+  id: string;
+  questionNo: string;
+  title: string;
+  type: QuestionType;
+  difficulty: Difficulty;
+
+  totalMarks: number;
+  marksObtained: number;
+
+  // MCQ
+  options?: string[];
+  selectedOption?: number;
+  correctOption?: number;
+
+  // Coding
+  language?: string;
+  code?: string;
+  testPassed?: number;
+  testTotal?: number;
+}
+
+/* ================= DUMMY DATA ================= */
+
+const questionsData: QuestionReport[] = [
+  {
+    id: 'q1',
+    questionNo: 'Q1',
+    title:
+      'If the ratio of boys to girls in a class is 3 : 2 and there are 15 boys, how many girls are there in the class?',
+    type: 'MCQ',
+    difficulty: 'Medium',
+    totalMarks: 1,
+    marksObtained: 0,
+    options: ['Option 1', 'Option 2', 'Option 3', 'Option 4'],
+    selectedOption: 1,
+    correctOption: 0,
+  },
+  {
+    id: 'q2',
+    questionNo: 'Q2',
+    title: 'What is the time complexity of binary search on a sorted array?',
+    type: 'CODING',
+    difficulty: 'Easy',
+    totalMarks: 10,
+    marksObtained: 10,
+    language: 'Python',
+    code: `def solution(nums, target):
+    for i in range(len(nums)):
+        for j in range(i + 1, len(nums)):
+            if nums[i] + nums[j] == target:
+                return [i, j]`,
+    testPassed: 10,
+    testTotal: 10,
+  },
+  {
+    id: 'q3',
+    questionNo: 'Q3',
+    title:
+      'If the ratio of boys to girls in a class is 3 : 2 and there are 15 boys, how many girls are there in the class?',
+    type: 'MCQ',
+    difficulty: 'Hard',
+    totalMarks: 1,
+    marksObtained: 1,
+    options: ['Option 1', 'Option 2', 'Option 3', 'Option 4'],
+    selectedOption: 0,
+    correctOption: 0,
+  },
 ];
 
 export default function QuestionWisePerformance() {
-  /* ================= FRESH STATE (RESET ON TAB SWITCH) ================= */
-  const { control } = useForm({
-    defaultValues: { attempt: '1' },
-  });
-
-  const [activeTab, setActiveTab] = useState<ReportTab>('responses');
-
-  /* ================= MOCK DATA (REPLACE WITH API) ================= */
-  const candidate: CandidatePerformance = {
-    name: 'John Doe',
-    assessmentName: 'Data Structures MCQ',
-    score: '25/30',
-    percentage: 83,
-  } as CandidatePerformance;
-
-  const [obtained, total] = candidate.score.split('/').map(Number);
-  const percentage = candidate.percentage;
-
-  const tabs = [
-    { key: 'responses', label: 'Responses & Scores' },
-    { key: 'proctoring', label: 'Proctoring Insights' },
-  ] as const;
-
   return (
-    <div className="flex flex-col gap-4">
-      {/* ================= TOP SUMMARY CARD ================= */}
-      {/* <HighestAvgDepartmentCard
-        label="Completion rate"
-        valueText={
-          <div className="flex items-baseline gap-2">
-            <span className="text-2xl font-semibold">{percentage}%</span>
-            <span className="text-sm text-[#475569]">
-              {obtained}/{total}
-            </span>
-          </div>
-        }
-        percentage={percentage}
-        barColor="linear-gradient(90deg, #DBA261 0%, #C16700 100%)"
-        barBgColor="#FFEDD5"
-      /> */}
+    <div className="flex flex-col gap-6">
+      <QuestionPerformance
+        data={questionsData.map((q) => ({
+          question: q.questionNo,
+          marksObtained: q.marksObtained,
+          totalMarks: q.totalMarks,
+          avgTime:
+            q.type === 'CODING'
+              ? Number((((q.testPassed ?? 0) / (q.testTotal ?? 1)) * 3 + 1).toFixed(1))
+              : 0.5,
+          difficulty: q.difficulty,
+        }))}
+        tooltipMode="marks"
+      />
 
-      {/* ================= ATTEMPT DROPDOWN ================= */}
-      {/* <div className="w-[160px]">
-        <Controller
-          name="attempt"
-          control={control}
-          render={({ field }) => (
-            <FormDropdown
-              value={field.value}
-              onChange={field.onChange}
-              options={attemptOptions}
-              placeholder="Attempt"
-            />
-          )}
-        />
-      </div> */}
-
-      {/* ================= INNER REPORT TABS ================= */}
-      {/* <PerformanceTabs tabs={tabs} activeTab={activeTab} onChange={setActiveTab} /> */}
-
-      {/* ================= TAB CONTENT ================= */}
-      {activeTab === 'responses' && <Reponses />}
-
-      {activeTab === 'proctoring' && (
-        <ProctoringInsights
-          screenshots={Array.from({ length: 13 }).map(
-            (_, i) => `https://placehold.co/160x120?text=${i + 1}`
-          )}
-          cameraOff={false}
-          tabChanged={false}
-          interruptions={[
-            {
-              id: 1,
-              title: 'Interruption 1',
-              events: [
-                { time: '19:03', description: 'Test Interrupted at question 1' },
-                { time: '19:05', description: 'Test continued from Question 1' },
-              ],
-            },
-            {
-              id: 2,
-              title: 'Interruption 2',
-              events: [
-                { time: '19:15', description: 'Test Interrupted at question 3' },
-                { time: '19:16', description: 'Test continued from Question 3' },
-              ],
-            },
-          ]}
-        />
-      )}
+      <div className="flex flex-col gap-6">
+        {questionsData.map((q) =>
+          q.type === 'CODING' ? (
+            <CodingQuestionCard key={q.id} q={q} />
+          ) : (
+            <MCQQuestionCard key={q.id} q={q} />
+          )
+        )}
+      </div>
     </div>
   );
 }
