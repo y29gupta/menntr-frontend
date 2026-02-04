@@ -203,7 +203,7 @@ const StudentSetupForm = () => {
 
                     <button
                       type="button"
-                      onClick={() => router.push('/admin/student-management')}
+                      // onClick={() => router.push('/admin/student-management')}
                       className="border border=[#904BFF] px-4 py-2 !text-[#904BFF] rounded-[64px]"
                     >
                       Cancel

@@ -21,7 +21,7 @@ type Props = {
 type MicStatus = 'idle' | 'error' | 'analyzing' | 'success';
 export type CameraStatus = 'off' | 'starting' | 'working' | 'aligning' | 'success' | 'error';
 
-export default function AssessmentStepModal({ open, onClose, assessmentId = '81' }: Props) {
+export default function AssessmentStepModal({ open, onClose, assessmentId = '33' }: Props) {
   const [step, setStep] = useState(1);
   const [consentChecked, setConsentChecked] = useState(false);
   const [micStatus, setMicStatus] = useState<MicStatus>('idle');
