@@ -110,16 +110,16 @@ export default function AssessmentStepModal({ open, onClose, assessmentId = '89'
 
         {/* BODY */}
         <div className="flex-1 mt-3">
-        {step === 1 && (
-          <StepPrivacyConsent
-            consentChecked={consentChecked}
-            setConsentChecked={setConsentChecked}
-          />
-        )}
+          {step === 1 && (
+            <StepPrivacyConsent
+              consentChecked={consentChecked}
+              setConsentChecked={setConsentChecked}
+            />
+          )}
 
-        {step === 2 && <StepMicCheck micStatus={micStatus} setMicStatus={setMicStatus} />}
+          {step === 2 && <StepMicCheck micStatus={micStatus} setMicStatus={setMicStatus} />}
 
-        {step === 3 && (
+          {step === 3 && (
             <StepCameraCheck
               cameraStatus={cameraStatus}
               setCameraStatus={setCameraStatus}
@@ -128,9 +128,9 @@ export default function AssessmentStepModal({ open, onClose, assessmentId = '89'
               videoRef={cameraCheckVideoRef}
               onCameraReady={() => setProctoringEnabled(true)}
             />
-        )}
+          )}
 
-        {step === 4 && <StepStartTest />}
+          {step === 4 && <StepStartTest />}
         </div>
 
         {/* FOOTER */}
