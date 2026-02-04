@@ -27,9 +27,10 @@ export default function AssessmentAttempt() {
   const [timeUp, setTimeUp] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [codingAttemptedMap, setCodingAttemptedMap] = useState<Record<number, boolean>>({});
-  const videoRef = useRef<HTMLVideoElement | null>(null);
+  // const videoRef = useRef<HTMLVideoElement | null>(null);
   const [videoStream, setVideoStream] = useState<MediaStream | null>(null);
   const fullscreenLockRef = useRef(false);
+  const proctoringVideoRef = useRef<HTMLVideoElement | null>(null);
   const searchParams = useSearchParams();
   const attemptId = Number(searchParams.get('attemptId'));
   const handleSelectOption = (optionIds: number[]) => {
@@ -112,30 +113,26 @@ export default function AssessmentAttempt() {
     document.documentElement.requestFullscreen?.().catch(() => {});
   }, []);
   // 🎥 Start camera ONCE for proctoring (runtime)
-  useEffect(() => {
-    let mounted = true;
+useEffect(() => {
+  let mounted = true;
 
-    navigator.mediaDevices
-      .getUserMedia({ video: true })
-      .then((stream) => {
-        if (!mounted) return;
+  navigator.mediaDevices.getUserMedia({ video: true }).then(async (stream) => {
+    if (!mounted) return;
 
-        setVideoStream(stream);
+    setVideoStream(stream);
 
-        // attach stream to hidden video
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
-        }
-      })
-      .catch(() => {
-        message.error('Camera access is required to continue the assessment');
-      });
+    if (proctoringVideoRef.current) {
+      proctoringVideoRef.current.srcObject = stream;
+      await proctoringVideoRef.current.play().catch(() => {});
+    }
+  });
 
-    return () => {
-      mounted = false;
-      videoStream?.getTracks().forEach((t) => t.stop());
-    };
-  }, []);
+  return () => {
+    mounted = false;
+    videoStream?.getTracks().forEach((t) => t.stop());
+  };
+}, []);
+
   // useEffect(() => {
   //   const handleFullscreenChange = () => {
   //     if (!document.fullscreenElement && !fullscreenLockRef.current) {
@@ -371,13 +368,27 @@ export default function AssessmentAttempt() {
         }}
       />
       {/* 🔒 Hidden video for proctoring */}
-      <video ref={videoRef} autoPlay muted playsInline className="hidden" />
+      <video
+        ref={proctoringVideoRef}
+        autoPlay
+        muted
+        playsInline
+        style={{
+          position: 'fixed',
+          top: '-10000px',
+          left: '-10000px',
+          width: '320px',
+          height: '240px',
+          opacity: 0.01,
+          pointerEvents: 'none',
+        }}
+      />
 
       {/* 🧠 Proctoring engine – runs for full exam */}
       {videoStream && attemptId && (
         <ProctoringClient
-          attemptId={46} // IMPORTANT: attemptId, not assessmentId if you have it
-          videoElement={videoRef.current}
+          attemptId={48} // IMPORTANT: attemptId, not assessmentId if you have it
+          videoElement={proctoringVideoRef.current}
           videoStream={videoStream}
           enabled
         />

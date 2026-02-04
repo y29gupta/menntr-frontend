@@ -33,17 +33,22 @@ export function useProctoringRecorder(videoStream: MediaStream | null) {
     chunksRef.current = [];
   }
 
-  function getBufferedBlob(seconds: number) {
-    const count = Math.min(seconds, chunksRef.current.length);
-    const blob = new Blob(chunksRef.current.slice(-count), {
-      type: 'video/webm',
-    });
-    if (blob.size < 10_000) {
-      throw new Error('Video buffer too small');
-    }
+async function getBufferedBlob(seconds: number): Promise<Blob> {
+  if (!recorderRef.current) throw new Error('Recorder not running');
 
-    return blob;
+  recorderRef.current.requestData(); // 🔑 forces buffer flush
+  await new Promise((r) => setTimeout(r, 100));
+
+  const count = Math.min(seconds, chunksRef.current.length);
+  const blob = new Blob(chunksRef.current.slice(-count), {
+    type: 'video/webm',
+  });
+  if (blob.size < 30_000) {
+    throw new Error(`Video too small: ${blob.size}`);
   }
+  return blob;
+}
+
 
   return { start, stop, getBufferedBlob };
 }

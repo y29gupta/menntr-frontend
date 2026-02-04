@@ -22,7 +22,7 @@ type Props = {
 type MicStatus = 'idle' | 'error' | 'analyzing' | 'success';
 export type CameraStatus = 'off' | 'starting' | 'working' | 'aligning' | 'success' | 'error';
 
-export default function AssessmentStepModal({ open, onClose, assessmentId = '87' }: Props) {
+export default function AssessmentStepModal({ open, onClose, assessmentId = '89' }: Props) {
   const [step, setStep] = useState(1);
   const [consentChecked, setConsentChecked] = useState(false);
   const [micStatus, setMicStatus] = useState<MicStatus>('idle');
@@ -30,7 +30,7 @@ export default function AssessmentStepModal({ open, onClose, assessmentId = '87'
   const [attemptId, setAttemptId] = useState<string | null>(null);
   const [videoStream, setVideoStream] = useState<MediaStream | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
-
+  const cameraCheckVideoRef = useRef<HTMLVideoElement | null>(null);
   const [proctoringEnabled, setProctoringEnabled] = useState(false);
 
   const router = useRouter();
@@ -125,7 +125,7 @@ export default function AssessmentStepModal({ open, onClose, assessmentId = '87'
               setCameraStatus={setCameraStatus}
               videoStream={videoStream}
               setVideoStream={setVideoStream}
-              videoRef={videoRef}
+              videoRef={cameraCheckVideoRef}
               onCameraReady={() => setProctoringEnabled(true)}
             />
         )}

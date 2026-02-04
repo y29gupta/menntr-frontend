@@ -1,4 +1,14 @@
-export function takeScreenshot(video: HTMLVideoElement): Blob {
+export async function takeScreenshot(video: HTMLVideoElement): Promise<Blob> {
+  if (video.videoWidth === 0) {
+    await new Promise<void>((resolve) => {
+      const onReady = () => {
+        video.removeEventListener('loadeddata', onReady);
+        resolve();
+      };
+      video.addEventListener('loadeddata', onReady);
+    });
+  }
+
   const canvas = document.createElement('canvas');
   canvas.width = video.videoWidth;
   canvas.height = video.videoHeight;
@@ -6,13 +16,5 @@ export function takeScreenshot(video: HTMLVideoElement): Blob {
   const ctx = canvas.getContext('2d')!;
   ctx.drawImage(video, 0, 0);
 
-  const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
-  const byteString = atob(dataUrl.split(',')[1]);
-  const array = new Uint8Array(byteString.length);
-
-  for (let i = 0; i < byteString.length; i++) {
-    array[i] = byteString.charCodeAt(i);
-  }
-
-  return new Blob([array], { type: 'image/jpeg' });
+  return new Promise((resolve) => canvas.toBlob((b) => resolve(b!), 'image/jpeg', 0.9));
 }
