@@ -34,19 +34,14 @@ export default function AssessmentCompletedPage() {
             </div>
 
             <p className="text-xs text-slate-500">
-              Assigned on :
-              <span className="font-medium text-slate-500 ml-1">
-                21st June 2025
-              </span>
+              Assigned on :<span className="font-medium text-slate-500 ml-1">21st June 2025</span>
             </p>
           </div>
         </div>
 
         {/* ================= TITLE ================= */}
         <div className="flex flex-col mt-3">
-          <p className="text-base sm:text-lg text-slate-800 font-medium">
-            Mid-Term Coding Test
-          </p>
+          <p className="text-base sm:text-lg text-slate-800 font-medium">Mid-Term Coding Test</p>
 
           <p className="flex flex-wrap items-center text-[12px] text-slate-500 mt-1">
             <span>Data Structures</span>
@@ -59,9 +54,7 @@ export default function AssessmentCompletedPage() {
 
         {/* ================= OVERVIEW ================= */}
         <div className="bg-[#FAFBFC] border border-gray-200 rounded-xl p-5 mt-5">
-          <h3 className="text-sm font-semibold text-gray-800">
-            Assessment Overview
-          </h3>
+          <h3 className="text-sm font-semibold text-gray-800">Assessment Overview</h3>
 
           <div className="h-px bg-gray-200 mt-3 mb-4" />
 
@@ -77,9 +70,7 @@ export default function AssessmentCompletedPage() {
 
         {/* ================= RULES ================= */}
         <div className="bg-[#FAFBFC] border border-gray-200 rounded-xl p-5 mt-5">
-          <h3 className="text-sm font-semibold text-gray-800">
-            Assessment Rules
-          </h3>
+          <h3 className="text-sm font-semibold text-gray-800">Assessment Rules</h3>
 
           <div className="h-px bg-gray-200 mt-3 mb-4" />
 
@@ -94,16 +85,14 @@ export default function AssessmentCompletedPage() {
 
         {/* ================= COMPLETED FOOTER ================= */}
         <div className="bg-[#FAFBFC] border border-gray-200 rounded-xl p-5 mt-5">
-          <h3 className="text-sm font-semibold text-gray-800">
-            Evaluation & Results
-          </h3>
+          <h3 className="text-sm font-semibold text-gray-800">Evaluation & Results</h3>
 
           <div className="h-px bg-gray-200 mt-3 mb-4" />
 
           <p className="text-sm text-gray-600 mb-6">
-            MCQ answers will be evaluated automatically after submission. Coding
-            answers will be evaluated after all test cases are executed. Results
-            may take some time depending on question complexity.
+            MCQ answers will be evaluated automatically after submission. Coding answers will be
+            evaluated after all test cases are executed. Results may take some time depending on
+            question complexity.
           </p>
 
           {/* ACTION BUTTONS */}
@@ -119,7 +108,7 @@ export default function AssessmentCompletedPage() {
                 transition
               "
             >
-              View Submission
+              view result
             </button>
 
             <button
@@ -133,7 +122,7 @@ export default function AssessmentCompletedPage() {
                 transition
               "
             >
-              View Result
+              View Details
             </button>
           </div>
         </div>

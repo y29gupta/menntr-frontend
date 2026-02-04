@@ -1,52 +1,74 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+
 import CompletedAssessmentCard from './CompletedAssessmentCard';
 import EmptyAssessmentState from './EmptyAssessmentState';
 import SearchWithFilter from './SearchWithFilter';
 import CompletedAssessmentFilterModal from '@/app/ui/modals/CompletedAssessmentFilterModal';
 
+type ApiAssessment = {
+  id: string;
+  title: string;
+  type: string;
+  end_time: string | null;
+  attempt_status: 'submitted' | 'evaluated' | 'not_started';
+};
+
 type CompletedAssessmentItem = {
-  id: number;
+  id: string;
   title: string;
   type: string;
   submittedOn: string;
-  status: 'UNDER_EVALUATION' | 'RESULT_PUBLISHED';
+  attemptStatus: 'submitted' | 'evaluated' | 'not_started';
 };
 
-const completedAssessments: CompletedAssessmentItem[] = [
-  {
-    id: 1,
-    title: 'Data Structures MCQ',
-    type: 'MCQ',
-    submittedOn: 'Aug 8, 2025',
-    status: 'UNDER_EVALUATION',
-  },
-  {
-    id: 2,
-    title: 'Data Structures MCQ',
-    type: 'MCQ',
-    submittedOn: 'Aug 8, 2025',
-    status: 'RESULT_PUBLISHED',
-  },
-  {
-    id: 3,
-    title: 'Data Structures MCQ',
-    type: 'MCQ',
-    submittedOn: 'Aug 8, 2025',
-    status: 'UNDER_EVALUATION',
-  },
-];
+function formatDate(date: string | null): string {
+  if (!date) return '-';
+
+  return new Date(date).toLocaleDateString('en-IN', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  });
+}
+
+async function fetchCompletedAssessments(): Promise<ApiAssessment[]> {
+  const res = await fetch('/api/student/assessments?status=completed', {
+    credentials: 'include',
+  });
+
+  const data = await res.json();
+  return data.assessments;
+}
 
 export default function CompletedAssessment() {
   const [search, setSearch] = useState('');
   const [showFilters, setShowFilters] = useState(false);
 
-  const filteredData = useMemo(() => {
-    return completedAssessments.filter((a) => a.title.toLowerCase().includes(search.toLowerCase()));
-  }, [search]);
+  const { data, isLoading } = useQuery({
+    queryKey: ['completed-assessments'],
+    queryFn: fetchCompletedAssessments,
+  });
 
-  if (filteredData.length === 0) {
+  const mappedAssessments: CompletedAssessmentItem[] = useMemo(() => {
+    if (!data) return [];
+
+    return data.map((a) => ({
+      id: a.id,
+      title: a.title,
+      type: a.type,
+      submittedOn: formatDate(a.end_time),
+      attemptStatus: a.attempt_status,
+    }));
+  }, [data]);
+
+  const filteredData = useMemo(() => {
+    return mappedAssessments.filter((a) => a.title.toLowerCase().includes(search.toLowerCase()));
+  }, [search, mappedAssessments]);
+
+  if (!isLoading && filteredData.length === 0) {
     return (
       <EmptyAssessmentState
         imageSrc="/assets/empty-ongoing-assessment.svg"
@@ -61,10 +83,7 @@ export default function CompletedAssessment() {
       <div className="w-130">
         <SearchWithFilter
           value={search}
-          onSearchChange={(v) => {
-            console.log('🔍 Compled search:', v);
-            setSearch(v);
-          }}
+          onSearchChange={setSearch}
           onToggleFilters={() => setShowFilters((p) => !p)}
           filterOpen={showFilters}
           filterModal={
