@@ -155,28 +155,28 @@ export const assessmentApi = {
     }
   },
 
-
-  bulkUploadQuestions: async (
-  assessmentId: string | null,
+bulkUploadQuestions: async (
+  assessmentId: string,
   type: 'mcq' | 'coding',
   file: File
 ) => {
   const formData = new FormData();
   formData.append('file', file);
+  console.log(assessmentId,"id")
+  const endpoint =
+    type === 'mcq'
+      ? `/assessments/${assessmentId}/mcq/bulk-create`
+      : `/assessments/${assessmentId}/questions/coding/bulk-upload`;
 
-     const res = await api.post(
-    `/assessments/${assessmentId}/${type}/bulk-create`,
-    formData,
-    {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    }
-  );
+  const res = await api.post(endpoint, formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
 
   return res.data;
-  },
-  
+},
+
   getQuestionById: async (questionId: string) => {
     // const { data } = await api.get(`/assessments/questions/${questionId}`);
     const { data } = await api.get(`/assessments/questions/${questionId}`);

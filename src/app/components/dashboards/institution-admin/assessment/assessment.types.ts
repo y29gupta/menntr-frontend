@@ -133,7 +133,7 @@ export type CreateAssessmentPayload = {
 
   category: string;
   assessment_type: string;
-  question_type: string;
+  // question_type: string;
 };
 
 

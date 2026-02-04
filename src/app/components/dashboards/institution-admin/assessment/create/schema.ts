@@ -12,7 +12,7 @@ export const stepOneSchema = z.object({
 
   category: z.string().min(1, 'Category is required'),
   AssessmentType: z.string().min(1, 'Assessment type is required'),
-  questionType: z.string().min(1, 'Question type is required'),
+  // questionType: z.string().min(1, 'Question type is required'),
 });
 
 

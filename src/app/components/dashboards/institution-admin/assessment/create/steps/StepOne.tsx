@@ -20,7 +20,7 @@ export default function StepOne({ form, onNext, onCancel }: Props) {
 
   const category = watch('category');
   const type = watch('AssessmentType');
-  const questionType = watch('questionType');
+  // const questionType = watch('questionType');
 
   const { data: metaData } = useQuery({
     queryKey: ['assessment-meta'],
@@ -71,21 +71,21 @@ export default function StepOne({ form, onNext, onCancel }: Props) {
     //   });
     // }
 
-    if (questionTypes.length && !form.formState.dirtyFields.questionType) {
-      if (!questionType) {
-        setValue('questionType', questionTypes[0] as any, {
-          shouldValidate: true,
-          shouldDirty: false,
-        });
-      }
-    }
+    // if (questionTypes.length && !form.formState.dirtyFields.questionType) {
+    //   if (!questionType) {
+    //     setValue('questionType', questionTypes[0] as any, {
+    //       shouldValidate: true,
+    //       shouldDirty: false,
+    //     });
+    //   }
+    // }
   }, [
     assessmentCategories,
     assessmentTypes,
     questionTypes,
     category,
     type,
-    questionType,
+    // questionType,
     setValue,
   ]);
 
@@ -121,7 +121,7 @@ export default function StepOne({ form, onNext, onCancel }: Props) {
               />
             </div>
 
-            <label className="text-sm font-medium block mt-6">Assessment Question Type</label>
+            {/* <label className="text-sm font-medium block mt-6">Assessment Question Type</label>
 
             <div className="flex flex-wrap gap-3 mt-2">
               {questionTypes.map((v) => (
@@ -151,7 +151,7 @@ export default function StepOne({ form, onNext, onCancel }: Props) {
 
             {errors.questionType && (
               <p className="text-xs text-red-500 mt-1">{errors.questionType.message}</p>
-            )}
+            )} */}
           </div>
 
           {/* DIVIDER */}

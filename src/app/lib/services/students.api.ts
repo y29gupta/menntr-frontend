@@ -80,6 +80,7 @@ export const studentsApi = {
     return res.data;
     
   },
+
   
 
 updatePlatformAccess: (
@@ -101,7 +102,33 @@ updatePlatformAccess: (
     }) => {
       const res = await api.post(`/students/${studentId}/additional-info`,payload)
       return res.data;
-    }
+  },
+    
+    getStudentById: async (studentId: string) => {
+  const res = await api.get(`/students/${studentId}`);
+  return res.data;
+},
+
+    
+  updateStudent: (
+        studentId: string,
+        data: Partial<StudentFormValues>
+      ) => {
+    const payload: Record<string, any> = {};
+
+    if (data.firstName !== undefined) payload.first_name = data.firstName;
+    if (data.lastName !== undefined) payload.last_name = data.lastName;
+    if (data.email !== undefined) payload.email = data.email;
+    if (data.phone !== undefined) payload.phone = data.phone;
+    if (data.gender !== undefined) payload.gender = data.gender;
+
+    // ✅ academic fields also allowed
+    if ((data as any).batchId !== undefined) payload.batch_id = (data as any).batchId;
+    if (data.rollNumber !== undefined) payload.roll_number = data.rollNumber;
+
+    return api.put(`/students/${studentId}`, payload);
+  },
+
 
 };
 

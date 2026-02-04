@@ -35,6 +35,8 @@ export type StudentFormValues = {
   phone: string;
   rollNumber: string;
   gender: 'male' | 'female' | 'other'; 
+  batchId?: number;
+
 };
 
 // student-management/student.types.ts

@@ -35,41 +35,72 @@ type Props = {
   mode: 'create' | 'edit';
   defaultValues?: Partial<StudentFormValues>;
   onCancel: () => void;
+  studentId?: string;
 };
 
-export default function CreateStudentForm({ mode, defaultValues, onCancel }: Props) {
+export default function CreateStudentForm({ mode, defaultValues, onCancel, studentId }: Props) {
   const router = useRouter();
   const queryClient = useQueryClient();
 
-  const methods = useForm({
+  const methods = useForm<StudentFormValues>({
     resolver: zodResolver(studentFormSchema),
-    defaultValues: {},
+    defaultValues,
   });
 
-  const mutation = useMutation({
+  // const mutation = useMutation({
+  //   mutationFn: studentsApi.createStudent,
+  //   onSuccess: (res, variable) => {
+  //     const { student_id } = res.data ?? '';
+
+  //     queryClient.invalidateQueries({ queryKey: ['students'] });
+  //     router.push(
+  //       `/admin/student-management/${student_id}/studentSetup?rollNumber=${variable.rollNumber}`
+  //     );
+  //   },
+  // });
+
+  const createMutation = useMutation({
     mutationFn: studentsApi.createStudent,
-    onSuccess: (res, variable) => {
-      const { student_id } = res.data ?? '';
+    onSuccess: (res, variables) => {
+      const student_id = res.data.student_id;
 
       queryClient.invalidateQueries({ queryKey: ['students'] });
+
       router.push(
-        `/admin/student-management/${student_id}/studentSetup?rollNumber=${variable.rollNumber}`
+        `/admin/student-management/${student_id}/studentSetup?rollNumber=${variables.rollNumber}`
       );
     },
   });
+
+  const updateMutation = useMutation({
+    mutationFn: (payload: Partial<StudentFormValues>) =>
+      studentsApi.updateStudent(studentId!, payload),
+    onSuccess: (res, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['students'] });
+
+      router.push(
+        `/admin/student-management/${studentId}/studentSetup?rollNumber=${variables.rollNumber}`
+      );
+    },
+  });
+
   const onSubmit = (data: StudentFormValues) => {
-    mutation.mutate(data);
+    if (mode === 'edit') {
+      updateMutation.mutate(data);
+    } else {
+      createMutation.mutate(data);
+    }
   };
+  const isSaving = mode === 'edit' ? updateMutation.isPending : createMutation.isPending;
+
+  // const onSubmit = (data: StudentFormValues) => {
+  //   mutation.mutate(data);
+  // };
 
   return (
     <form onSubmit={methods.handleSubmit(onSubmit)} className="space-y-6">
       <div className="relative  border px-6 pt-6 pb-8 rounded-3xl border-[#DBE3E9]">
-        <DynamicForm<StudentFormValues>
-         
-          fields={studentFields}
-          layout="two-column"
-          form={methods}
-        />
+        <DynamicForm<StudentFormValues> fields={studentFields} layout="two-column" form={methods} />
       </div>
 
       <div className="flex justify-center gap-4">
@@ -77,9 +108,9 @@ export default function CreateStudentForm({ mode, defaultValues, onCancel }: Pro
           type="submit"
           className=" bg-[linear-gradient(90deg,#904BFF_0%,#C053C2_100%)]
             !text-white hover:bg-[#6D28D9] py-2 px-4 rounded-[64px]"
-          disabled={mutation.isPending}
+          disabled={isSaving}
         >
-          {mutation.isPending ? 'Saving...' : 'Go Next'}
+          {isSaving ? 'Saving...' : 'Go Next'}
         </button>
 
         <button

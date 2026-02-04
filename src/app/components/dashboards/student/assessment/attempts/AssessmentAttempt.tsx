@@ -128,33 +128,74 @@ export default function AssessmentAttempt() {
   //   };
   // }, []);
 
+  const saveCurrentAnswer = async () => {
+    if (!currentQuestion) return;
+
+    const selectedOptions = selectedOptionsMap[currentIndex] ?? [];
+    const timeTakenSeconds = Math.floor((Date.now() - questionStartTimeRef.current) / 1000);
+
+    await saveAnswerMutation.mutateAsync({
+      assessment_question_id: currentQuestion.assessment_question_id,
+      question_id: currentQuestion.question_id,
+      selected_option_ids: selectedOptions, // empty allowed
+      time_taken_seconds: timeTakenSeconds,
+    });
+
+    setQuestionStatus((prev) => ({
+      ...prev,
+      [currentIndex]: {
+        ...prev[currentIndex],
+        attempted: selectedOptions.length > 0,
+        visited: true,
+      },
+    }));
+  };
+
   /* ================= Navigation ================= */
+
   // const goNext = async () => {
   //   if (!currentQuestion) return;
 
+  //   const selectedOptions = selectedOptionsMap[currentIndex] ?? [];
+  //   const isAttempted = selectedOptions.length > 0;
+
   //   try {
   //     const timeTakenSeconds = Math.floor((Date.now() - questionStartTimeRef.current) / 1000);
-  //     console.log(currentIndex, 'index', currentQuestion);
+
+  //     // 🔹 Save answer (empty array allowed)
   //     await saveAnswerMutation.mutateAsync({
   //       assessment_question_id: currentQuestion.assessment_question_id,
   //       question_id: currentQuestion.question_id,
-  //       selected_option_ids: selectedOptionsMap[currentIndex] ?? [],
+  //       selected_option_ids: selectedOptions,
   //       time_taken_seconds: timeTakenSeconds,
   //     });
 
-  //     setQuestionStatus((prev) => ({
-  //       ...prev,
-  //       [currentIndex]: {
-  //         ...prev[currentIndex],
-  //         attempted: true,
-  //       },
-  //       [currentIndex + 1]: {
-  //         ...prev[currentIndex + 1],
+  //     setQuestionStatus((prev) => {
+  //       const next = { ...prev };
+
+  //       const selectedOptions = selectedOptionsMap[currentIndex] ?? [];
+  //       const isAttempted = selectedOptions.length > 0;
+
+  //       // ✅ Update CURRENT question
+  //       next[currentIndex] = {
+  //         ...next[currentIndex],
+  //         attempted: isAttempted,
   //         visited: true,
-  //       },
-  //     }));
+  //       };
+
+  //       // ✅ Update NEXT question ONLY if it exists
+  //       if (next[currentIndex + 1]) {
+  //         next[currentIndex + 1] = {
+  //           ...next[currentIndex + 1],
+  //           visited: true,
+  //         };
+  //       }
+
+  //       return next;
+  //     });
 
   //     setCurrentIndex((i) => i + 1);
+  //     questionStartTimeRef.current = Date.now();
   //   } catch {
   //     message.error('Failed to save answer');
   //   }
@@ -214,11 +255,13 @@ export default function AssessmentAttempt() {
     if (currentIndex === 0) return;
     setCurrentIndex((i) => i - 1);
   };
-
-  const submitAssessment = () => {
-    console.log('Submitted answers', questionStatus);
-    // setTimeUp(true);
-    router.replace(`/student/assessment/${assessmentId}/preview`);
+  const submitAssessment = async () => {
+    try {
+      await saveCurrentAnswer();
+      router.replace(`/student/assessment/${assessmentId}/preview`);
+    } catch {
+      message.error('Failed to save answer');
+    }
   };
 
   if (runtimeLoading || questionLoading) return null;

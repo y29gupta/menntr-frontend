@@ -58,7 +58,7 @@ export function QuestionRenderer({
           <h3 className="font-medium text-[#6C768A] text-[16px] mb-1">
             Question {currentIndex + 1}
           </h3>
-          <p className="text-[16px] font-medium text-[#1A2C50]"> {question?.question_text}</p>
+          <p className="text-[16px] font-medium !text-[#1A2C50]"> {question?.question_text}</p>
         </div>
 
         {/* Right */}
