@@ -8,7 +8,7 @@ import { assessmentApi } from '../../assessment.service';
 const inputClass =
   'w-full h-[44px] px-3 rounded-lg border border-[#E5E7EB] text-sm placeholder:text-[#9CA3AF] focus:outline-none focus:border-[#7C3AED] focus:ring-2 focus:ring-[#E9D5FF]';
 
-const labelClass = 'text-sm font-medium text-[#344054] mb-2 block';
+const labelClass = 'text-sm font-medium text-[#344054] mb-1 block';
 
 type Props = {
   assessmentId: string;
