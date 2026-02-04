@@ -13,7 +13,7 @@ type Props = {
   defaultValues?: StudentFormValues;
 };
 
-export default function AddStudentLayout({ mode = 'create', defaultValues }: Props) {
+export default function AddStudentLayout({ mode = 'create', defaultValues, studentId }: Props) {
   const [profileImage, setProfileImage] = useState<File | null>(null);
   const router = useRouter();
 
@@ -39,6 +39,7 @@ export default function AddStudentLayout({ mode = 'create', defaultValues }: Pro
           mode={mode}
           onCancel={() => router.push('/admin/student-management')}
           defaultValues={defaultValues}
+          studentId={studentId}
           // onCancel={() => router.push('/admin/student-management')}
         />
       </div>

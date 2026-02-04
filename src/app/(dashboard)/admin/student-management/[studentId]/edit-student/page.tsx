@@ -18,6 +18,7 @@ export default function EditStudentPage() {
   if (isLoading || !data) return null;
 
   const defaultValues = mapStudentApiToFormValues(data);
+  console.log(studentId, 'page');
 
   return <AddStudentLayout mode="edit" studentId={studentId} defaultValues={defaultValues} />;
 }

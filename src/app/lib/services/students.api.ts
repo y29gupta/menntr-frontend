@@ -115,6 +115,7 @@ updatePlatformAccess: (
         data: Partial<StudentFormValues>
       ) => {
     const payload: Record<string, any> = {};
+    console.log(studentId,"stud")
 
     if (data.firstName !== undefined) payload.first_name = data.firstName;
     if (data.lastName !== undefined) payload.last_name = data.lastName;
