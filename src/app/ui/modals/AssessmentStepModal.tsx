@@ -1,16 +1,17 @@
 'use client';
 
-import { useState } from 'react';
-import Image from 'next/image';
-import { CircleCheckBig } from 'lucide-react';
+import { useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { notifyManager, useMutation } from '@tanstack/react-query';
-import { attemptsApi } from '@/app/components/dashboards/student/assessment/attempts/assessment.service';
+import { useMutation } from '@tanstack/react-query';
 import { message } from 'antd';
+
 import StepPrivacyConsent from './StepPrivacyConsent';
 import StepMicCheck from './StepMicCheck';
 import StepCameraCheck from './StepCameraCheck';
 import StepStartTest from './StepStartTest';
+import ProctoringClient from '@/proctoring/ProctoringClient';
+
+import { attemptsApi } from '@/app/components/dashboards/student/assessment/attempts/assessment.service';
 
 type Props = {
   open: boolean;
@@ -21,34 +22,29 @@ type Props = {
 type MicStatus = 'idle' | 'error' | 'analyzing' | 'success';
 export type CameraStatus = 'off' | 'starting' | 'working' | 'aligning' | 'success' | 'error';
 
-export default function AssessmentStepModal({ open, onClose, assessmentId = '85' }: Props) {
+export default function AssessmentStepModal({ open, onClose, assessmentId = '87' }: Props) {
   const [step, setStep] = useState(1);
   const [consentChecked, setConsentChecked] = useState(false);
   const [micStatus, setMicStatus] = useState<MicStatus>('idle');
   const [cameraStatus, setCameraStatus] = useState<CameraStatus>('off');
+  const [attemptId, setAttemptId] = useState<string | null>(null);
   const [videoStream, setVideoStream] = useState<MediaStream | null>(null);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+
+  const [proctoringEnabled, setProctoringEnabled] = useState(false);
 
   const router = useRouter();
 
   const startAssessmentMutation = useMutation({
-    mutationFn: (assessmentId: string) => attemptsApi.startAssessment(assessmentId),
-
-    onSuccess: (data) => {
-      // success notify (use your existing notify util if present)
-      message.success(data.message || 'Assessment started successfully');
+    mutationFn: (id: string) => attemptsApi.startAssessment(id),
+    onSuccess: (res) => {
+      setAttemptId(res.attempt_id);
+      message.success('Assessment started');
       onClose();
-
-      if (assessmentId) {
-        router.push(`/student/assessment/${assessmentId}`);
-      }
+      router.push(`/student/assessment/${assessmentId}?attemptId=${res.attempt_id}`);
     },
-
-    onError: (error: any) => {
-      const message =
-        error?.response?.data?.message || 'Unable to start assessment. Please try again.';
-      message.error(
-        error?.response?.data?.message || 'Unable to start assessment. Please try again.'
-      );
+    onError: () => {
+      message.error('Unable to start assessment');
     },
   });
 
@@ -114,25 +110,27 @@ export default function AssessmentStepModal({ open, onClose, assessmentId = '85'
 
         {/* BODY */}
         <div className="flex-1 mt-3">
-          {step === 1 && (
-            <StepPrivacyConsent
-              consentChecked={consentChecked}
-              setConsentChecked={setConsentChecked}
-            />
-          )}
+        {step === 1 && (
+          <StepPrivacyConsent
+            consentChecked={consentChecked}
+            setConsentChecked={setConsentChecked}
+          />
+        )}
 
-          {step === 2 && <StepMicCheck micStatus={micStatus} setMicStatus={setMicStatus} />}
+        {step === 2 && <StepMicCheck micStatus={micStatus} setMicStatus={setMicStatus} />}
 
-          {step === 3 && (
+        {step === 3 && (
             <StepCameraCheck
               cameraStatus={cameraStatus}
               setCameraStatus={setCameraStatus}
               videoStream={videoStream}
               setVideoStream={setVideoStream}
+              videoRef={videoRef}
+              onCameraReady={() => setProctoringEnabled(true)}
             />
-          )}
+        )}
 
-          {step === 4 && <StepStartTest />}
+        {step === 4 && <StepStartTest />}
         </div>
 
         {/* FOOTER */}

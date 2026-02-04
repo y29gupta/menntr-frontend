@@ -1,5 +1,6 @@
 'use client';
 
+import ProctoringClient from '@/proctoring/ProctoringClient';
 import AssessmentStepper from './AssessmentStepper';
 
 import AssessmentHeader from './AssessmentHeader';
@@ -7,7 +8,7 @@ import AssessmentHeader from './AssessmentHeader';
 import AssessmentFooter from './AssessmentFooter';
 import { QuestionRenderer } from './questions/QuestionRenderer';
 import { useEffect, useRef, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { mcqDummyQuestions } from './data/mcq.dummy';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { assessmentApi } from './assessment.service';
@@ -26,9 +27,11 @@ export default function AssessmentAttempt() {
   const [timeUp, setTimeUp] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [codingAttemptedMap, setCodingAttemptedMap] = useState<Record<number, boolean>>({});
-
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const [videoStream, setVideoStream] = useState<MediaStream | null>(null);
   const fullscreenLockRef = useRef(false);
-
+  const searchParams = useSearchParams();
+  const attemptId = Number(searchParams.get('attemptId'));
   const handleSelectOption = (optionIds: number[]) => {
     setSelectedOptionsMap((prev) => ({
       ...prev,
@@ -108,7 +111,31 @@ export default function AssessmentAttempt() {
   useEffect(() => {
     document.documentElement.requestFullscreen?.().catch(() => {});
   }, []);
+  // 🎥 Start camera ONCE for proctoring (runtime)
+  useEffect(() => {
+    let mounted = true;
 
+    navigator.mediaDevices
+      .getUserMedia({ video: true })
+      .then((stream) => {
+        if (!mounted) return;
+
+        setVideoStream(stream);
+
+        // attach stream to hidden video
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+        }
+      })
+      .catch(() => {
+        message.error('Camera access is required to continue the assessment');
+      });
+
+    return () => {
+      mounted = false;
+      videoStream?.getTracks().forEach((t) => t.stop());
+    };
+  }, []);
   // useEffect(() => {
   //   const handleFullscreenChange = () => {
   //     if (!document.fullscreenElement && !fullscreenLockRef.current) {
@@ -258,7 +285,7 @@ export default function AssessmentAttempt() {
   const submitAssessment = async () => {
     try {
       await saveCurrentAnswer();
-      router.replace(`/student/assessment/${assessmentId}/preview`);
+    router.replace(`/student/assessment/${assessmentId}/preview`);
     } catch {
       message.error('Failed to save answer');
     }
@@ -343,6 +370,18 @@ export default function AssessmentAttempt() {
           router.replace('/student/assessment');
         }}
       />
+      {/* 🔒 Hidden video for proctoring */}
+      <video ref={videoRef} autoPlay muted playsInline className="hidden" />
+
+      {/* 🧠 Proctoring engine – runs for full exam */}
+      {videoStream && attemptId && (
+        <ProctoringClient
+          attemptId={46} // IMPORTANT: attemptId, not assessmentId if you have it
+          videoElement={videoRef.current}
+          videoStream={videoStream}
+          enabled
+        />
+      )}
     </>
   );
 }
