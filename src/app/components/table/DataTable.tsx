@@ -75,7 +75,7 @@ function DataTable<T extends RowData>({
               <tr key={hg.id}>
                 {hg.headers.map((header) => (
                   <th
-                    key={header.id}
+                    key={`${hg.id}-${header.id}`}
                     className="px-4 py-3 text-left font-semibold !text-[#1A2C50] bg-gray-50"
                   >
                     {flexRender(header.column.columnDef.header, header.getContext())}

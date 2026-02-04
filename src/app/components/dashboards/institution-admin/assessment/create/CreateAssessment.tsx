@@ -171,23 +171,23 @@ export default function CreateAssessment({ mode = 'create', editAssessmentId }: 
     const values = form.getValues();
 
     try {
-      // if (isEdit && assessmentId) {
-      //   const payload = buildUpdatePayload(values);
+      if (isEdit && assessmentId) {
+        const payload = buildUpdatePayload(values);
 
-      //   await updateAssessmentMutation.mutateAsync({
-      //     assessmentId,
-      //     payload,
-      //   });
+        await updateAssessmentMutation.mutateAsync({
+          assessmentId,
+          payload,
+        });
 
-      //   message.success('Assessment updated successfully');
-      // } else {
-      //   const payload = buildCreatePayload(values);
+        message.success('Assessment updated successfully');
+      } else {
+        const payload = buildCreatePayload(values);
 
-      //   const res = await createAssessmentMutation.mutateAsync(payload);
-      //   setAssessmentId(res.id);
+        const res = await createAssessmentMutation.mutateAsync(payload);
+        setAssessmentId(res.id);
 
-      //   message.success('Assessment created successfully');
-      // }
+        message.success('Assessment created successfully');
+      }
 
       // SAME FLOW
       setStep(2);
@@ -199,15 +199,15 @@ export default function CreateAssessment({ mode = 'create', editAssessmentId }: 
   const handleStepTwoNext = async () => {
     const isValid = await form.trigger(['institutionCategory', 'department', 'batches']);
 
-    // if (!isValid || !assessmentId) return;
+    if (!isValid || !assessmentId) return;
     // if (!isValid) return;
 
     const { batches } = form.getValues();
 
-    // await updateAudienceMutation.mutateAsync({
-    //   assessmentId,
-    //   batchIds: batches.map((id) => Number(id)),
-    // });
+    await updateAudienceMutation.mutateAsync({
+      assessmentId,
+      batchIds: batches.map((id) => Number(id)),
+    });
 
     setStep(3);
   };

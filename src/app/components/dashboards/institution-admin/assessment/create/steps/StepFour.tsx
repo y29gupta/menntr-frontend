@@ -500,7 +500,6 @@ export default function StepFour({ onBack, onCancel, assessmentId, onDeleteQuest
           assessmentId={assessmentId}
           mcqMeta={mcqMeta}
           codingMeta={codingMeta}
-          initialType={editData?.type === 'coding' ? 'Coding' : 'MCQ'}
           initialData={editData}
           mode={editMode}
           onClose={() => setIsModalOpen(false)}

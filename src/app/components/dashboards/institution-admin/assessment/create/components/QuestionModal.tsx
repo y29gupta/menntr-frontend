@@ -6,14 +6,12 @@ import { createPortal } from 'react-dom';
 import CreateMCQModal from './CreateMCQModal';
 import CreateCodingModal from './CreateCodingModal';
 
-// import CreateMCQForm from './CreateMCQForm';
-// import CreateCodingForm from './CreateCodingForm';
+type QuestionType = 'MCQ' | 'Coding';
 
 type Props = {
   assessmentId: string;
   mcqMeta: any;
   codingMeta: any;
-  initialType?: 'MCQ' | 'Coding';
   initialData?: any;
   mode?: 'create' | 'edit';
   onClose: () => void;
@@ -25,14 +23,13 @@ export default function QuestionModalShell({
   assessmentId,
   mcqMeta,
   codingMeta,
-  initialType = 'MCQ',
   initialData,
   mode = 'create',
   onClose,
   onSave,
   onSaveAndNext,
 }: Props) {
-  const [type, setType] = useState<'MCQ' | 'Coding'>('MCQ');
+  const [type, setType] = useState<QuestionType>('MCQ');
 
   useEffect(() => {
     if (mode === 'edit' && initialData?.type) {
@@ -40,24 +37,26 @@ export default function QuestionModalShell({
     }
   }, [mode, initialData]);
 
+  const headerTitle =
+    type === 'MCQ'
+      ? mode === 'edit'
+        ? 'Edit MCQ Question'
+        : 'Create MCQ Question'
+      : mode === 'edit'
+        ? 'Edit Coding Question'
+        : 'Add a programming problem for this assessment';
+
   return createPortal(
     <div className="fixed inset-0 z-[9999]">
+      {/* Overlay */}
       <div className="absolute inset-0 bg-white/70" onClick={onClose} />
 
+      {/* Right drawer */}
       <div className="absolute right-0 top-0 h-full w-full max-w-[620px] bg-white shadow-xl">
         {/* HEADER */}
-        <div className="flex justify-between items-start border-b px-6 py-4">
+        <div className="flex justify-between items-start border-b border-[#C3CAD9] px-6 py-4">
           <div>
-            <h3 className="text-base font-semibold text-[#101828]">
-              {type === 'MCQ'
-                ? mode === 'edit'
-                  ? 'Edit MCQ Question'
-                  : 'Create MCQ Question'
-                : mode === 'edit'
-                  ? 'Edit Coding Question'
-                  : 'Add a programming problem for this assessment'}
-            </h3>
-
+            <h3 className="text-base font-semibold text-[#101828]">{headerTitle}</h3>
             <p className="text-sm text-gray-500">Add a question to Aptitude Mock – Jan 2025</p>
           </div>
           <X className="cursor-pointer" onClick={onClose} />
@@ -65,40 +64,45 @@ export default function QuestionModalShell({
 
         {/* CHIPS */}
         <div className="flex gap-2 px-6 py-4">
-          {(['MCQ', 'Coding'] as const).map((t) => (
+          {(['MCQ', 'Coding'] as QuestionType[]).map((t) => (
             <button
               key={t}
               onClick={() => setType(t)}
               disabled={mode === 'edit'}
-              className={`px-4 py-1 rounded-full border text-sm ${
-                type === t ? 'bg-purple-100 border-purple-500 text-purple-700' : 'border-gray-300'
+              className={`flex items-center gap-2 px-4 py-1 rounded-full border text-sm ${
+                type === t
+                  ? 'bg-[#F6F0FF] border-[#7C3AED] !text-[#7C3AED]'
+                  : 'border-gray-300 !text-[#3D465C]'
               }`}
             >
+              {type === t && <span className="text-[#7C3AED] text-xs font-bold">✓</span>}
               {t}
             </button>
           ))}
         </div>
 
         {/* BODY */}
-        <div className="px-6 pb-6 overflow-y-auto h-[calc(100%-160px)]">
-          {type === 'MCQ' && mcqMeta ? (
+        <div className="px-6 pb-6 overflow-y-auto h-[calc(100%-170px)]">
+          {type === 'MCQ' && (
             <CreateMCQModal
               assessmentId={assessmentId}
               meta={mcqMeta}
-              initialData={type === initialType ? initialData : undefined}
+              initialData={type === 'MCQ' ? initialData : undefined}
               mode={mode}
               onSave={onSave}
               onSaveAndNext={onSaveAndNext}
             />
-          ) : type === 'Coding' && codingMeta ? (
+          )}
+
+          {type === 'Coding' && (
             <CreateCodingModal
               assessmentId={assessmentId}
               meta={codingMeta}
-              initialData={type === initialType ? initialData : undefined}
+              initialData={type === 'Coding' ? initialData : undefined}
               mode={mode}
-              onSubmit={onSave}
+              onSave={onSave}
             />
-          ) : null}
+          )}
         </div>
       </div>
     </div>,
