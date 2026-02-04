@@ -17,7 +17,7 @@ export const assessmentPerformanceMockData: AssessmentPerformanceRow[] = [
     duration: '25 mins',
     score: 85,
     scorePercent: 85,
-    status: 'In-Progress',
+    status: 'In Progress',
   },
   {
     assessmentName: 'Aptitude Mock – Jan 2025',
@@ -26,6 +26,6 @@ export const assessmentPerformanceMockData: AssessmentPerformanceRow[] = [
     duration: '25 mins',
     score: 85,
     scorePercent: 85,
-    status: 'Not started yet',
+    status: 'Not Started',
   },
 ];

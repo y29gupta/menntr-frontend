@@ -5,8 +5,8 @@ import { useState } from 'react';
 type TestCase = {
   name: string;
   input: string;
-  expected: boolean;
-  output: boolean | null;
+  expected: string; // ✅ string (from backend)
+  output: string | null; // ✅ string (from backend)
   passed: boolean;
 };
 
@@ -18,6 +18,8 @@ type Props = {
 export default function TestResult({ status, cases }: Props) {
   const [activeTab, setActiveTab] = useState(0);
   const currentCase = cases[activeTab];
+
+  if (!currentCase) return null;
 
   return (
     <div className="border border-[#C3CAD9] rounded-xl p-6 bg-white">
@@ -33,11 +35,11 @@ export default function TestResult({ status, cases }: Props) {
         <p className="text-[14px] text-[#6C768A]">
           {status === 'passed'
             ? 'You have passed the sample test cases.'
-            : `You've failed to answer ${cases.filter((c) => !c.passed).length}/${cases.length} test cases`}
+            : `You've failed ${cases.filter((c) => !c.passed).length}/${cases.length} test cases`}
         </p>
       </div>
 
-      {/* Test Case Tabs */}
+      {/* Tabs */}
       <div className="flex gap-0 border-b border-[#E5E7EB] mb-4">
         {cases.map((testCase, index) => (
           <button
@@ -50,63 +52,38 @@ export default function TestResult({ status, cases }: Props) {
                   ? testCase.passed
                     ? 'border-[#22C55E] text-[#22C55E]!'
                     : 'border-[#EF4444] text-[#EF4444]!'
-                  : 'border-transparent text-[#6C768A] hover:text-[#1A2C50]'
+                  : 'border-transparent text-[#6C768A]'
               }
             `}
           >
-            {testCase.passed ? (
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <circle cx="8" cy="8" r="7" stroke="currentColor" strokeWidth="1.5" />
-                <path
-                  d="M5 8L7 10L11 6"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            ) : (
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <circle cx="8" cy="8" r="7" stroke="currentColor" strokeWidth="1.5" />
-                <path
-                  d="M6 6L10 10M10 6L6 10"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                />
-              </svg>
-            )}
-            {testCase.name}
+            {testCase.passed ? '✔' : '✖'} {testCase.name}
           </button>
         ))}
       </div>
 
-      {/* Test Case Details */}
+      {/* Details */}
       <div className="space-y-4">
-        {/* Input */}
         <div>
           <label className="text-[14px] font-medium text-[#6C768A] mb-2 block">Input</label>
-          <div className="bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg px-4 py-3 text-[14px] text-[#1A2C50]">
+          <pre className="bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg px-4 py-3 text-[14px] whitespace-pre-wrap">
             {currentCase.input}
-          </div>
+          </pre>
         </div>
 
-        {/* Your Output */}
         <div>
           <label className="text-[14px] font-medium text-[#6C768A] mb-2 block">Your Output</label>
-          <div className="bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg px-4 py-3 text-[14px] text-[#1A2C50]">
-            {currentCase.output !== null ? String(currentCase.output) : 'Null'}
-          </div>
+          <pre className="bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg px-4 py-3 text-[14px] whitespace-pre-wrap">
+            {currentCase.output ?? 'No Output'}
+          </pre>
         </div>
 
-        {/* Expected Output */}
         <div>
           <label className="text-[14px] font-medium text-[#6C768A] mb-2 block">
             Expected Output
           </label>
-          <div className="bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg px-4 py-3 text-[14px] text-[#1A2C50]">
-            {String(currentCase.expected)}
-          </div>
+          <pre className="bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg px-4 py-3 text-[14px] whitespace-pre-wrap">
+            {currentCase.expected}
+          </pre>
         </div>
       </div>
     </div>

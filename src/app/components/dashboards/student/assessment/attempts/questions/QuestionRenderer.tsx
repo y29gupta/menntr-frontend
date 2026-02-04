@@ -15,6 +15,8 @@ type Props = {
 
   onToggleReview: (index: number) => void; // ✅ ADD
   isReviewed: boolean;
+
+  onCodingAttempted: (index: number) => void;
 };
 
 export function QuestionRenderer({
@@ -25,16 +27,22 @@ export function QuestionRenderer({
 
   onToggleReview,
   isReviewed,
+  onCodingAttempted,
 }: Props) {
-  const questionType: 'mcq' | 'coding' = 'mcq';
+  if (!question) return null;
+  const questionType: 'single_correct' | 'coding' = question.type;
   // const currentQuestion = mcqDummyQuestions[currentIndex];
+
+  console.log(question, 'coding');
 
   return (
     <div className="flex flex-col flex-1 min-h-0">
       {/* ───────── Top Center Title ───────── */}
       <div className="relative flex items-center justify-center">
         <span className="text-xl font-semibold !text-[#1A2C50]">
-          {questionType === 'mcq' ? 'MCQ - Single correct answer' : 'Coding - Single problem'}
+          {questionType === 'single_correct'
+            ? 'MCQ - Single correct answer'
+            : 'Coding - Single problem'}
         </span>
 
         <span className="absolute right-0  text-[16px] font-semibold !text-[#1A2C50]">
@@ -76,14 +84,21 @@ export function QuestionRenderer({
 
       {/* ───────── Question Body ───────── */}
       <div className="mt-4 flex-1 min-h-0">
-        {questionType === 'mcq' && (
+        {questionType === 'single_correct' && (
           <McqQuestion
             question={question}
             selectedOptions={selectedOptions}
             onSelectOption={onSelectOption}
           />
         )}
-        {/* {questionType === 'mcq' && <CodingQuestion />} */}
+        {questionType === 'coding' && (
+          <CodingQuestion
+            question={question}
+            onSubmitSuccess={() => {
+              onCodingAttempted(currentIndex);
+            }}
+          />
+        )}
       </div>
     </div>
   );

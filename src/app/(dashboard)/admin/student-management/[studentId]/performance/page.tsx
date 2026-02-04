@@ -1,13 +1,18 @@
+'use client';
+
 import ReusableBarChart from '@/app/components/charts/PerformanceBarChart';
+import { CandidatePerformance } from '@/app/components/dashboards/institution-admin/assessment/performance/performance-section/CandidatePerformance.columns';
+import ViewReportModal from '@/app/components/dashboards/institution-admin/assessment/performance/student-performance/ViewReportModal';
 import { AssessmentPerformanceTable } from '@/app/components/dashboards/institution-admin/student-management/performance';
+import { AssessmentPerformanceRow } from '@/app/components/dashboards/institution-admin/student-management/performance/assessment.types';
 import PerformanceCard from '@/app/ui/ProgressCard';
 import { Avatar } from 'antd';
 import { Upload } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import React from 'react';
-type AssessmentStatus = 'Completed' | 'In-Progress' | 'Not started yet';
+import React, { useState } from 'react';
+type AssessmentStatus = 'Completed' | 'In Progress' | 'Not Started';
 
 type AssessmentCategory = 'Aptitude' | 'Domain';
 
@@ -37,7 +42,7 @@ const assessmentTableData: AssessmentRow[] = [
     duration: '25 mins',
     score: 85,
     scorePercent: 85,
-    status: 'In-Progress',
+    status: 'In Progress',
   },
   {
     assessmentName: 'Aptitude Mock – Jan 2025',
@@ -46,7 +51,7 @@ const assessmentTableData: AssessmentRow[] = [
     duration: '25 mins',
     score: 85,
     scorePercent: 85,
-    status: 'Not started yet',
+    status: 'Not Started',
   },
 ];
 
@@ -96,6 +101,27 @@ const performanceChartData = [
 ];
 
 const page = () => {
+  const [reportOpen, setReportOpen] = useState(false);
+  const [selectedCandidate, setSelectedCandidate] = useState<CandidatePerformance | null>(null);
+
+  const handleViewReport = (row: AssessmentPerformanceRow) => {
+    const candidate: CandidatePerformance = {
+      id: Number(row.attempt), // or any unique id
+      name: 'Arun Kumar',
+      email: 'arun.kumar@college.edu',
+
+      assessmentName: row.assessmentName,
+      duration: row.duration, // ✅ ADD THIS
+      status: row.status, // ✅ ADD THIS
+
+      score: `${row.score}`, // number → string
+      percentage: row.scorePercent,
+    };
+
+    setSelectedCandidate(candidate);
+    setReportOpen(true);
+  };
+
   return (
     <>
       <div
@@ -206,11 +232,18 @@ const page = () => {
               </p>
             </div>
             <div className="broder  px-4">
-              <AssessmentPerformanceTable />
+              <AssessmentPerformanceTable onViewReport={handleViewReport} />
             </div>
           </div>
         </div>
       </div>
+      <ViewReportModal
+        open={reportOpen}
+        candidate={selectedCandidate}
+        onClose={() => setReportOpen(false)}
+        onNext={() => {}}
+        onPrev={() => {}}
+      />
     </>
   );
 };

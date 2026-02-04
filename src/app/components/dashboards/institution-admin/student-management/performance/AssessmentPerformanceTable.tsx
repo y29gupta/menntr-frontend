@@ -5,12 +5,15 @@ import DataTable from '@/app/components/table/DataTable';
 
 import { assessmentPerformanceColumns } from './assessment.columns';
 import { assessmentPerformanceMockData } from './assessment.mock';
+import { CandidatePerformance } from '../../assessment/performance/performance-section/CandidatePerformance.columns';
+import { AssessmentPerformanceRow } from './assessment.types';
 
 type Props = {
   showUpload?: boolean;
+  onViewReport: (row: AssessmentPerformanceRow) => void;
 };
 
-export default function AssessmentPerformanceTable({ showUpload = false }: Props) {
+export default function AssessmentPerformanceTable({ showUpload = false, onViewReport }: Props) {
   return (
     <div className="mt-4 flex flex-col gap-4">
       {/* Search + Filter */}
@@ -33,7 +36,7 @@ export default function AssessmentPerformanceTable({ showUpload = false }: Props
       </div>
 
       <DataTable
-        columns={assessmentPerformanceColumns}
+        columns={assessmentPerformanceColumns(onViewReport)}
         data={assessmentPerformanceMockData}
         columnFilters={{}}
         onColumnFilterChange={() => {}}
