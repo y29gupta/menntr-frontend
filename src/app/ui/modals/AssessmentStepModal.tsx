@@ -1,16 +1,19 @@
 'use client';
 
 import { useState } from 'react';
-import Image from 'next/image';
-import { CircleCheckBig } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import { notifyManager, useMutation } from '@tanstack/react-query';
-import { attemptsApi } from '@/app/components/dashboards/student/assessment/attempts/assessment.service';
+import { useRouter, useParams } from 'next/navigation';
+import { useMutation } from '@tanstack/react-query';
 import { message } from 'antd';
+
 import StepPrivacyConsent from './StepPrivacyConsent';
 import StepMicCheck from './StepMicCheck';
 import StepCameraCheck from './StepCameraCheck';
 import StepStartTest from './StepStartTest';
+
+import { attemptsApi } from '@/app/components/dashboards/student/assessment/attempts/assessment.service';
+import { api } from '@/app/lib/api';
+
+/* ================= TYPES ================= */
 
 type Props = {
   open: boolean;
@@ -21,7 +24,21 @@ type Props = {
 type MicStatus = 'idle' | 'error' | 'analyzing' | 'success';
 export type CameraStatus = 'off' | 'starting' | 'working' | 'aligning' | 'success' | 'error';
 
-export default function AssessmentStepModal({ open, onClose, assessmentId = '35' }: Props) {
+/* ================= CONSENT API ================= */
+
+const assessmentConsentApi = {
+  giveConsent: async (assessmentId: string) => {
+    const res = await api.post(`/student/assessments/${assessmentId}/consent`);
+    return res.data as {
+      can_proceed: boolean;
+      message?: string;
+    };
+  },
+};
+
+/* ================= COMPONENT ================= */
+
+export default function AssessmentStepModal({ open, onClose, assessmentId }: Props) {
   const [step, setStep] = useState(1);
   const [consentChecked, setConsentChecked] = useState(false);
   const [micStatus, setMicStatus] = useState<MicStatus>('idle');
@@ -29,91 +46,98 @@ export default function AssessmentStepModal({ open, onClose, assessmentId = '35'
   const [videoStream, setVideoStream] = useState<MediaStream | null>(null);
 
   const router = useRouter();
+  const params = useParams();
 
-  const startAssessmentMutation = useMutation({
-    mutationFn: (assessmentId: string) => attemptsApi.startAssessment(assessmentId),
+  // ID ALWAYS COMES FROM URL
+  const assessmentIdFromUrl = (params?.id as string) || assessmentId;
+
+  /* ================= CONSENT MUTATION ================= */
+
+  const consentMutation = useMutation({
+    mutationFn: (id: string) => assessmentConsentApi.giveConsent(id),
 
     onSuccess: (data) => {
-      // success notify (use your existing notify util if present)
-      message.success(data.message || 'Assessment started successfully');
+      if (data?.can_proceed) {
+        setStep(2);
+      } else {
+        message.error(data?.message || 'Consent not approved');
+      }
+    },
+
+    onError: () => {
+      message.error('Unable to record consent. Please try again.');
+    },
+  });
+
+  /* ================= START ASSESSMENT ================= */
+
+  const startAssessmentMutation = useMutation({
+    mutationFn: (id: string) => attemptsApi.startAssessment(id),
+
+    onSuccess: (data) => {
+      message.success(data.message || 'Assessment started');
       onClose();
 
-      if (assessmentId) {
-        router.push(`/student/assessment/${assessmentId}`);
+      if (assessmentIdFromUrl) {
+        router.push(`/student/assessment/${assessmentIdFromUrl}`);
       }
     },
 
     onError: (error: any) => {
-      const message =
-        error?.response?.data?.message || 'Unable to start assessment. Please try again.';
-      message.error(
-        error?.response?.data?.message || 'Unable to start assessment. Please try again.'
-      );
+      message.error(error?.response?.data?.message || 'Unable to start assessment');
     },
   });
 
   if (!open) return null;
 
+  /* ================= STEP HANDLER ================= */
+
   const nextStep = () => {
-    if (step === 1 && !consentChecked) return;
-    // if (step === 4) return onClose();
-    // if (step === 4) {
-    //   onClose();
+    // STEP 1 → CONSENT
+    if (step === 1) {
+      if (!consentChecked) return;
+      if (!assessmentIdFromUrl || consentMutation.isPending) return;
 
-    //   if (assessmentId) {
-    //     // router.push(`/student/assessment/40`);
-    //     router.push(`/student/assessment/${assessmentId}`);
-    //   }
+      consentMutation.mutate(assessmentIdFromUrl);
+      return;
+    }
 
-    //   return;
-    // }
+    // STEP 4 → START TEST
     if (step === 4) {
-      if (!assessmentId || startAssessmentMutation.isPending) return;
+      if (!assessmentIdFromUrl || startAssessmentMutation.isPending) return;
 
-      startAssessmentMutation.mutate(assessmentId);
+      startAssessmentMutation.mutate(assessmentIdFromUrl);
       return;
     }
 
     setStep((s) => s + 1);
   };
 
+  /* ================= UI ================= */
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-[6px]">
-      <div
-        className="
-          bg-white
-          rounded-[20px]
-          shadow-[0px_20px_60px_rgba(16,24,40,0.25)]
-          w-200 h-100
-          md:w-180 md:h-auto
-          p-6
-          flex flex-col
-          justify-between
-        "
-      >
+      <div className="bg-white rounded-[20px] shadow-[0px_20px_60px_rgba(16,24,40,0.25)] w-200 p-6 flex flex-col">
         {/* HEADER */}
         <div>
           <div className="flex justify-between items-start">
             <div>
               <h2 className="text-[20px] font-bold text-[#0F172A]">Before you begin</h2>
-
               <p className="text-[14px] text-[#6E788C]">
                 We need to verify your microphone and camera to ensure a smooth test experience
               </p>
             </div>
 
-            <p className="text-[14px] text-[#1A2C50] flex items-center gap-1">
-              Step
-              <span className="font-semibold text-[#101828] text-[16px] leading-none">{step}</span>
-              of 4
+            <p className="text-[14px] text-[#1A2C50]">
+              Step <span className="font-semibold text-[16px]">{step}</span> of 4
             </p>
           </div>
 
-          <div className="h-px bg-[#E4E7EC]" />
+          <div className="h-px bg-[#E4E7EC] mt-2" />
         </div>
 
         {/* BODY */}
-        <div className="flex-1 mt-3">
+        <div className="flex-1 mt-4">
           {step === 1 && (
             <StepPrivacyConsent
               consentChecked={consentChecked}
@@ -139,32 +163,27 @@ export default function AssessmentStepModal({ open, onClose, assessmentId = '35'
         <div className="flex gap-4 mt-6">
           <button
             onClick={onClose}
-            className="
-              flex-1
-              h-10
-              rounded-full
-              border border-[#344054]
-              text-[#344054]
-              font-medium
-            "
+            className="flex-1 h-10 rounded-full border border-[#344054] text-[#344054]"
           >
             Cancel
           </button>
 
           <button
             onClick={nextStep}
-            disabled={step === 1 && !consentChecked}
-            className="
-              flex-1
-              h-10
-              rounded-full
-              text-white!
-              font-medium
-              bg-linear-to-r from-[#904BFF] to-[#C053C2]
-              disabled:opacity-40
-            "
+            disabled={
+              (step === 1 && !consentChecked) ||
+              consentMutation.isPending ||
+              startAssessmentMutation.isPending
+            }
+            className="flex-1 h-10 rounded-full font-medium text-white! bg-linear-to-r from-[#904BFF] to-[#C053C2] disabled:opacity-40"
           >
-            Next
+            {step === 4
+              ? startAssessmentMutation.isPending
+                ? 'Starting...'
+                : 'Start Assessment'
+              : step === 1 && consentMutation.isPending
+                ? 'Verifying...'
+                : 'Next'}
           </button>
         </div>
       </div>
