@@ -285,7 +285,7 @@ export default function AssessmentAttempt() {
   const submitAssessment = async () => {
     try {
       await saveCurrentAnswer();
-    router.replace(`/student/assessment/${assessmentId}/preview`);
+      router.replace(`/student/assessment/${assessmentId}/preview`);
     } catch {
       message.error('Failed to save answer');
     }
