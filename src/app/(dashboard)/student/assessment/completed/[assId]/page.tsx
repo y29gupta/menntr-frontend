@@ -2,8 +2,11 @@
 
 import { useParams, useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
+import { useState, useEffect } from 'react';
+import { X } from 'lucide-react';
 
 import AssessmentHeaders from '@/app/components/dashboards/student/assessment/assessmentHeaders';
+import AssessmentResultPage from '@/app/ui/modals/AssessmentResultPage';
 
 /* ================= API ================= */
 
@@ -42,6 +45,13 @@ export default function AssessmentCompletedPage() {
   const { assId } = useParams<{ assId: string }>();
   const router = useRouter();
 
+  const [openResultModal, setOpenResultModal] = useState(false);
+
+  useEffect(() => {
+    if (openResultModal) document.body.style.overflow = 'hidden';
+    else document.body.style.overflow = '';
+  }, [openResultModal]);
+
   const { data, isLoading } = useQuery({
     queryKey: ['completed-assessment', assId],
     queryFn: () => fetchAssessment(assId),
@@ -50,14 +60,11 @@ export default function AssessmentCompletedPage() {
 
   if (isLoading || !data) return null;
 
-  const showViewDetails =
-    data.attempt_status === 'submitted' || data.attempt_status === 'evaluated';
-
-  const showViewResult = data.attempt_status === 'evaluated';
-
   return (
     <div className="min-h-screen w-full">
       <AssessmentHeaders />
+
+      {/* ================= YOUR ORIGINAL PAGE (UNCHANGED) ================= */}
 
       <div
         className="
@@ -93,6 +100,7 @@ export default function AssessmentCompletedPage() {
             </p>
           </div>
         </div>
+
         {/* ================= TITLE ================= */}
         <div className="flex flex-col mt-3">
           <p className="text-base sm:text-lg text-slate-800 font-medium">{data.title}</p>
@@ -105,6 +113,7 @@ export default function AssessmentCompletedPage() {
             <span>Section A</span>
           </p>
         </div>
+
         {/* ================= OVERVIEW ================= */}
         <div className="bg-[#FAFBFC] border border-gray-200 rounded-xl p-5 mt-5">
           <h3 className="text-sm font-semibold text-gray-800">Assessment Overview</h3>
@@ -120,6 +129,7 @@ export default function AssessmentCompletedPage() {
             <OverviewItem label="Total Marks" value={String(data.overview.total_marks)} />
           </div>
         </div>
+
         {/* ================= RULES ================= */}
         <div className="bg-[#FAFBFC] border border-gray-200 rounded-xl p-5 mt-5">
           <h3 className="text-sm font-semibold text-gray-800">Assessment Rules</h3>
@@ -132,8 +142,8 @@ export default function AssessmentCompletedPage() {
             ))}
           </ul>
         </div>
-        {/* ================= COMPLETED FOOTER ================= */}
 
+        {/* ================= COMPLETED FOOTER ================= */}
         <div className="bg-[#FAFBFC] border border-gray-200 rounded-xl p-5 mt-5">
           <h3 className="text-sm font-semibold text-gray-800">Evaluation & Results</h3>
 
@@ -146,33 +156,30 @@ export default function AssessmentCompletedPage() {
           </p>
 
           <div className="flex justify-center gap-4 flex-wrap">
-            {/* ✅ ALWAYS SHOWN */}
             <button
               className="
-              px-6 py-2.5
-              rounded-full
-              text-sm font-medium
-              text-purple-600!
-              border border-purple-300
-              hover:bg-purple-50
-              transition
-            "
+                px-6 py-2.5
+                rounded-full
+                text-sm font-medium
+                border border-purple-300
+                text-purple-600!
+                hover:bg-purple-50
+              "
             >
               View Submission
             </button>
 
-            {/* ✅ ONLY FOR EVALUATED */}
             {data.attempt_status === 'evaluated' && (
               <button
+                onClick={() => setOpenResultModal(true)}
                 className="
-                px-6 py-2.5
-                rounded-full
-                text-sm font-medium
-                text-white!
-                bg-gradient-to-r from-[#904BFF] to-[#C053C2]
-                hover:opacity-90
-                transition
-              "
+                  px-6 py-2.5
+                  rounded-full
+                  text-sm font-medium
+                  text-white!
+                  bg-gradient-to-r from-[#904BFF] to-[#C053C2]
+                  hover:opacity-90
+                "
               >
                 View Results
               </button>
@@ -180,11 +187,33 @@ export default function AssessmentCompletedPage() {
           </div>
         </div>
       </div>
+
+      {/* ================= RESULT MODAL (FIXED) ================= */}
+      {openResultModal && (
+        <div className="fixed inset-0 z-[999] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/50" onClick={() => setOpenResultModal(false)} />
+
+          <div className="relative w-full max-w-4xl bg-white rounded-3xl shadow-2xl max-h-[90vh] overflow-hidden flex flex-col">
+            {/* Close Button */}
+            <button
+              onClick={() => setOpenResultModal(false)}
+              className="absolute top-5 right-11   rounded-full  "
+            >
+              <X size={25} className="text-gray-600" />
+            </button>
+
+            {/* Scrollable Content */}
+            <div className="overflow-y-auto flex-1">
+              <AssessmentResultPage />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
-/* ================= HELPERS ================= */
+/* ================= HELPERS (UNCHANGED) ================= */
 
 function OverviewItem({ label, value }: { label: string; value: string }) {
   return (
