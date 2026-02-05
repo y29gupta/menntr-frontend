@@ -1,24 +1,7 @@
 'use client';
 
 import { CheckCircle, XCircle } from 'lucide-react';
-
-/* ================= LOCAL TYPE (MUST MATCH) ================= */
-
-type Difficulty = 'Easy' | 'Medium' | 'Hard';
-type QuestionType = 'MCQ' | 'CODING';
-
-interface QuestionReport {
-  id: string;
-  questionNo: string;
-  title: string;
-  type: QuestionType;
-  difficulty: Difficulty;
-  totalMarks: number;
-  marksObtained: number;
-  options?: string[];
-  selectedOption?: number;
-  correctOption?: number;
-}
+import { Difficulty, QuestionReport } from './responses.types';
 
 /* ================= STYLES ================= */
 
