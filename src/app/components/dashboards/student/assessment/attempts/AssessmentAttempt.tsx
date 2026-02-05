@@ -428,19 +428,19 @@ useEffect(() => {
         playsInline
         style={{
           position: 'fixed',
-          top: '-10000px',
-          left: '-10000px',
-          width: '320px',
-          height: '240px',
-          opacity: 0.01,
-          pointerEvents: 'none',
+          // top: '-10000px',
+          // left: '-10000px',
+          // width: '320px',
+          // height: '240px',
+          opacity: 0,
+          // pointerEvents: 'none',
         }}
       />
 
       {/* 🧠 Proctoring engine – runs for full exam */}
       {videoStream && attemptId && (
         <ProctoringClient
-          attemptId={48} // IMPORTANT: attemptId, not assessmentId if you have it
+          attemptId={attemptId} // IMPORTANT: attemptId, not assessmentId if you have it
           videoElement={proctoringVideoRef.current}
           videoStream={videoStream}
           enabled

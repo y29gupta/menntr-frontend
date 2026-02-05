@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { useMutation } from '@tanstack/react-query';
 import { message } from 'antd';
 
@@ -11,6 +11,7 @@ import StepCameraCheck from './StepCameraCheck';
 import StepStartTest from './StepStartTest';
 import ProctoringClient from '@/proctoring/ProctoringClient';
 
+import { api } from '@/app/lib/api';
 import { attemptsApi } from '@/app/components/dashboards/student/assessment/attempts/assessment.service';
 
 type Props = {
@@ -22,7 +23,20 @@ type Props = {
 type MicStatus = 'idle' | 'error' | 'analyzing' | 'success';
 export type CameraStatus = 'off' | 'starting' | 'working' | 'aligning' | 'success' | 'error';
 
-export default function AssessmentStepModal({ open, onClose, assessmentId = '89' }: Props) {
+const assessmentConsentApi = {
+  giveConsent: async (assessmentId: string) => {
+    const res = await api.post(`/student/assessments/${assessmentId}/consent`);
+
+    return res.data as {
+      can_proceed: boolean;
+
+      message?: string;
+    };
+  },
+};
+
+/* ================= COMPONENT ================= */
+export default function AssessmentStepModal({ open, onClose, assessmentId }: Props) {
   const [step, setStep] = useState(1);
   const [consentChecked, setConsentChecked] = useState(false);
   const [micStatus, setMicStatus] = useState<MicStatus>('idle');
@@ -34,35 +48,56 @@ export default function AssessmentStepModal({ open, onClose, assessmentId = '89'
   const [proctoringEnabled, setProctoringEnabled] = useState(false);
 
   const router = useRouter();
+  const params = useParams();
+
+  // ID ALWAYS COMES FROM URL
+
+  const assessmentIdFromUrl = (params?.id as string) || assessmentId;
+
+  /* ================= CONSENT MUTATION ================= */
+
+  const consentMutation = useMutation({
+    mutationFn: (id: string) => assessmentConsentApi.giveConsent(id),
+
+    onSuccess: (data) => {
+      if (data?.can_proceed) {
+        setStep(2);
+      } else {
+        message.error(data?.message || 'Consent not approved');
+      }
+    },
+
+    onError: () => {
+      message.error('Unable to record consent. Please try again.');
+    },
+  });
 
   const startAssessmentMutation = useMutation({
     mutationFn: (id: string) => attemptsApi.startAssessment(id),
-    onSuccess: (res) => {
-      setAttemptId(res.attempt_id);
-      message.success('Assessment started');
+    onSuccess: (data) => {
+      setAttemptId(data.attempt_id);
+      message.success(data.message || 'Assessment Started');
       onClose();
-      router.push(`/student/assessment/${assessmentId}?attemptId=${res.attempt_id}`);
+      if (assessmentIdFromUrl) {
+        router.push(`/student/assessment/${assessmentIdFromUrl}`);
+      }
     },
-    onError: () => {
-      message.error('Unable to start assessment');
+    onError: (error: any) => {
+      message.error(error?.response?.data?.message || 'Unable to start assessment');
     },
   });
 
   if (!open) return null;
 
   const nextStep = () => {
-    if (step === 1 && !consentChecked) return;
-    // if (step === 4) return onClose();
-    // if (step === 4) {
-    //   onClose();
+if (step === 1) {
+  if (!consentChecked) return;
+  if (!assessmentIdFromUrl || consentMutation.isPending) return;
 
-    //   if (assessmentId) {
-    //     // router.push(`/student/assessment/40`);
-    //     router.push(`/student/assessment/${assessmentId}`);
-    //   }
-
-    //   return;
-    // }
+  consentMutation.mutate(assessmentIdFromUrl);
+  return;
+}
+    
     if (step === 4) {
       if (!assessmentId || startAssessmentMutation.isPending) return;
 
@@ -151,7 +186,11 @@ export default function AssessmentStepModal({ open, onClose, assessmentId = '89'
 
           <button
             onClick={nextStep}
-            disabled={step === 1 && !consentChecked}
+            disabled={
+              (step === 1 && !consentChecked) ||
+              consentMutation.isPending ||
+              startAssessmentMutation.isPending
+            }
             className="
               flex-1
               h-10
@@ -162,7 +201,13 @@ export default function AssessmentStepModal({ open, onClose, assessmentId = '89'
               disabled:opacity-40
             "
           >
-            Next
+            {step === 4
+              ? startAssessmentMutation.isPending
+                ? 'Starting...'
+                : 'Start Assessment'
+              : step === 1 && consentMutation.isPending
+                ? 'Verifying...'
+                : 'Next'}
           </button>
         </div>
       </div>

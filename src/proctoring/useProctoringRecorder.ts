@@ -1,41 +1,32 @@
 import { useRef } from 'react';
 
-export function useProctoringRecorder(videoStream: MediaStream | null) {
+const TIMESLICE_MS = 1000; // 1s chunks
+const MAX_BUFFER_SECONDS = 30; // keep last 30s
+
+export function useProctoringRecorder(stream: MediaStream | null) {
   const recorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
 
   function start() {
-    if (!videoStream || recorderRef.current) return;
+    if (!stream || recorderRef.current) return;
 
-    const recorder = new MediaRecorder(videoStream, {
-      mimeType: 'video/webm', // 🔥 DO NOT force codecs
+    const recorder = new MediaRecorder(stream, {
+      mimeType: 'video/webm;codecs=vp8,opus',
     });
 
     recorder.ondataavailable = (e) => {
-      if (e.data && e.data.size > 0) {
+      if (e.data.size > 0) {
         chunksRef.current.push(e.data);
+
+        // 🔒 keep rolling buffer
+        if (chunksRef.current.length > MAX_BUFFER_SECONDS) {
+          chunksRef.current.shift();
+        }
       }
     };
 
-    recorder.start(); // 🔥 NO TIMESLICE
+    recorder.start(TIMESLICE_MS);
     recorderRef.current = recorder;
-  }
-
-  async function getFinalBlob(): Promise<Blob> {
-    if (!recorderRef.current) {
-      throw new Error('Recorder not running');
-    }
-
-    return new Promise((resolve) => {
-      recorderRef.current!.onstop = () => {
-        const blob = new Blob(chunksRef.current, {
-          type: 'video/webm',
-        });
-        resolve(blob);
-      };
-
-      recorderRef.current!.stop(); // 🔥 FINALIZES WEBM
-    });
   }
 
   function stop() {
@@ -44,5 +35,12 @@ export function useProctoringRecorder(videoStream: MediaStream | null) {
     chunksRef.current = [];
   }
 
-  return { start, stop, getFinalBlob };
+  function getBufferedBlob(seconds = 20): Blob {
+    const count = Math.min(seconds, chunksRef.current.length);
+    return new Blob(chunksRef.current.slice(-count), {
+      type: 'video/webm',
+    });
+  }
+
+  return { start, stop, getBufferedBlob };
 }
