@@ -41,7 +41,7 @@ type Props = {
 export default function CreateStudentForm({ mode, defaultValues, onCancel, studentId }: Props) {
   const router = useRouter();
   const queryClient = useQueryClient();
-
+  console.log(studentId, 'studentid');
   const methods = useForm<StudentFormValues>({
     resolver: zodResolver(studentFormSchema),
     defaultValues,

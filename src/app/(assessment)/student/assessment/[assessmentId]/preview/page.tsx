@@ -19,14 +19,27 @@ export default function Page() {
     enabled: !!assessmentId,
   });
 
+  // const submitMutation = useMutation({
+  //   mutationFn: () => assessmentApi.submitAssessment(assessmentId),
+
+  //   onSuccess: (res) => {
+  //     // store submit response for submit screen
+  //     sessionStorage.setItem('assessment-submit-response', JSON.stringify(res));
+
+  //     // redirect to submit screen
+  //     router.replace(`/student/assessment/${assessmentId}/submit`);
+  //   },
+  // });
+
   const submitMutation = useMutation({
     mutationFn: () => assessmentApi.submitAssessment(assessmentId),
 
     onSuccess: (res) => {
-      // store submit response for submit screen
+      sessionStorage.removeItem('assessment-attempt-state');
+      sessionStorage.removeItem('return-from-preview');
+
       sessionStorage.setItem('assessment-submit-response', JSON.stringify(res));
 
-      // redirect to submit screen
       router.replace(`/student/assessment/${assessmentId}/submit`);
     },
   });
@@ -34,6 +47,7 @@ export default function Page() {
   if (isLoading || !data) return null;
 
   const submitAssessment = () => {
+    console.log('check');
     submitMutation.mutate();
   };
 
@@ -44,12 +58,13 @@ export default function Page() {
           durationMinutes={30}
           onTimeUp={submitAssessment}
           onGoBack={() => {
+            sessionStorage.setItem('return-from-preview', 'true');
             setShowPrevSubmit(false);
             router.push(`/student/assessment/${assessmentId}`);
           }}
           onSubmitNow={submitAssessment}
           stats={{
-            attended: 25,
+            totalQuestions: data.total_questions,
             answered: data.attended,
             unanswered: data.unanswered,
             timeTaken: `${data.time_taken_minutes} mins`,

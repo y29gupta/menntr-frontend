@@ -12,7 +12,7 @@ import StepOne from './steps/StepOne';
 import { StepTwo } from './steps/StepTwo';
 import StepThree from './steps/StepThree';
 import { StepFour } from './steps/StepFour';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { studentsApi } from '@/app/lib/services/students.api';
 import { toast } from 'react-toastify';
 import { message } from 'antd';
@@ -38,6 +38,24 @@ const StudentSetupForm = () => {
     resolver: zodResolver(studentSetupFormSchema),
     defaultValues: {},
   });
+
+  const { data: studentData } = useQuery({
+    queryKey: ['student', studentId],
+    queryFn: () => studentsApi.getStudentById(studentId),
+    enabled: !!studentId,
+  });
+
+  useEffect(() => {
+    if (!studentData?.academic) return;
+
+    const academic = studentData.academic;
+
+    methods.setValue('program', String(academic.category_role_id));
+    methods.setValue('department', String(academic.department_role_id));
+    methods.setValue('batchId', String(academic.batch_id));
+    methods.setValue('section', String(academic.section_id));
+    methods.setValue('rollNumber', academic.roll_number);
+  }, [studentData, methods]);
 
   useEffect(() => {
     if (rollNumberFromUrl) {
@@ -185,7 +203,7 @@ const StudentSetupForm = () => {
 
                     <button
                       type="button"
-                      // onClick={onCancel}
+                      // onClick={() => router.push('/admin/student-management')}
                       className="border border=[#904BFF] px-4 py-2 !text-[#904BFF] rounded-[64px]"
                     >
                       Cancel

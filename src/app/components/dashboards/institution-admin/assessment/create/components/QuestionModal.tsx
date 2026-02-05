@@ -52,7 +52,8 @@ export default function QuestionModalShell({
       <div className="absolute inset-0 bg-white/70" onClick={onClose} />
 
       {/* Right drawer */}
-      <div className="absolute right-0 top-0 h-full w-full max-w-[620px] bg-white shadow-xl">
+      {/* <div className="absolute right-0 top-0 h-full w-full max-w-[620px] bg-white shadow-xl"> */}
+      <div className="absolute right-0 top-0 h-full w-full max-w-[620px] bg-white shadow-xl flex flex-col">
         {/* HEADER */}
         <div className="flex justify-between items-start border-b border-[#C3CAD9] px-6 py-4">
           <div>
@@ -82,7 +83,7 @@ export default function QuestionModalShell({
         </div>
 
         {/* BODY */}
-        <div className="px-6 pb-6 overflow-y-auto h-[calc(100%-170px)]">
+        <div className="flex-1 overflow-y-auto px-6 pb-6">
           {type === 'MCQ' && (
             <CreateMCQModal
               assessmentId={assessmentId}

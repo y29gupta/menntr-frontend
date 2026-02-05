@@ -48,7 +48,7 @@ export default function CodingQuestion({ question, onSubmitSuccess }: Props) {
   }>({ status: null, cases: [] });
 
   const runCode = async () => {
-    const res = await assessmentApi.runCodingAnswer('91', {
+    const res = await assessmentApi.runCodingAnswer('33', {
       question_id: Number(question.question_id),
       language: 'python',
       source_code: code,

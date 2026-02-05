@@ -27,6 +27,9 @@ function StepOne({ form }: props) {
     queryFn: getPrograms,
   });
 
+  const isEditMode =
+    !!form.getValues('program') && !!form.getValues('department') && !!form.getValues('batchId');
+
   console.log(programId, 'prog');
   const { data: departments = [] } = useQuery({
     queryKey: ['departments', programId],
@@ -42,18 +45,33 @@ function StepOne({ form }: props) {
 
   // Reset dependent fields when program changes
   useEffect(() => {
+    if (isEditMode) return;
+
     setValue('department', '');
     setValue('batchId', '');
     setValue('academicYear', '');
     setValue('section', '');
   }, [programId]);
 
-  // Reset dependent fields when department changes
   useEffect(() => {
+    if (isEditMode) return;
+
     setValue('batchId', '');
     setValue('academicYear', '');
     setValue('section', '');
   }, [departmentId]);
+
+  useEffect(() => {
+    if (!batchId || !batches.length) return;
+
+    const batch = batches.find((b: any) => String(b.id) === batchId);
+    if (!batch) return;
+
+    // ✅ only set if empty (important)
+    if (!form.getValues('academicYear')) {
+      setValue('academicYear', String(batch.academic_year));
+    }
+  }, [batchId, batches, setValue, form]);
 
   /* ------------------ Options Mapping ------------------ */
 

@@ -11,7 +11,7 @@ import { api } from "@/app/lib/api";
 // import { AssessmentQuestionResponse, getAssessmentListResponse } from "./assessment.schema";
 import { AssessmentAccessPayload, AssessmentListResult, AssessmentMetaResponse, AssessmentQuestionResponse, CreateAssessmentPayload, CreateCodingQuestionPayload, getAssessmentListResponse, QuestionMetaType, UpdateQuestionPayload } from "./assessment.types";
 
-export type AssessmentTab = "active" | "draft" | "closed";
+export type AssessmentTab = "active" | "draft" | "completed";
 
 export const assessmentApi = {
   // getAssessmentList: async (
