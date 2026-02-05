@@ -4,6 +4,7 @@ import { Pencil, Trash } from 'lucide-react';
 import { StudentApi } from './student.types';
 import Image from 'next/image';
 import { redirect, useRouter } from 'next/navigation';
+import { DataTableMeta } from '@/app/components/table/DataTable';
 
 export const studentColumns: ColumnDef<StudentApi>[] = [
   {
@@ -77,9 +78,42 @@ export const studentColumns: ColumnDef<StudentApi>[] = [
   },
   {
     header: 'Actions',
-    cell: ({ row }) => {
+    // cell: ({ row }) => {
+    //   const router = useRouter();
+    //   const studentId = row.original.id;
+
+    //   return (
+    //     <div className="flex items-center gap-3">
+    //       <Image
+    //         width={16}
+    //         height={16}
+    //         src="/assets/performanceIcon.svg"
+    //         alt="performanceIcon"
+    //         onClick={(e) => {
+    //           e.stopPropagation();
+    //           router.push(`/admin/student-management/${studentId}/edit-student`);
+    //         }}
+    //       />
+
+    //       <Image
+    //         width={18}
+    //         height={18}
+    //         src="/assets/deleteIcon.svg"
+    //         alt="deleteIcon"
+    //         onClick={(e) => {
+    //           e.stopPropagation();
+    //         }}
+    //       />
+    //     </div>
+    //   );
+    // },
+    cell: ({ row, table }) => {
       const router = useRouter();
       const studentId = row.original.id;
+
+      const meta = table.options.meta as DataTableMeta<StudentApi> & {
+        onDeleteClick?: (id: string) => void;
+      };
 
       return (
         <div className="flex items-center gap-3">
@@ -94,7 +128,16 @@ export const studentColumns: ColumnDef<StudentApi>[] = [
             }}
           />
 
-          <Image width={18} height={18} src="/assets/deleteIcon.svg" alt="deleteIcon" />
+          <Image
+            width={18}
+            height={18}
+            src="/assets/deleteIcon.svg"
+            alt="deleteIcon"
+            onClick={(e) => {
+              e.stopPropagation();
+              meta?.onDeleteClick?.(studentId);
+            }}
+          />
         </div>
       );
     },

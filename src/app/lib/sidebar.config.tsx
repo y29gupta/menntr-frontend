@@ -28,12 +28,14 @@ export const SIDEBAR_CONFIG = {
       path: '/super-admin',
       icon: <LayoutDashboard size={20} />,
     },
+
+    // 🔶 UPCOMING FEATURES (as per Figma)
     {
       label: 'Manage Institutions',
       path: '/super-admin/institutions',
       icon: <Building2 size={20} />,
+      disabled: true,
     },
-    // 🔶 UPCOMING FEATURES (as per Figma)
     {
       label: 'License Management',
       path: '/super-admin/licenses',
@@ -103,12 +105,12 @@ export const SIDEBAR_CONFIG = {
     {
       label: 'User Management',
       path: '/admin/user-management',
-      icon: <UserRound />,
+      icon: <UserRound size={20} />,
     },
     {
       label: 'Student Management',
       path: '/admin/student-management',
-      icon: <StudentIcon />,
+      icon: <StudentIcon size={20} />,
     },
     {
       label: 'Assessment',
