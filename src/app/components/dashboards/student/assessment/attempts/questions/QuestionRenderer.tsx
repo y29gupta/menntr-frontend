@@ -1,3 +1,5 @@
+'use client';
+
 import DifficultyBadge from '../DifficultyBadge';
 import MarkForReview from '../MarkForReview';
 import McqQuestion from './McqQuestion';
@@ -13,6 +15,8 @@ type Props = {
 
   onToggleReview: (index: number) => void; // ✅ ADD
   isReviewed: boolean;
+
+  onCodingAttempted: (index: number) => void;
 };
 
 export function QuestionRenderer({
@@ -23,16 +27,22 @@ export function QuestionRenderer({
 
   onToggleReview,
   isReviewed,
+  onCodingAttempted,
 }: Props) {
-  const questionType: 'mcq' | 'coding' = 'mcq';
+  if (!question) return null;
+  const questionType: 'single_correct' | 'coding' = question.type;
   // const currentQuestion = mcqDummyQuestions[currentIndex];
 
+  console.log(question, 'coding');
+
   return (
-    <div className="flex flex-col flex-1 ">
+    <div className="flex flex-col flex-1 min-h-0">
       {/* ───────── Top Center Title ───────── */}
       <div className="relative flex items-center justify-center">
         <span className="text-xl font-semibold !text-[#1A2C50]">
-          {questionType === 'mcq' ? 'MCQ - Single correct answer' : 'Coding - Single problem'}
+          {questionType === 'single_correct'
+            ? 'MCQ - Single correct answer'
+            : 'Coding - Single problem'}
         </span>
 
         <span className="absolute right-0  text-[16px] font-semibold !text-[#1A2C50]">
@@ -48,7 +58,7 @@ export function QuestionRenderer({
           <h3 className="font-medium text-[#6C768A] text-[16px] mb-1">
             Question {currentIndex + 1}
           </h3>
-          <p className="text-[16px] font-medium text-[#1A2C50]"> {question?.question_text}</p>
+          <p className="text-[16px] font-medium !text-[#1A2C50]"> {question?.question_text}</p>
         </div>
 
         {/* Right */}
@@ -73,15 +83,22 @@ export function QuestionRenderer({
       <div className="mt-4 border-t border-gray-200" />
 
       {/* ───────── Question Body ───────── */}
-      <div className="mt-4 h-[250px] overflow-auto">
-        {questionType === 'mcq' && (
+      <div className="mt-4 flex-1 min-h-0">
+        {questionType === 'single_correct' && (
           <McqQuestion
             question={question}
             selectedOptions={selectedOptions}
             onSelectOption={onSelectOption}
           />
         )}
-        {/* {questionType === 'coding' && <CodingQuestion />} */}
+        {questionType === 'coding' && (
+          <CodingQuestion
+            question={question}
+            onSubmitSuccess={() => {
+              onCodingAttempted(currentIndex);
+            }}
+          />
+        )}
       </div>
     </div>
   );

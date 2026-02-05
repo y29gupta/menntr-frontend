@@ -1,4 +1,5 @@
 import { api } from '@/app/lib/api';
+import { SubmitAssessmentResponse, SubmitPreviewResponse } from './assessment.types';
 
 export type StartAssessmentResponse = {
   success: boolean;
@@ -11,7 +12,6 @@ export type StartAssessmentResponse = {
     next_screen: string;
   };
 };
-
 
 export type AssessmentRuntimeResponse = {
   duration_minutes: number;
@@ -26,33 +26,35 @@ export type AssessmentRuntimeResponse = {
 
 export const attemptsApi = {
   startAssessment: async (assessmentId: string): Promise<StartAssessmentResponse> => {
-    const res = await api.post(
-      `/student/assessments/${assessmentId}/start`
-    );
+    const res = await api.post(`/student/assessments/${assessmentId}/start`);
     return res.data;
   },
 };
 
-
 export const assessmentApi = {
   getRuntime: async (assessmentId: string): Promise<AssessmentRuntimeResponse> => {
-    const res = await api.get(
-      `/student/assessments/${assessmentId}/runtime`
-    );
+    const res = await api.get(`/student/assessments/${assessmentId}/runtime`);
     return res.data;
-    },
-    
-    
+  },
+
   /* ================= Questions ================= */
 
   getQuestion: async (assessmentId: string, index: number) => {
-    const res = await api.get(
-      `/student/assessments/${assessmentId}/questions/${index}`
-    );
+    const res = await api.get(`/student/assessments/${assessmentId}/questions/${index}`);
     return res.data;
-    },
-  
-  
+  },
+
+  runCodingAnswer: async (
+    assessmentId: string,
+    payload: {
+      question_id: number;
+      language: string;
+      source_code: string;
+    }
+  ) => {
+    return api.post(`/student/assessments/${assessmentId}/answers/coding/run`, payload);
+  },
+
   saveMcqAnswer: async (
     assessmentId: string,
     payload: {
@@ -62,14 +64,47 @@ export const assessmentApi = {
       time_taken_seconds: number;
     }
   ) => {
-    return api.post(
-      `/student/assessments/${assessmentId}/answers/mcq`,
-      payload
-    );
+    return api.post(`/student/assessments/${assessmentId}/answers/mcq`, payload);
   },
+
+  saveCodingAnswer: async (
+    assessmentId: string,
+    payload: {
+      question_id: number;
+      language: string;
+      source_code: string;
+    }
+  ) => {
+    return api.post(`/student/assessments/${assessmentId}/answers/coding/save`, payload);
+  },
+
+  getSubmitPreview: async (assessmentId: string): Promise<SubmitPreviewResponse> => {
+    const res = await api.get(
+      `/student/assessments/${assessmentId}/submit-preview`
+    );
+    return res.data;
+  },
+
+  submitAssessment: async (assessmentId: string): Promise<SubmitAssessmentResponse> => {
+    const res = await api.post(
+      `/student/assessments/${assessmentId}/submit`
+    );
+    return res.data;
+  },
+  submitFeedback: (
+  assessmentId: string,
+  payload: {
+    overall_rating: number;
+    flow_rating: string;
+    comments: string;
+  }
+) => {
+  return api.post(
+    `/student/assessments/${assessmentId}/feedback`,
+    payload
+  );
+},
+
 };
 
-
 // ------------------assessmets api for question -------------------
-
-

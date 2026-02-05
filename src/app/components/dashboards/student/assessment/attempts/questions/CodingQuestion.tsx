@@ -1,37 +1,132 @@
-export default function CodingQuestion() {
+'use client';
+
+import { useEffect, useState } from 'react';
+import CodeEditor from './CodeEditor';
+import TestResult from './Testresult';
+import { assessmentApi } from '../assessment.service';
+import { useQueryClient } from '@tanstack/react-query';
+
+type TestCase = {
+  name: string;
+  input: string;
+  expected: string;
+  output: string | null;
+  passed: boolean;
+};
+
+type CodingQuestionData = {
+  assessment_question_id: string;
+  question_id: string;
+  title: string;
+  description: string;
+  constraints: string;
+  examples: {
+    input: string;
+    output: string;
+  }[];
+  supported_languages: string[];
+  previous_code: string | null;
+};
+
+type Props = {
+  question: CodingQuestionData;
+  onSubmitSuccess: () => void;
+};
+
+export default function CodingQuestion({ question, onSubmitSuccess }: Props) {
+  const [code, setCode] = useState(question.previous_code ?? '');
+
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    setCode(question.previous_code ?? '');
+  }, [question.question_id]);
+
+  const [result, setResult] = useState<{
+    status: 'passed' | 'failed' | null;
+    cases: TestCase[];
+  }>({ status: null, cases: [] });
+
+  const runCode = async () => {
+    const res = await assessmentApi.runCodingAnswer('33', {
+      question_id: Number(question.question_id),
+      language: 'python',
+      source_code: code,
+    });
+
+    const data = res.data;
+
+    setResult({
+      status: data.status === 'accepted' ? 'passed' : 'failed',
+      cases: question.examples.map((ex, idx) => ({
+        name: `Sample test case ${idx + 1}`,
+        input: ex.input,
+        expected: ex.output,
+        output: data.outputs?.[idx] ?? null,
+        passed: data.outputs?.[idx] === ex.output,
+      })),
+    });
+  };
+
+  const submitCode = async () => {
+    await assessmentApi.saveCodingAnswer('33', {
+      question_id: Number(question.question_id),
+      language: 'python',
+      source_code: code,
+    });
+
+    queryClient.invalidateQueries({
+      queryKey: ['assessment-question'],
+    });
+
+    onSubmitSuccess();
+  };
+
   return (
-    <div className="grid grid-cols-2 gap-6 mt-4">
-      {/* Problem */}
-      <div className="text-sm text-gray-700 space-y-3">
-        <p>Write a function that checks whether a string is a palindrome.</p>
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-full min-h-0">
+      {/* LEFT */}
+      <div className="flex flex-col gap-2 text-[16px] font-medium text-[#1A2C50] overflow-y-auto pr-2">
+        <p>{question.description}</p>
 
         <div>
-          <p className="font-medium">Input:</p>
-          <p>A string s</p>
+          <p className="text-[#6C768A]">Input:</p>
+          {question.examples.map((ex, idx) => (
+            <pre key={idx} className="mt-1 text-sm bg-[#F7F9FC] p-2 rounded whitespace-pre-wrap">
+              {ex.input}
+            </pre>
+          ))}
         </div>
 
         <div>
-          <p className="font-medium">Output:</p>
-          <p>Return true if palindrome, else false</p>
+          <p className="text-[#6C768A]">Output:</p>
+          {question.examples.map((ex, idx) => (
+            <pre key={idx} className="mt-1 text-sm bg-[#F7F9FC] p-2 rounded whitespace-pre-wrap">
+              {ex.output}
+            </pre>
+          ))}
         </div>
 
         <div>
-          <p className="font-medium">Constraints:</p>
-          <p>1 ≤ length of s ≤ 10⁵</p>
+          <p className="text-[#6C768A]">Constraints:</p>
+          <pre className="whitespace-pre-wrap">{question.constraints}</pre>
         </div>
       </div>
 
-      {/* Editor */}
-      <div className="border rounded-xl overflow-hidden">
-        <div className="flex justify-between items-center px-4 py-2 border-b">
-          <span className="text-sm font-medium">Code Editor</span>
-          <button className="text-sm text-purple-600 font-semibold">Run Code</button>
-        </div>
+      {/* RIGHT */}
+      <div className="h-full min-h-0 overflow-y-auto pr-2">
+        <div className="flex flex-col gap-4">
+          <div className="h-[300px] flex-shrink-0">
+            <CodeEditor
+              code={code}
+              setCode={setCode}
+              onRun={runCode}
+              onSubmit={submitCode}
+              supportedLanguages={question.supported_languages}
+            />
+          </div>
 
-        <textarea
-          className="w-full h-64 p-4 font-mono text-sm outline-none"
-          defaultValue={`def isPalindrome(s):\n    # write code here`}
-        />
+          {result.status && <TestResult status={result.status} cases={result.cases} />}
+        </div>
       </div>
     </div>
   );

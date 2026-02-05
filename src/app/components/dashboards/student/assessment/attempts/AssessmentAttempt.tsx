@@ -25,6 +25,7 @@ export default function AssessmentAttempt() {
   const [selectedOptionsMap, setSelectedOptionsMap] = useState<Record<number, number[]>>({});
   const [timeUp, setTimeUp] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
+  const [codingAttemptedMap, setCodingAttemptedMap] = useState<Record<number, boolean>>({});
 
   const fullscreenLockRef = useRef(false);
 
@@ -48,6 +49,26 @@ export default function AssessmentAttempt() {
     enabled: !!assessmentId,
   });
 
+  useEffect(() => {
+    const fromPreview = sessionStorage.getItem('return-from-preview');
+    if (!fromPreview || !runtime?.total_questions) return;
+
+    setCurrentIndex(runtime.total_questions - 1);
+
+    sessionStorage.removeItem('return-from-preview');
+  }, [runtime?.total_questions]);
+
+  useEffect(() => {
+    const saved = sessionStorage.getItem('assessment-attempt-state');
+    if (!saved) return;
+
+    const parsed = JSON.parse(saved);
+
+    setCurrentIndex(parsed.currentIndex);
+    setQuestionStatus(parsed.questionStatus);
+    setSelectedOptionsMap(parsed.selectedOptionsMap);
+  }, []);
+
   const [currentIndex, setCurrentIndex] = useState(0);
 
   // question status map
@@ -62,17 +83,32 @@ export default function AssessmentAttempt() {
     >
   >({});
 
+  // useEffect(() => {
+  //   if (!runtime?.total_questions) return;
+
+  //   setQuestionStatus(
+  //     Object.fromEntries(
+  //       Array.from({ length: runtime.total_questions }).map((_, i) => [
+  //         i,
+  //         { attempted: false, visited: i === 0, review: false },
+  //       ])
+  //     )
+  //   );
+  // }, [runtime?.total_questions]);
+
   useEffect(() => {
     if (!runtime?.total_questions) return;
 
-    setQuestionStatus(
-      Object.fromEntries(
+    setQuestionStatus((prev) => {
+      if (Object.keys(prev).length > 0) return prev;
+
+      return Object.fromEntries(
         Array.from({ length: runtime.total_questions }).map((_, i) => [
           i,
           { attempted: false, visited: i === 0, review: false },
         ])
-      )
-    );
+      );
+    });
   }, [runtime?.total_questions]);
 
   /* ================= Fetch Question ================= */
@@ -101,10 +137,10 @@ export default function AssessmentAttempt() {
     },
   });
 
-  // // // 🔹 Enter fullscreen on mount
-  // useEffect(() => {
-  //   document.documentElement.requestFullscreen?.().catch(() => {});
-  // }, []);
+  // // 🔹 Enter fullscreen on mount
+  useEffect(() => {
+    document.documentElement.requestFullscreen?.().catch(() => {});
+  }, []);
 
   // useEffect(() => {
   //   const handleFullscreenChange = () => {
@@ -125,33 +161,74 @@ export default function AssessmentAttempt() {
   //   };
   // }, []);
 
+  const saveCurrentAnswer = async () => {
+    if (!currentQuestion) return;
+
+    const selectedOptions = selectedOptionsMap[currentIndex] ?? [];
+    const timeTakenSeconds = Math.floor((Date.now() - questionStartTimeRef.current) / 1000);
+
+    await saveAnswerMutation.mutateAsync({
+      assessment_question_id: currentQuestion.assessment_question_id,
+      question_id: currentQuestion.question_id,
+      selected_option_ids: selectedOptions, // empty allowed
+      time_taken_seconds: timeTakenSeconds,
+    });
+
+    setQuestionStatus((prev) => ({
+      ...prev,
+      [currentIndex]: {
+        ...prev[currentIndex],
+        attempted: selectedOptions.length > 0,
+        visited: true,
+      },
+    }));
+  };
+
   /* ================= Navigation ================= */
+
   // const goNext = async () => {
   //   if (!currentQuestion) return;
 
+  //   const selectedOptions = selectedOptionsMap[currentIndex] ?? [];
+  //   const isAttempted = selectedOptions.length > 0;
+
   //   try {
   //     const timeTakenSeconds = Math.floor((Date.now() - questionStartTimeRef.current) / 1000);
-  //     console.log(currentIndex, 'index', currentQuestion);
+
+  //     // 🔹 Save answer (empty array allowed)
   //     await saveAnswerMutation.mutateAsync({
   //       assessment_question_id: currentQuestion.assessment_question_id,
   //       question_id: currentQuestion.question_id,
-  //       selected_option_ids: selectedOptionsMap[currentIndex] ?? [],
+  //       selected_option_ids: selectedOptions,
   //       time_taken_seconds: timeTakenSeconds,
   //     });
 
-  //     setQuestionStatus((prev) => ({
-  //       ...prev,
-  //       [currentIndex]: {
-  //         ...prev[currentIndex],
-  //         attempted: true,
-  //       },
-  //       [currentIndex + 1]: {
-  //         ...prev[currentIndex + 1],
+  //     setQuestionStatus((prev) => {
+  //       const next = { ...prev };
+
+  //       const selectedOptions = selectedOptionsMap[currentIndex] ?? [];
+  //       const isAttempted = selectedOptions.length > 0;
+
+  //       // ✅ Update CURRENT question
+  //       next[currentIndex] = {
+  //         ...next[currentIndex],
+  //         attempted: isAttempted,
   //         visited: true,
-  //       },
-  //     }));
+  //       };
+
+  //       // ✅ Update NEXT question ONLY if it exists
+  //       if (next[currentIndex + 1]) {
+  //         next[currentIndex + 1] = {
+  //           ...next[currentIndex + 1],
+  //           visited: true,
+  //         };
+  //       }
+
+  //       return next;
+  //     });
 
   //     setCurrentIndex((i) => i + 1);
+  //     questionStartTimeRef.current = Date.now();
   //   } catch {
   //     message.error('Failed to save answer');
   //   }
@@ -161,33 +238,35 @@ export default function AssessmentAttempt() {
     if (!currentQuestion) return;
 
     const selectedOptions = selectedOptionsMap[currentIndex] ?? [];
-    const isAttempted = selectedOptions.length > 0;
+
+    const isMcq = currentQuestion.type === 'single_correct';
+    const isCoding = currentQuestion.type === 'coding';
+
+    const isAttempted = isMcq
+      ? selectedOptions.length > 0
+      : questionStatus[currentIndex]?.attempted === true;
 
     try {
       const timeTakenSeconds = Math.floor((Date.now() - questionStartTimeRef.current) / 1000);
 
-      // 🔹 Save answer (empty array allowed)
-      await saveAnswerMutation.mutateAsync({
-        assessment_question_id: currentQuestion.assessment_question_id,
-        question_id: currentQuestion.question_id,
-        selected_option_ids: selectedOptions,
-        time_taken_seconds: timeTakenSeconds,
-      });
+      if (isMcq) {
+        await saveAnswerMutation.mutateAsync({
+          assessment_question_id: currentQuestion.assessment_question_id,
+          question_id: currentQuestion.question_id,
+          selected_option_ids: selectedOptions,
+          time_taken_seconds: timeTakenSeconds,
+        });
+      }
 
       setQuestionStatus((prev) => {
         const next = { ...prev };
 
-        const selectedOptions = selectedOptionsMap[currentIndex] ?? [];
-        const isAttempted = selectedOptions.length > 0;
-
-        // ✅ Update CURRENT question
         next[currentIndex] = {
           ...next[currentIndex],
           attempted: isAttempted,
           visited: true,
         };
 
-        // ✅ Update NEXT question ONLY if it exists
         if (next[currentIndex + 1]) {
           next[currentIndex + 1] = {
             ...next[currentIndex + 1],
@@ -210,35 +289,58 @@ export default function AssessmentAttempt() {
     setCurrentIndex((i) => i - 1);
   };
 
-  const submitAssessment = () => {
-    console.log('Submitted answers', questionStatus);
-    setTimeUp(true);
+  // const submitAssessment = async () => {
+  //   try {
+  //     await saveCurrentAnswer();
+  //     router.replace(`/student/assessment/${assessmentId}/preview`);
+  //   } catch {
+  //     message.error('Failed to save answer');
+  //   }
+  // };
+
+  const submitAssessment = async () => {
+    try {
+      await saveCurrentAnswer();
+
+      sessionStorage.setItem(
+        'assessment-attempt-state',
+        JSON.stringify({
+          currentIndex,
+          questionStatus,
+          selectedOptionsMap,
+        })
+      );
+
+      router.replace(`/student/assessment/${assessmentId}/preview`);
+    } catch {
+      message.error('Failed to save answer');
+    }
   };
 
   if (runtimeLoading || questionLoading) return null;
 
   return (
     <>
-      <div className="min-h-screen pb-6 pt-12  px-12  bg-[#F7F6FB] flex flex-col">
+      <div className="h-screen pb-6 px-12 bg-[#F7F6FB] flex flex-col">
         <AssessmentHeader durationMinutes={runtime?.duration_minutes} onTimeUp={submitAssessment} />
 
-        <div className="px-6  mt-6">
+        <div className="px-6 mt-6 flex-shrink-0">
           <AssessmentStepper
             total={runtime?.total_questions ?? 0}
             currentIndex={currentIndex}
             statusMap={questionStatus}
             onStepClick={(index) => {
-              if (index > currentIndex) return; // safety (also enforced in stepper)
+              if (index > currentIndex) return;
               setCurrentIndex(index);
               questionStartTimeRef.current = Date.now();
             }}
           />
         </div>
 
-        <div className="flex-1    mt-6">
+        <div className="flex-1 mt-6 min-h-0 mb-6">
           <div
             className="bg-white border border-[#FFFFFF80] rounded-2xl shadow-[0px_0px_8px_0px_rgba(15,23,42,0.15)]
-                  p-6 flex flex-col w-full"
+                p-6 flex flex-col w-full h-full"
           >
             <QuestionRenderer
               currentIndex={currentIndex}
@@ -256,11 +358,21 @@ export default function AssessmentAttempt() {
                   },
                 }));
               }}
+              onCodingAttempted={(index) => {
+                setQuestionStatus((prev) => ({
+                  ...prev,
+                  [index]: {
+                    ...prev[index],
+                    attempted: true,
+                    visited: true,
+                  },
+                }));
+              }}
             />
           </div>
         </div>
 
-        <div className="mt-6">
+        <div className="flex-shrink-0">
           <AssessmentFooter
             currentIndex={currentIndex}
             total={runtime?.total_questions ?? 0}

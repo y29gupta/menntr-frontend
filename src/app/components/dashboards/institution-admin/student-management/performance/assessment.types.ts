@@ -1,7 +1,4 @@
-export type AssessmentStatus =
-  | 'Completed'
-  | 'In-Progress'
-  | 'Not started yet';
+export type AssessmentStatus = 'Completed' | 'In Progress' | 'Not Started';
 
 export type AssessmentCategory = 'Aptitude' | 'Domain';
 

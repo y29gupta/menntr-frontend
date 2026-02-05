@@ -2,7 +2,9 @@ import { ColumnDef } from '@tanstack/react-table';
 import { AssessmentPerformanceRow, AssessmentStatus, AssessmentCategory } from './assessment.types';
 import Image from 'next/image';
 
-export const assessmentPerformanceColumns: ColumnDef<AssessmentPerformanceRow>[] = [
+export const assessmentPerformanceColumns = (
+  onViewReport: (row: AssessmentPerformanceRow) => void
+): ColumnDef<AssessmentPerformanceRow>[] => [
   {
     header: 'Assessment name',
     accessorKey: 'assessmentName',
@@ -44,8 +46,8 @@ export const assessmentPerformanceColumns: ColumnDef<AssessmentPerformanceRow>[]
 
       const map: Record<AssessmentStatus, string> = {
         Completed: 'bg-[#F4FFF0] text-[#008E00]',
-        'In-Progress': 'bg-[#FFFAE6] text-[#8E6100]',
-        'Not started yet': 'bg-[#F5F5F5] text-[#636771]',
+        'In Progress': 'bg-[#FFFAE6] text-[#8E6100]',
+        'Not Started': 'bg-[#F5F5F5] text-[#636771]',
       };
 
       return (
@@ -57,13 +59,13 @@ export const assessmentPerformanceColumns: ColumnDef<AssessmentPerformanceRow>[]
   },
   {
     header: 'Actions',
-    cell: () => (
-      //   <span className="text-violet-600 text-sm font-medium cursor-pointer hover:underline">
-      //     View Report
-      //   </span>
-      <button className="cursor-pointer gap-2 flex !text-[#7A39E9] text-sm font-medium ">
+    cell: ({ row }) => (
+      <button
+        onClick={() => onViewReport(row.original)}
+        className="cursor-pointer gap-2 flex !text-[#7A39E9] text-sm font-medium"
+      >
         <Image width={16} height={16} src="/assets/reportIcon.png" alt="reportIcon" />
-        <span className="text-inherit">View Report</span>
+        <span>View Report</span>
       </button>
     ),
   },

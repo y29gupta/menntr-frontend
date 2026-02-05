@@ -73,7 +73,7 @@ export const assessmentColumns: ColumnDef<AssessmentRow>[] = [
     // },
   },
   {
-    accessorKey: 'updated_at',
+    accessorKey: 'created_at',
     header: 'Expiry On',
     accessorFn: (row) => row.updated_at,
     cell: ({ getValue }) => formatDate(getValue<string>()),
