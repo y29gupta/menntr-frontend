@@ -1,14 +1,14 @@
-// responses.types.ts
+export type Difficulty = 'Easy' | 'Medium' | 'Hard';
 export type QuestionType = 'MCQ' | 'CODING';
 
-export type QuestionReport = {
+export interface QuestionReport {
   id: number;
   questionNo: string;
-  type: QuestionType;
   title: string;
-  difficulty: 'Easy' | 'Medium' | 'Hard';
-  marksObtained: number;
+  type: QuestionType;
+  difficulty: Difficulty;
   totalMarks: number;
+  marksObtained: number;
 
   // MCQ
   options?: string[];
@@ -20,4 +20,4 @@ export type QuestionReport = {
   code?: string;
   testPassed?: number;
   testTotal?: number;
-};
+}

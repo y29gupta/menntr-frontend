@@ -1,23 +1,6 @@
 'use client';
 
-/* ================= LOCAL TYPE (MUST MATCH) ================= */
-
-type Difficulty = 'Easy' | 'Medium' | 'Hard';
-type QuestionType = 'MCQ' | 'CODING';
-
-interface QuestionReport {
-  id: string;
-  questionNo: string;
-  title: string;
-  type: QuestionType;
-  difficulty: Difficulty;
-  totalMarks: number;
-  marksObtained: number;
-  language?: string;
-  code?: string;
-  testPassed?: number;
-  testTotal?: number;
-}
+import { Difficulty, QuestionReport } from './responses.types';
 
 /* ================= STYLES ================= */
 

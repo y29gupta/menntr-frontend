@@ -1,23 +1,55 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import QuestionPerformance from './performance-section/QuestionPerformance';
 import CandidatePerformanceHeader from './performance-section/CandidatePerformanceHeader';
 import { useForm } from 'react-hook-form';
 import CandidatePerformanceTable from './performance-section/CandidatePerformanceTable';
-import { questionWiseData } from './performance-section/QuestionPerformance.data';
+import { fetchAttempts, fetchQuestionPerformance } from './assessmentPerformance.api';
 
-function PerformanceSection() {
+type Props = {
+  assessmentId: string;
+};
+
+function PerformanceSection({ assessmentId }: Props) {
   const [search, setSearch] = useState('');
   const [showFilters, setShowFilters] = useState(false);
+  const [questionData, setQuestionData] = useState<any[]>([]);
+  const [attemptOptions, setAttemptOptions] = useState<{ label: string; value: string }[]>([]);
 
   const { control } = useForm({
     defaultValues: {
       attemptId: '',
     },
   });
+
+  useEffect(() => {
+    fetchQuestionPerformance(assessmentId).then((res) => {
+      setQuestionData(
+        res.data.map((q: any) => ({
+          question: `Q${q.questionNo}`,
+          marksObtained: q.accuracy,
+          totalMarks: 100,
+          avgTime: Math.round(q.avgTimeSeconds / 60),
+          difficulty: q.difficulty,
+        }))
+      );
+    });
+  }, [assessmentId]);
+
+  useEffect(() => {
+    fetchAttempts(assessmentId).then((res) => {
+      setAttemptOptions(
+        res.data.attempts.map((a: number) => ({
+          label: `Attempt ${a}`,
+          value: String(a),
+        }))
+      );
+    });
+  }, [assessmentId]);
+
   return (
     <div className="flex flex-col gap-4">
       <QuestionPerformance
-        data={questionWiseData}
+        data={questionData}
         title="Average time per question"
         tooltipMode="percentage"
         yDomain={[0, 100]}
@@ -30,12 +62,14 @@ function PerformanceSection() {
         showFilters={showFilters}
         onToggleFilters={() => setShowFilters((p) => !p)}
         control={control}
-        attemptOptions={[
-          { label: 'Attempt 1', value: '1' },
-          { label: 'Attempt 2', value: '2' },
-        ]}
+        attemptOptions={attemptOptions}
       />
-      <CandidatePerformanceTable showColumnFilters={showFilters} />
+
+      <CandidatePerformanceTable
+        assessmentId={assessmentId}
+        search={search}
+        showColumnFilters={showFilters}
+      />
     </div>
   );
 }
