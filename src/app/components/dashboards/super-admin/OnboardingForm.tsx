@@ -9,6 +9,7 @@ import { Check } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { plansApi, type Plan } from '@/app/lib/api/plans.api';
 import { useEffect, useMemo } from 'react';
+import Profile from '@/app/ui/Profile';
 
 type Props = {
   mode: 'create' | 'edit';
@@ -25,7 +26,7 @@ export default function OnboardingForm({ mode, defaultValues, onCancel, onSubmit
   });
 
   const plans = plansData?.data || [];
-  
+
   // Get default plan code (premium or first available)
   const defaultPlanCode = useMemo(() => {
     if (defaultValues?.plan_id) return defaultValues.plan_id;
@@ -93,9 +94,7 @@ export default function OnboardingForm({ mode, defaultValues, onCancel, onSubmit
           </button>
         </h1>
 
-        <Button danger type="default" className="text-xs sm:text-sm">
-          Log out
-        </Button>
+        <Profile />
       </div>
 
       {/* TITLE */}
@@ -211,16 +210,17 @@ export default function OnboardingForm({ mode, defaultValues, onCancel, onSubmit
                     {selectedPlan.description && (
                       <p className="text-sm text-gray-600 mb-3">{selectedPlan.description}</p>
                     )}
-                    
+
                     {/* Modules and Features */}
                     {selectedPlan.modules && selectedPlan.modules.length > 0 ? (
                       <div className="space-y-4 max-h-[400px] overflow-y-auto">
                         {selectedPlan.modules.map((module) => (
-                          <div key={module.id} className="border-b border-gray-200 pb-3 last:border-b-0">
+                          <div
+                            key={module.id}
+                            className="border-b border-gray-200 pb-3 last:border-b-0"
+                          >
                             <div className="flex items-center gap-2 mb-2">
-                              {module.icon && (
-                                <span className="text-lg">{module.icon}</span>
-                              )}
+                              {module.icon && <span className="text-lg">{module.icon}</span>}
                               <h4 className="font-semibold text-[16px] text-[#0F172A]">
                                 {module.name}
                               </h4>
@@ -231,7 +231,10 @@ export default function OnboardingForm({ mode, defaultValues, onCancel, onSubmit
                             {module.features && module.features.length > 0 && (
                               <ul className="space-y-2 ml-6">
                                 {module.features.map((feature) => (
-                                  <li key={feature.id} className="flex items-start gap-2 text-sm text-gray-700">
+                                  <li
+                                    key={feature.id}
+                                    className="flex items-start gap-2 text-sm text-gray-700"
+                                  >
                                     <Check className="h-4 w-4 shrink-0 text-purple-600 mt-0.5" />
                                     <div className="flex-1">
                                       <span className="text-[14px]">{feature.name}</span>

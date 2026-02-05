@@ -17,7 +17,7 @@ import Batches from '@/app/components/dashboards/institution-admin/organization/
 const Page = () => {
   const [activeTab, setActiveTab] = useState<
     'Categories' | 'Departments' | 'Batches' | 'Role Hierarchy'
-  >('Departments');
+  >('Categories');
   const [departmentView, setDepartmentView] = useState<'list' | 'form'>('list');
   const [categoryView, setCategoryView] = useState<'list' | 'form'>('list');
   const [batchView, setBatchView] = useState<'list' | 'form'>('list');

@@ -21,6 +21,8 @@ export type PerformanceBarData = {
 
 type Props = {
   data: PerformanceBarData[];
+  barColor?: string; // single color support
+  enableScoreGradient?: boolean; // multi color toggle
 };
 
 /* ---------------- figma-based color logic (GRADIENTS) ---------------- */
@@ -66,7 +68,7 @@ const CustomTooltip = ({ active, payload }: any) => {
 };
 
 /* ---------------- reusable bar chart ONLY ---------------- */
-const ReusablePerformanceBarChart = ({ data = [] }: Props) => {
+const ReusablePerformanceBarChart = ({ data = [], enableScoreGradient, barColor }: Props) => {
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
 
   const chartMinWidth = isMobile ? '100%' : `${Math.max(data.length * 120, 600)}px`; // 👈 NEVER 0
@@ -120,10 +122,19 @@ const ReusablePerformanceBarChart = ({ data = [] }: Props) => {
 
             <Tooltip content={<CustomTooltip />} cursor={false} />
 
-            <Bar dataKey="score" radius={[6, 6, 0, 0]} barSize={14}>
+            {/* <Bar dataKey="score" radius={[6, 6, 0, 0]} barSize={14}>
               {data.map((item, index) => (
                 <Cell key={index} fill={getBarColor(item.score)} />
               ))}
+            </Bar> */}
+            <Bar
+              dataKey="score"
+              radius={[6, 6, 0, 0]}
+              barSize={14}
+              fill={!enableScoreGradient ? barColor || '#4F46E5' : undefined}
+            >
+              {enableScoreGradient &&
+                data.map((item, index) => <Cell key={index} fill={getBarColor(item.score)} />)}
             </Bar>
           </BarChart>
         </ResponsiveContainer>
