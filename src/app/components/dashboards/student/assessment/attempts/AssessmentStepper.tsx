@@ -27,13 +27,23 @@ export default function AssessmentStepper({ total, currentIndex, statusMap, onSt
   const showPagination = total > VISIBLE_COUNT;
 
   /* 🔹 AUTO-SCROLL ONLY WHEN CURRENT QUESTION IS OUTSIDE VIEW */
+  // useEffect(() => {
+  //   if (currentIndex < windowStart) {
+  //     setWindowStart(currentIndex);
+  //   } else if (currentIndex >= windowEnd) {
+  //     setWindowStart(Math.min(currentIndex - VISIBLE_COUNT + 1, maxWindowStart));
+  //   }
+  // }, [currentIndex, windowStart, maxWindowStart]);
+
   useEffect(() => {
+    if (currentIndex < 0) return;
+
     if (currentIndex < windowStart) {
-      setWindowStart(currentIndex);
+      setWindowStart(Math.max(0, currentIndex));
     } else if (currentIndex >= windowEnd) {
-      setWindowStart(Math.min(currentIndex - VISIBLE_COUNT + 1, maxWindowStart));
+      setWindowStart(Math.max(0, Math.min(currentIndex - VISIBLE_COUNT + 1, maxWindowStart)));
     }
-  }, [currentIndex, windowStart, maxWindowStart]);
+  }, [currentIndex, windowStart, windowEnd, maxWindowStart]);
 
   /* 🔹 MANUAL PAGINATION (ARROWS) */
   const goPrevWindow = () => {
