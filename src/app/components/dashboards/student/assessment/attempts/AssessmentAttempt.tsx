@@ -113,25 +113,25 @@ export default function AssessmentAttempt() {
     document.documentElement.requestFullscreen?.().catch(() => {});
   }, []);
   // 🎥 Start camera ONCE for proctoring (runtime)
-useEffect(() => {
-  let mounted = true;
+  useEffect(() => {
+    let mounted = true;
 
-  navigator.mediaDevices.getUserMedia({ video: true }).then(async (stream) => {
-    if (!mounted) return;
+    navigator.mediaDevices.getUserMedia({ video: true }).then(async (stream) => {
+      if (!mounted) return;
 
-    setVideoStream(stream);
+      setVideoStream(stream);
 
-    if (proctoringVideoRef.current) {
-      proctoringVideoRef.current.srcObject = stream;
-      await proctoringVideoRef.current.play().catch(() => {});
-    }
-  });
+      if (proctoringVideoRef.current) {
+        proctoringVideoRef.current.srcObject = stream;
+        await proctoringVideoRef.current.play().catch(() => {});
+      }
+    });
 
-  return () => {
-    mounted = false;
-    videoStream?.getTracks().forEach((t) => t.stop());
-  };
-}, []);
+    return () => {
+      mounted = false;
+      videoStream?.getTracks().forEach((t) => t.stop());
+    };
+  }, []);
 
   // useEffect(() => {
   //   const handleFullscreenChange = () => {
@@ -228,19 +228,14 @@ useEffect(() => {
   const goNext = async () => {
     if (!currentQuestion) return;
 
+    const isMcq = currentQuestion.type === 'single_correct';
     const selectedOptions = selectedOptionsMap[currentIndex] ?? [];
 
-    const isMcq = currentQuestion.type === 'single_correct';
-    const isCoding = currentQuestion.type === 'coding';
-
-    const isAttempted = isMcq
-      ? selectedOptions.length > 0
-      : questionStatus[currentIndex]?.attempted === true;
-
     try {
-      const timeTakenSeconds = Math.floor((Date.now() - questionStartTimeRef.current) / 1000);
-
+      // ✅ save ONLY mcq
       if (isMcq) {
+        const timeTakenSeconds = Math.floor((Date.now() - questionStartTimeRef.current) / 1000);
+
         await saveAnswerMutation.mutateAsync({
           assessment_question_id: currentQuestion.assessment_question_id,
           question_id: currentQuestion.question_id,
@@ -249,12 +244,13 @@ useEffect(() => {
         });
       }
 
+      // ✅ update status
       setQuestionStatus((prev) => {
         const next = { ...prev };
 
         next[currentIndex] = {
           ...next[currentIndex],
-          attempted: isAttempted,
+          attempted: isMcq ? selectedOptions.length > 0 : next[currentIndex]?.attempted,
           visited: true,
         };
 
@@ -279,12 +275,24 @@ useEffect(() => {
     if (currentIndex === 0) return;
     setCurrentIndex((i) => i - 1);
   };
+
   const submitAssessment = async () => {
     try {
-      await saveCurrentAnswer();
+      if (currentQuestion?.type === 'single_correct') {
+        await saveCurrentAnswer();
+      }
+
+      if (currentQuestion?.type === 'coding') {
+        await assessmentApi.saveCodingAnswer(assessmentId!, {
+          question_id: Number(currentQuestion.question_id),
+          language: 'python', // i need to change this later
+          source_code: currentQuestion.previous_code ?? '',
+        });
+      }
+
       router.replace(`/student/assessment/${assessmentId}/preview`);
     } catch {
-      message.error('Failed to save answer');
+      message.error('Failed to submit assessment');
     }
   };
 
@@ -375,19 +383,19 @@ useEffect(() => {
         playsInline
         style={{
           position: 'fixed',
-          // top: '-10000px',
-          // left: '-10000px',
-          // width: '320px',
-          // height: '240px',
-          opacity: 0,
-          // pointerEvents: 'none',
+          top: '-10000px',
+          left: '-10000px',
+          width: '320px',
+          height: '240px',
+          opacity: 0.01,
+          pointerEvents: 'none',
         }}
       />
 
       {/* 🧠 Proctoring engine – runs for full exam */}
       {videoStream && attemptId && (
         <ProctoringClient
-          attemptId={attemptId} // IMPORTANT: attemptId, not assessmentId if you have it
+          attemptId={48} // IMPORTANT: attemptId, not assessmentId if you have it
           videoElement={proctoringVideoRef.current}
           videoStream={videoStream}
           enabled

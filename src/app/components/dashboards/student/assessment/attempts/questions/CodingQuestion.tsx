@@ -48,7 +48,7 @@ export default function CodingQuestion({ question, onSubmitSuccess }: Props) {
   }>({ status: null, cases: [] });
 
   const runCode = async () => {
-    const res = await assessmentApi.runCodingAnswer('91', {
+    const res = await assessmentApi.runCodingAnswer('27', {
       question_id: Number(question.question_id),
       language: 'python',
       source_code: code,
@@ -69,7 +69,7 @@ export default function CodingQuestion({ question, onSubmitSuccess }: Props) {
   };
 
   const submitCode = async () => {
-    await assessmentApi.saveCodingAnswer('91', {
+    await assessmentApi.saveCodingAnswer('27', {
       question_id: Number(question.question_id),
       language: 'python',
       source_code: code,
