@@ -6,14 +6,20 @@ import { useRouter } from 'next/navigation';
 export type AssessmentStatus = { kind: 'pending' } | { kind: 'ends'; timeLeft: string };
 
 type AssessmentCardProps = {
+  assId: string;
   title: string;
   type: string;
   duration: string;
   status: AssessmentStatus;
 };
 
-export default function AssessmentCard({ title, type, duration, status }: AssessmentCardProps) {
-  // const router = useRouter();
+export default function AssessmentCard({
+  assId,
+  title,
+  type,
+  duration,
+  status,
+}: AssessmentCardProps) {
   const isPending = status.kind === 'pending';
 
   const router = useRouter();
@@ -60,8 +66,7 @@ export default function AssessmentCard({ title, type, duration, status }: Assess
             hover:opacity-90
             transition
           "
-          // onClick={() => router.push(`/student/assessment/${2}`)}
-          onClick={() => router.push('/student/assessment/start')}
+          onClick={() => router.push(`/student/assessment/ongoing/${assId}`)}
         >
           Take Assessment
         </button>

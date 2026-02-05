@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Camera, CameraOff, CheckCircle, X } from 'lucide-react';
 import FaceAlignmentOverlay from './FaceAlignmentOverlay';
+import { getFaceDetector } from '@/app/lib/mediapipeFaceDetector';
 
 export type CameraStatus = 'off' | 'starting' | 'working' | 'aligning' | 'success' | 'error';
 
@@ -24,6 +25,8 @@ type Props = {
   setCameraStatus: React.Dispatch<React.SetStateAction<CameraStatus>>;
   videoStream: MediaStream | null;
   setVideoStream: React.Dispatch<React.SetStateAction<MediaStream | null>>;
+  onCameraReady?: () => void;
+  videoRef: React.RefObject<HTMLVideoElement | null>;
 };
 
 export default function StepCameraCheck({
@@ -31,8 +34,10 @@ export default function StepCameraCheck({
   setCameraStatus,
   videoStream,
   setVideoStream,
+  onCameraReady,
+  videoRef,
 }: Props) {
-  const videoRef = useRef<HTMLVideoElement | null>(null);
+  // const videoRef = useRef<HTMLVideoElement | null>(null);
   const detectorRef = useRef<any>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -90,25 +95,18 @@ export default function StepCameraCheck({
     if (cameraStatus !== 'aligning') return;
     if (!videoRef.current) return;
 
-    let alignedSince: number | null = null;
     let resolved = false;
+    let alignedSince: number | null = null;
     let waitStart = Date.now();
+    let lastSent = 0;
+    let rafId: number;
 
     setWaitSecondsLeft(Math.ceil(MAX_WAIT_TIME / 1000));
     setAlignSecondsLeft(Math.ceil(ALIGN_TIME_REQUIRED / 1000));
 
     (async () => {
-      const mp = await import('@mediapipe/face_detection');
-
-      const detector = new mp.FaceDetection({
-        locateFile: (file: string) =>
-          `https://cdn.jsdelivr.net/npm/@mediapipe/face_detection/${file}`,
-      });
-
-      detector.setOptions({
-        model: 'short',
-        minDetectionConfidence: 0.6,
-      });
+      const detector = await getFaceDetector();
+      if (!detector) return;
 
       detector.onResults((results: any) => {
         if (resolved) return;
@@ -124,11 +122,8 @@ export default function StepCameraCheck({
         }
 
         const box = detection.boundingBox;
-        const faceX =
-          (box.xCenter !== undefined ? box.xCenter : box.xmin + box.width / 2) * VIDEO_WIDTH;
-
-        const faceY =
-          (box.yCenter !== undefined ? box.yCenter : box.ymin + box.height / 2) * VIDEO_HEIGHT;
+        const faceX = box.xCenter * VIDEO_WIDTH;
+        const faceY = box.yCenter * VIDEO_HEIGHT;
 
         if (isInsideOval(faceX, faceY)) {
           if (!alignedSince) alignedSince = Date.now();
@@ -138,8 +133,8 @@ export default function StepCameraCheck({
 
           if (elapsedAlign >= ALIGN_TIME_REQUIRED) {
             resolved = true;
-            cleanup();
             setCameraStatus('success');
+            onCameraReady?.();
           }
         } else {
           alignedSince = null;
@@ -147,24 +142,28 @@ export default function StepCameraCheck({
         }
       });
 
-      detectorRef.current = detector;
+      const loop = () => {
+        if (resolved || !videoRef.current) return;
 
-      intervalRef.current = setInterval(async () => {
-        if (videoRef.current && videoRef.current.readyState >= 2) {
-          await detector.send({ image: videoRef.current });
-        }
-      }, 300);
+        const now = performance.now();
 
-      timeoutRef.current = setTimeout(() => {
-        if (!resolved) {
-          cleanup();
-          setCameraStatus('error');
+        // 🔒 HARD THROTTLE → 5 FPS (SAFE)
+        if (now - lastSent > 200 && videoRef.current.readyState >= 2) {
+          lastSent = now;
+          detector.send({ image: videoRef.current });
         }
-      }, MAX_WAIT_TIME);
+
+        rafId = requestAnimationFrame(loop);
+      };
+
+      loop();
     })();
 
-    return cleanup;
-  }, [cameraStatus, setCameraStatus]);
+    return () => {
+      resolved = true;
+      cancelAnimationFrame(rafId);
+    };
+  }, [cameraStatus]);
 
   /* ================= UI ================= */
 

@@ -37,12 +37,11 @@ export default function StepMicCheck({ micStatus, setMicStatus }: Props) {
     setSecondsLeft(6);
 
     try {
-      // 🎤 Request mic
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: {
           echoCancellation: true,
           noiseSuppression: true,
-          autoGainControl: false,
+          autoGainControl: true,
         },
       });
 
@@ -52,23 +51,24 @@ export default function StepMicCheck({ micStatus, setMicStatus }: Props) {
       audioCtxRef.current = audioCtx;
 
       const analyser = audioCtx.createAnalyser();
-      analyser.fftSize = 2048;
+      analyser.fftSize = 1024;
 
       const source = audioCtx.createMediaStreamSource(stream);
       source.connect(analyser);
 
       const buffer = new Uint8Array(analyser.fftSize);
 
-      const GRACE_TIME = 1000;
-      const LISTEN_TIME = 6000;
+      const GRACE_TIME = 700;
+      const LISTEN_TIME = 5000;
       const startAt = Date.now() + GRACE_TIME;
       const endAt = startAt + LISTEN_TIME;
 
-      const VOICE_THRESHOLD = 0.035; // 🔥 filters background noise
-      const REQUIRED_FRAMES = 15; // sustained voice
+      const VOICE_THRESHOLD = 0.018;
+      const PEAK_THRESHOLD = 0.12;
+      const REQUIRED_FRAMES = 6;
+
       let activeFrames = 0;
 
-      // ⏱ Countdown
       timerRef.current = setInterval(() => {
         setSecondsLeft((s) => (s > 0 ? s - 1 : 0));
       }, 1000);
@@ -84,27 +84,28 @@ export default function StepMicCheck({ micStatus, setMicStatus }: Props) {
         analyser.getByteTimeDomainData(buffer);
 
         let sum = 0;
+        let peak = 0;
+
         for (let i = 0; i < buffer.length; i++) {
           const v = (buffer[i] - 128) / 128;
           sum += v * v;
+          peak = Math.max(peak, Math.abs(v));
         }
 
         const rms = Math.sqrt(sum / buffer.length);
 
-        // 🔊 Strong voice only
-        if (rms > VOICE_THRESHOLD) {
-          activeFrames += 1;
+        if (rms > VOICE_THRESHOLD && peak > PEAK_THRESHOLD) {
+          activeFrames++;
         } else {
-          activeFrames = 0;
+          activeFrames = Math.max(0, activeFrames - 1);
         }
 
-        // ✅ Voice confirmed (but delay success)
         if (activeFrames >= REQUIRED_FRAMES) {
           stopMic();
 
           successDelayRef.current = setTimeout(() => {
             setMicStatus('success');
-          }, 1500); // 👌 smooth UX delay
+          }, 800);
 
           return;
         }
@@ -129,7 +130,6 @@ export default function StepMicCheck({ micStatus, setMicStatus }: Props) {
     <div className="flex flex-col items-center justify-center h-full">
       <div className="w-full text-left mb-2">
         <h3 className="text-[16px] font-semibold text-[#1A2C50]">Microphone Check</h3>
-
         <p className="text-[14px] text-[#667085] mt-1">
           Please say “Hello” to test your microphone
         </p>
@@ -143,24 +143,14 @@ export default function StepMicCheck({ micStatus, setMicStatus }: Props) {
         {micStatus === 'idle' && (
           <button
             onClick={startMicTest}
-            className="
-              border border-[#904BFF]
-              text-[#904BFF]
-              px-6 py-2
-              rounded-full
-              text-sm
-              hover:bg-purple-50
-              transition
-            "
+            className="border border-[#904BFF] text-[#904BFF] px-6 py-2 rounded-full text-sm hover:bg-purple-50 transition"
           >
-            speak
+            Speak
           </button>
         )}
 
         {micStatus === 'analyzing' && (
-          <p className="text-[#1A2C50] font-normal text-sm">
-            Analyzing your voice ({secondsLeft}s)
-          </p>
+          <p className="text-[#1A2C50] text-sm">Analyzing your voice ({secondsLeft}s)</p>
         )}
 
         {micStatus === 'success' && (
@@ -169,7 +159,6 @@ export default function StepMicCheck({ micStatus, setMicStatus }: Props) {
               <CircleCheckBig />
               Microphone detected — you sound good!
             </div>
-
             <p className="text-[#6E788C] text-xs">Click next to proceed</p>
           </div>
         )}
@@ -177,20 +166,11 @@ export default function StepMicCheck({ micStatus, setMicStatus }: Props) {
         {micStatus === 'error' && (
           <div className="flex flex-col items-center gap-3">
             <div className="flex items-center gap-2 text-[#F44336] text-sm font-medium">
-              <span>✕</span>
-              We couldn’t hear you — check mic settings
+              ✕ We couldn’t hear you — check mic settings
             </div>
-
             <button
               onClick={startMicTest}
-              className="
-                border border-[#904BFF]
-                text-[#904BFF]!
-                px-5 py-2
-                rounded-full
-                text-sm
-                hover:bg-purple-50
-              "
+              className="border border-[#904BFF] text-[#904BFF] px-5 py-2 rounded-full text-sm hover:bg-purple-50"
             >
               Retry
             </button>
