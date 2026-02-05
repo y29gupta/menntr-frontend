@@ -33,6 +33,7 @@ export type InstitutionApi = {
   name: string;
   code: string;
   contact_email: string;
+  subdomain: string;
   status: string;
 
   studentCount: number;
@@ -67,8 +68,8 @@ export type Institution = {
   name: string;
   code: string;
   plan: string;
-  contactEmail: string;
-
+  subdomain: string;
+  contact_email: string;
   students: string;
 
   status: string;
@@ -122,10 +123,9 @@ export function mapInstitutions(apiData: InstitutionApi[]): Institution[] {
     name: item.name,
     code: item.code,
     plan: item.plan?.name ?? '—',
-    contactEmail: item.contact_email,
-
+    subdomain: item.subdomain ?? '-',
+    contact_email: item.contact_email,
     students: String(item.studentCount ?? 0),
-
     status: item.status,
     planId: item.plan?.id || 1,
   }));
@@ -145,8 +145,9 @@ export async function updateInstitution(id: number | string, payload: Institutio
         body: JSON.stringify({
           name: payload.name,
           code: payload.code,
-          contactEmail: payload.contact_email,
-          planId: PLAN_CODE_TO_ID[payload.plan_id as PlanCode],
+          subdomain: payload.subdomain,
+          contact_email: payload.contact_email,
+          plan_id: PLAN_CODE_TO_ID[payload.plan_id],
         }),
       }).then((res) => {
         if (!res.ok) {
@@ -294,4 +295,12 @@ export const createProgram = async (payload: {
     showApiError(error);
     throw error;
   }
+};
+
+import axios from 'axios';
+export const institutionsApi = {
+  getById: (id: number) => axios.get(
+  `${process.env.NEXT_PUBLIC_API_BASE_URL}/super-admin/institutions/${id}`,
+  { withCredentials: true }
+).then(res => res.data)
 };

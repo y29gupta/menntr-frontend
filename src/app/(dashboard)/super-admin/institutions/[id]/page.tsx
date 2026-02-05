@@ -1,43 +1,50 @@
 'use client';
 
 import { useParams, useRouter } from 'next/navigation';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import OnboardingForm from '@/app/components/dashboards/super-admin/OnboardingForm';
-import { fetchInstitutions, mapInstitutions, updateInstitution } from '@/app/lib/institutions.api';
+import { institutionsApi, updateInstitution } from '@/app/lib/institutions.api';
 import { InstitutionFormValues } from '@/app/lib/institution';
 
 export default function EditInstitutionPage() {
   const params = useParams();
-  const id = Array.isArray(params.id) ? params.id[0] : params.id;
+  const idParam = Array.isArray(params.id) ? params.id[0] : params.id;
+  const institutionId = Number(idParam);
   const router = useRouter();
   const queryClient = useQueryClient();
-  console.log(id, 'institution id ');
+
+  if (Number.isNaN(institutionId)) {
+    return <p>Invalid institution id</p>;
+  }
+
+  // ✅ Correct API call
   const { data, isLoading } = useQuery({
-    queryKey: ['institutions'],
-    queryFn: fetchInstitutions,
+    queryKey: ['institution', institutionId],
+    queryFn: () => institutionsApi.getById(institutionId),
+    enabled: !!institutionId,
   });
 
-  const updateMutation = useMutation({
-    mutationFn: (formData: InstitutionFormValues) => updateInstitution(id!, formData),
 
-    onSuccess: () => {
+  const updateMutation = useMutation({
+    mutationFn: (formData: InstitutionFormValues) =>
+      updateInstitution(Number(institutionId), formData),
+
+    onSuccess: (updatedInstitution) => {
+      queryClient.setQueryData(['institution', Number(institutionId)], updatedInstitution);
+
       queryClient.invalidateQueries({ queryKey: ['institutions'] });
+
       router.push('/super-admin');
     },
   });
+
 
   if (isLoading || !data) {
     return <p>Loading...</p>;
   }
 
-  const institutions = mapInstitutions(data?.data ?? []);
-
-  const institution = institutions.find((inst) => String(inst.id) === id);
-
-  console.log(institution, id, 'insti');
-
-  if (!institution) return <p>Institution not found</p>;
+  // ✅ data IS the institution
+  const institution = data;
 
   return (
     <OnboardingForm
@@ -45,8 +52,9 @@ export default function EditInstitutionPage() {
       defaultValues={{
         name: institution.name,
         code: institution.code,
-        contactEmail: institution.contactEmail,
-        plan: institution.plan === 'Premium' ? 'PREMIUM' : 'BASIC',
+        subdomain: institution.subdomain ?? '',
+        contact_email: institution.contact_email,
+        plan_id: institution.plan?.code?.toUpperCase(),
       }}
       onCancel={() => router.push('/super-admin')}
       onSubmitForm={(formData) => updateMutation.mutate(formData)}

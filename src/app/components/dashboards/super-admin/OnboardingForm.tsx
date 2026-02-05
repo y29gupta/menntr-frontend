@@ -38,6 +38,7 @@ export default function OnboardingForm({ mode, defaultValues, onCancel, onSubmit
     handleSubmit,
     watch,
     setValue,
+    reset,
     formState: { errors },
   } = useForm<InstitutionFormValues>({
     resolver: zodResolver(institutionSchema),
@@ -49,7 +50,11 @@ export default function OnboardingForm({ mode, defaultValues, onCancel, onSubmit
       plan_id: defaultPlanCode,
     },
   });
-
+useEffect(() => {
+  if (defaultValues && mode === 'edit') {
+    reset(defaultValues);
+  }
+}, [defaultValues, mode, reset]);
   // Update plan_id when plans are loaded
   useEffect(() => {
     if (plans.length > 0 && !defaultValues?.plan_id) {

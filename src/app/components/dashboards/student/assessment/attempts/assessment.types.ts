@@ -1,4 +1,5 @@
 export type SubmitPreviewResponse = {
+  total_questions: number;
   attended: number;
   unanswered: number;
   time_taken_minutes: number;

@@ -64,7 +64,7 @@ export default function Page() {
           }}
           onSubmitNow={submitAssessment}
           stats={{
-            attended: 25,
+            totalQuestions: data.total_questions,
             answered: data.attended,
             unanswered: data.unanswered,
             timeTaken: `${data.time_taken_minutes} mins`,
