@@ -18,7 +18,7 @@ export default function SuperAdminPage() {
   const createMutation = useMutation({
     mutationFn: createInstitution,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['institutions'] });
+      queryClient.invalidateQueries({ queryKey: ['institutions'], exact: false });
       setView('dashboard');
     },
     onError: (err) => {

@@ -108,6 +108,7 @@ export async function fetchInstitutions(
   const res = await fetch(url, {
     method: 'GET',
     credentials: 'include',
+    cache: 'no-store'
   });
 
   if (!res.ok) throw new Error('Failed to fetch institutions');
