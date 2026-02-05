@@ -84,11 +84,6 @@ function DataTable<T extends RowData>({
                         placeholder={colName}
                         value={columnFilters[columnId] ?? ''}
                         onChange={(e) => onColumnFilterChange(columnId, e.target.value)}
-                        // onChange={(e) => {
-                        //   if (typeof onColumnFilterChange === 'function') {
-                        //     onColumnFilterChange(e.target.value);
-                        //   }
-                        // }}
                       />
                     </th>
                   );
@@ -108,13 +103,11 @@ function DataTable<T extends RowData>({
                   onClick={hasRowClick ? () => onRowClick(row.original) : undefined}
                   title={hasRowClick ? 'Click to view performance' : undefined}
                   className={`border-b border-gray-200 last:border-none transition-colors duration-200
-    ${hasRowClick ? 'cursor-pointer hover:bg-purple-50' : ''}
-  `}
-                  // className="border-b border-gray-200 last:border-none"
+                    ${hasRowClick ? 'cursor-pointer hover:bg-purple-50' : ''}
+                  `}
                 >
                   {row.getVisibleCells().map((cell) => (
                     <td key={cell.id} className="px-4 py-3 ">
-                      {/* {flexRender(cell.column.columnDef.cell, cell.getContext())} */}
                       {(() => {
                         const rendered = flexRender(cell.column.columnDef.cell, cell.getContext());
 
@@ -145,27 +138,7 @@ function DataTable<T extends RowData>({
           </tbody>
         </table>
       </div>
-      {/* <div className="flex justify-end items-center gap-3 mt-3 text-xs sm:text-sm">
-        <button
-          className="px-3 py-1 border rounded disabled:opacity-30"
-          onClick={onPreviousPage}
-          disabled={!canPreviousPage}
-        >
-          Prev
-        </button>
 
-        <span>
-          Page {currentPage} of {pageCount}
-        </span>
-
-        <button
-          className="px-3 py-1 border rounded disabled:opacity-30"
-          onClick={onNextPage}
-          disabled={!canNextPage}
-        >
-          Next
-        </button>
-      </div> */}
       <div className="flex justify-center items-center gap-2 mt-3 text-xs sm:text-sm select-none text-gray-600">
         {/* First */}
         <button
