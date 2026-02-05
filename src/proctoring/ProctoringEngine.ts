@@ -1,9 +1,9 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 import { handleCheat } from './handleCheat';
 import { useTabMonitoring } from './useTabMonitoring';
 import { useProctoringRecorder } from './useProctoringRecorder';
 
-const CHEAT_COOLDOWN_MS = 20_000; // ✅ 20 seconds
+const COOLDOWN_MS = 20_000;
 
 export function useProctoringEngine({
   attemptId,
@@ -17,35 +17,27 @@ export function useProctoringEngine({
   enabled: boolean;
 }) {
   const recorder = useProctoringRecorder(videoStream);
-
-  // 🔒 timestamp-based cooldown (PRODUCTION SAFE)
-  const lastTriggeredAtRef = useRef<number>(0);
+  const lastRef = useRef<number | null>(null);
 
   useEffect(() => {
-    if (enabled) recorder.start();
-    else recorder.stop();
+    enabled ? recorder.start() : recorder.stop();
   }, [enabled]);
 
-  const reportCheat = async (reason: string) => {
-    if (!videoElement || !enabled) return;
+  const reportCheat = useCallback(
+    async (reason: string) => {
+      if (!enabled || !videoElement) return;
 
-    const now = Date.now();
+      const now = Date.now();
+      if (lastRef.current && now - lastRef.current < COOLDOWN_MS) {
+        console.log('⏳ Cheat ignored (cooldown)');
+        return;
+      }
 
-    // 🚫 Cooldown guard
-    if (now - lastTriggeredAtRef.current < CHEAT_COOLDOWN_MS) {
-      console.log('⏳ Cheat ignored (cooldown active)');
-      return;
-    }
-
-    lastTriggeredAtRef.current = now;
-
-    await handleCheat({
-      attemptId,
-      reason,
-      recorder,
-      videoElement,
-    });
-  };
+      lastRef.current = now;
+      await handleCheat({ attemptId, reason, recorder, videoElement });
+    },
+    [enabled, attemptId, videoElement]
+  );
 
   useTabMonitoring({ enabled, onCheat: reportCheat });
 }

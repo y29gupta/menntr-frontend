@@ -2,27 +2,30 @@ import { uploadToAzure } from './upload';
 import { takeScreenshot } from './screenshot';
 import { api } from '@/app/lib/api';
 
-type HandleCheatArgs = {
+export async function handleCheat({
+  attemptId,
+  reason,
+  recorder,
+  videoElement,
+}: {
   attemptId: number;
   reason: string;
-  recorder: {
-    // getBufferedBlob: (seconds: number) => Promise<Blob>;
-    getFinalBlob: () => Promise<Blob>;
-  };
+  recorder: { getBufferedBlob: (seconds: number) => Blob };
   videoElement: HTMLVideoElement;
-}
+}) {
+  console.log('🚨 Cheat detected:', reason);
 
-export async function handleCheat({ attemptId, reason, recorder, videoElement }: HandleCheatArgs) {
-  console.log('🚨 Cheat:', reason);
+  // Ensure video frame is ready
+  if (videoElement.readyState < 2) {
+    await new Promise((r) => setTimeout(r, 300));
+  }
 
-  await videoElement.play().catch(() => {});
-
-  const videoBlob = await recorder.getFinalBlob();
+  const videoBlob = recorder.getBufferedBlob(20);
   const imageBlob = await takeScreenshot(videoElement);
-  console.log('🎥 Video size:', videoBlob.size);
-  console.log('📸 Image size:', imageBlob.size);
+
   if (videoBlob.size < 50_000) {
-    throw new Error('Video too small');
+    console.warn('⚠️ Video too small, skipping upload');
+    return;
   }
 
   const [videoSas, imageSas] = await Promise.all([
@@ -41,4 +44,6 @@ export async function handleCheat({ attemptId, reason, recorder, videoElement }:
     videoPath: videoSas.blobPath,
     imagePath: imageSas.blobPath,
   });
+
+  console.log('✅ Proctoring event saved');
 }
