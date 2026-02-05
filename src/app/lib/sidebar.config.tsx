@@ -32,6 +32,7 @@ export const SIDEBAR_CONFIG = {
       label: 'Manage Institutions',
       path: '/super-admin/institutions',
       icon: <Building2 size={20} />,
+      disabled: true,
     },
     // 🔶 UPCOMING FEATURES (as per Figma)
     {
