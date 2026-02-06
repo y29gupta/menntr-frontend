@@ -305,6 +305,7 @@ export default function AssessmentAttempt() {
               onSelectOption={handleSelectOption}
               selectedOptions={selectedOptionsMap[currentIndex] ?? []}
               isReviewed={questionStatus[currentIndex]?.review ?? false}
+              assessmentId={params.assessmentId}
               onToggleReview={(index) => {
                 setQuestionStatus((prev) => ({
                   ...prev,
