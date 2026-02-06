@@ -77,11 +77,12 @@ export default function AssessmentStepModal({ open, onClose, assessmentId }: Pro
   const startAssessmentMutation = useMutation({
     mutationFn: (id: string) => attemptsApi.startAssessment(id),
     onSuccess: (data) => {
+      sessionStorage.setItem('attemptId', data.attempt_id);
       setAttemptId(data.attempt_id);
       message.success(data.message || 'Assessment Started');
       onClose();
       if (assessmentIdFromUrl) {
-        router.push(`/student/assessment/${assessmentIdFromUrl}`);
+        router.push(`/student/assessment/${assessmentIdFromUrl}?attemptId=${data.attempt_id}`);
       }
     },
     onError: (error: any) => {

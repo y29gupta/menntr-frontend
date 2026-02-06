@@ -4,20 +4,14 @@ import ProctoringClient from '@/proctoring/ProctoringClient';
 import AssessmentStepper from './AssessmentStepper';
 
 import AssessmentHeader from './AssessmentHeader';
-// import QuestionStepper from './QuestionStepper';
 import AssessmentFooter from './AssessmentFooter';
 import { QuestionRenderer } from './questions/QuestionRenderer';
 import { useEffect, useRef, useState } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
-import { mcqDummyQuestions } from './data/mcq.dummy';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { assessmentApi } from './assessment.service';
 import { message } from 'antd';
 import AssessmentTimeUpModal from '@/app/ui/modals/AssessmentTimeUpModal';
-
-// type Props = {
-//   assessmentId: string;
-// };
 
 export default function AssessmentAttempt() {
   const params = useParams();
@@ -26,13 +20,57 @@ export default function AssessmentAttempt() {
   const [selectedOptionsMap, setSelectedOptionsMap] = useState<Record<number, number[]>>({});
   const [timeUp, setTimeUp] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
-  const [codingAttemptedMap, setCodingAttemptedMap] = useState<Record<number, boolean>>({});
-  // const videoRef = useRef<HTMLVideoElement | null>(null);
   const [videoStream, setVideoStream] = useState<MediaStream | null>(null);
   const fullscreenLockRef = useRef(false);
   const proctoringVideoRef = useRef<HTMLVideoElement | null>(null);
   const searchParams = useSearchParams();
-  const attemptId = Number(searchParams.get('attemptId'));
+  const attemptIdParam = searchParams.get('attemptId');
+  const attemptId = attemptIdParam ? Number(attemptIdParam) : null;
+
+  // ✅ ENTER FULLSCREEN ONCE
+  useEffect(() => {
+    document.documentElement.requestFullscreen?.().catch(() => {});
+  }, []);
+
+  // ✅ START CAMERA ONCE
+  useEffect(() => {
+    let mounted = true;
+
+    navigator.mediaDevices
+      .getUserMedia({ video: true })
+      .then(async (stream) => {
+        if (!mounted) return;
+
+        setVideoStream(stream);
+
+        // attach stream to hidden video
+        if (proctoringVideoRef.current) {
+          proctoringVideoRef.current.srcObject = stream;
+          await proctoringVideoRef.current.play().catch(() => {});
+        }
+      })
+      .catch((err) => {
+        console.error('❌ Camera access failed:', err);
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  // ✅ CLEANUP CAMERA ON UNMOUNT
+  useEffect(() => {
+    return () => {
+      console.log('🧹 Cleaning up camera stream');
+      if (videoStream) {
+        videoStream.getTracks().forEach((track) => {
+          track.stop();
+          console.log('🛑 Stopped track:', track.kind);
+        });
+      }
+    };
+  }, [videoStream]);
+
   const handleSelectOption = (optionIds: number[]) => {
     setSelectedOptionsMap((prev) => ({
       ...prev,
@@ -87,19 +125,6 @@ export default function AssessmentAttempt() {
     >
   >({});
 
-  // useEffect(() => {
-  //   if (!runtime?.total_questions) return;
-
-  //   setQuestionStatus(
-  //     Object.fromEntries(
-  //       Array.from({ length: runtime.total_questions }).map((_, i) => [
-  //         i,
-  //         { attempted: false, visited: i === 0, review: false },
-  //       ])
-  //     )
-  //   );
-  // }, [runtime?.total_questions]);
-
   useEffect(() => {
     if (!runtime?.total_questions) return;
 
@@ -125,7 +150,6 @@ export default function AssessmentAttempt() {
     enabled: !!assessmentId,
   });
 
-  // const [selectedOptionIds, setSelectedOptionIds] = useState<number[]>([]);
   const questionStartTimeRef = useRef<number>(Date.now());
 
   /* ================= Save Answer ================= */
@@ -141,50 +165,6 @@ export default function AssessmentAttempt() {
     },
   });
 
-  // // 🔹 Enter fullscreen on mount
-  useEffect(() => {
-    document.documentElement.requestFullscreen?.().catch(() => {});
-  }, []);
-  // 🎥 Start camera ONCE for proctoring (runtime)
-useEffect(() => {
-  let mounted = true;
-
-  navigator.mediaDevices.getUserMedia({ video: true }).then(async (stream) => {
-    if (!mounted) return;
-
-    setVideoStream(stream);
-
-    if (proctoringVideoRef.current) {
-      proctoringVideoRef.current.srcObject = stream;
-      await proctoringVideoRef.current.play().catch(() => {});
-    }
-  });
-
-  return () => {
-    mounted = false;
-    videoStream?.getTracks().forEach((t) => t.stop());
-  };
-}, []);
-
-  // useEffect(() => {
-  //   const handleFullscreenChange = () => {
-  //     if (!document.fullscreenElement && !fullscreenLockRef.current) {
-  //       fullscreenLockRef.current = true;
-
-  //       setShowCancelModal(true);
-
-  //       setTimeout(() => {
-  //         document.documentElement.requestFullscreen().catch(() => {});
-  //       }, 0);
-  //     }
-  //   };
-
-  //   document.addEventListener('fullscreenchange', handleFullscreenChange);
-  //   return () => {
-  //     document.removeEventListener('fullscreenchange', handleFullscreenChange);
-  //   };
-  // }, []);
-
   const saveCurrentAnswer = async () => {
     if (!currentQuestion) return;
 
@@ -194,7 +174,7 @@ useEffect(() => {
     await saveAnswerMutation.mutateAsync({
       assessment_question_id: currentQuestion.assessment_question_id,
       question_id: currentQuestion.question_id,
-      selected_option_ids: selectedOptions, // empty allowed
+      selected_option_ids: selectedOptions,
       time_taken_seconds: timeTakenSeconds,
     });
 
@@ -209,54 +189,6 @@ useEffect(() => {
   };
 
   /* ================= Navigation ================= */
-
-  // const goNext = async () => {
-  //   if (!currentQuestion) return;
-
-  //   const selectedOptions = selectedOptionsMap[currentIndex] ?? [];
-  //   const isAttempted = selectedOptions.length > 0;
-
-  //   try {
-  //     const timeTakenSeconds = Math.floor((Date.now() - questionStartTimeRef.current) / 1000);
-
-  //     // 🔹 Save answer (empty array allowed)
-  //     await saveAnswerMutation.mutateAsync({
-  //       assessment_question_id: currentQuestion.assessment_question_id,
-  //       question_id: currentQuestion.question_id,
-  //       selected_option_ids: selectedOptions,
-  //       time_taken_seconds: timeTakenSeconds,
-  //     });
-
-  //     setQuestionStatus((prev) => {
-  //       const next = { ...prev };
-
-  //       const selectedOptions = selectedOptionsMap[currentIndex] ?? [];
-  //       const isAttempted = selectedOptions.length > 0;
-
-  //       // ✅ Update CURRENT question
-  //       next[currentIndex] = {
-  //         ...next[currentIndex],
-  //         attempted: isAttempted,
-  //         visited: true,
-  //       };
-
-  //       // ✅ Update NEXT question ONLY if it exists
-  //       if (next[currentIndex + 1]) {
-  //         next[currentIndex + 1] = {
-  //           ...next[currentIndex + 1],
-  //           visited: true,
-  //         };
-  //       }
-
-  //       return next;
-  //     });
-
-  //     setCurrentIndex((i) => i + 1);
-  //     questionStartTimeRef.current = Date.now();
-  //   } catch {
-  //     message.error('Failed to save answer');
-  //   }
-  // };
 
   const goNext = async () => {
     if (!currentQuestion) return;
@@ -313,15 +245,6 @@ useEffect(() => {
     setCurrentIndex((i) => i - 1);
   };
 
-  // const submitAssessment = async () => {
-  //   try {
-  //     await saveCurrentAnswer();
-  //     router.replace(`/student/assessment/${assessmentId}/preview`);
-  //   } catch {
-  //     message.error('Failed to save answer');
-  //   }
-  // };
-
   const submitAssessment = async () => {
     try {
       await saveCurrentAnswer();
@@ -335,7 +258,17 @@ useEffect(() => {
         })
       );
 
-      router.replace(`/student/assessment/${assessmentId}/preview`);
+      // ✅ Stop camera before navigation
+      console.log('🛑 Stopping camera before submit...');
+      if (videoStream) {
+        videoStream.getTracks().forEach((track) => {
+          track.stop();
+          console.log('🛑 Stopped track on submit:', track.kind);
+        });
+        setVideoStream(null);
+      }
+
+      router.replace(`/student/assessment/${assessmentId}/preview?attemptId=${attemptId}`);
     } catch {
       message.error('Failed to save answer');
     }
@@ -417,9 +350,15 @@ useEffect(() => {
           setShowCancelModal(false);
         }}
         onCancelConfirm={() => {
+          // ✅ Stop camera on cancel
+          if (videoStream) {
+            videoStream.getTracks().forEach((track) => track.stop());
+            setVideoStream(null);
+          }
           router.replace('/student/assessment');
         }}
       />
+
       {/* 🔒 Hidden video for proctoring */}
       <video
         ref={proctoringVideoRef}
@@ -428,19 +367,14 @@ useEffect(() => {
         playsInline
         style={{
           position: 'fixed',
-          // top: '-10000px',
-          // left: '-10000px',
-          // width: '320px',
-          // height: '240px',
           opacity: 0,
-          // pointerEvents: 'none',
         }}
       />
 
       {/* 🧠 Proctoring engine – runs for full exam */}
       {videoStream && attemptId && (
         <ProctoringClient
-          attemptId={attemptId} // IMPORTANT: attemptId, not assessmentId if you have it
+          attemptId={attemptId}
           videoElement={proctoringVideoRef.current}
           videoStream={videoStream}
           enabled

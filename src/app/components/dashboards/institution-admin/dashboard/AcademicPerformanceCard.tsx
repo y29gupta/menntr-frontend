@@ -1,15 +1,13 @@
 'use client';
 import { BarChart3 } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { fetchDashboardData } from '@/app/lib/api/dashboardApi';
 
-const academicPerformanceData = {
-  title: 'Avg Academic Performance',
-  percentage: 73,
-  minimum: 75,
-  studentBreakdown: [
-    { label: 'High performers', count: 312 },
-    { label: 'At-risk students', count: 35 },
-  ],
+type AcademicPerformanceResponse = {
+  averagePercentage: number;
+  minimumRequired: number;
+  highPerformers: number;
+  atRiskStudents: number;
 };
 
 const STUDENT_GROUP_COLORS: Record<string, string> = {
@@ -18,18 +16,51 @@ const STUDENT_GROUP_COLORS: Record<string, string> = {
 };
 
 export default function AcademicPerformanceCard() {
-  const { title, percentage, minimum, studentBreakdown } = academicPerformanceData;
+  // ─────────────────────────────
+  // Hooks (order NEVER changes)
+  // ─────────────────────────────
+  const [data, setData] = useState<AcademicPerformanceResponse | null>(null);
 
   const radius = 80;
   const strokeWidth = 32;
   const circumference = 2 * Math.PI * radius;
-  const progress = (percentage / 100) * circumference;
 
   const [dashOffset, setDashOffset] = useState(circumference);
 
+  // ─────────────────────────────
+  // Fetch backend data
+  // ─────────────────────────────
   useEffect(() => {
+    async function load() {
+      const res = await fetchDashboardData<AcademicPerformanceResponse>(
+        '/dashboard/academic-performance'
+      );
+      setData(res);
+    }
+    load();
+  }, []);
+
+  // ─────────────────────────────
+  // Animate donut when data arrives
+  // ─────────────────────────────
+  useEffect(() => {
+    if (!data) return;
+
+    const progress = (data.averagePercentage / 100) * circumference;
     setDashOffset(circumference - progress);
-  }, [progress, circumference]);
+  }, [data, circumference]);
+
+  // ─────────────────────────────
+  // Render guard (AFTER hooks)
+  // ─────────────────────────────
+  if (!data) return null;
+
+  const { averagePercentage, minimumRequired, highPerformers, atRiskStudents } = data;
+
+  const studentBreakdown = [
+    { label: 'High performers', count: highPerformers },
+    { label: 'At-risk students', count: atRiskStudents },
+  ];
 
   return (
     <div
@@ -40,13 +71,16 @@ export default function AcademicPerformanceCard() {
         <div className="flex gap-2">
           <BarChart3 className="text-gray-500" />
           <div>
-            <h3 className="text-sm sm:text-[16px] font-semibold text-gray-900">{title}</h3>
-            <p className="text-xs text-gray-500">Minimum requirement: {minimum}%</p>
+            <h3 className="text-sm sm:text-[16px] font-semibold text-gray-900">
+              Avg Academic Performance
+            </h3>
+            <p className="text-xs text-gray-500">Minimum requirement: {minimumRequired}%</p>
           </div>
         </div>
       </div>
 
       <div className="flex flex-col md:flex-row items-center gap-6 sm:gap-8 lg:gap-12">
+        {/* Donut */}
         <div className="relative w-36 h-36 sm:w-40 sm:h-40 lg:w-48 lg:h-48 flex-shrink-0">
           <svg className="w-full h-full rotate-90 scale-x-[-1]" viewBox="0 0 200 200">
             <defs>
@@ -80,7 +114,7 @@ export default function AcademicPerformanceCard() {
             />
           </svg>
 
-          {/* Center */}
+          {/* Center (UNCHANGED) */}
           <div className="absolute inset-0 flex items-center justify-center">
             <div
               className="absolute w-24 h-24 sm:w-28 sm:h-28 lg:w-32 lg:h-32 rounded-full"
@@ -94,13 +128,13 @@ export default function AcademicPerformanceCard() {
                 background: 'linear-gradient(135.66deg, #EDEFF1 13.37%, #E5E9EC 85.76%)',
               }}
             >
-              <span className="text-[36px] font-semibold text-[#1A2C50]">{percentage}%</span>
+              <span className="text-[36px] font-semibold text-[#1A2C50]">{averagePercentage}%</span>
             </div>
           </div>
         </div>
 
         {/* Student Breakdown */}
-        <div className="space-y-4 sm:space-y-6">
+        <div className="space-y-4 sm:space-y-6 pl-2">
           {studentBreakdown.map((item, i) => {
             const color = STUDENT_GROUP_COLORS[item.label] ?? '#64748B';
 
@@ -110,9 +144,17 @@ export default function AcademicPerformanceCard() {
                   <div className="w-2 h-2 rounded-full" style={{ backgroundColor: color }} />
                   <span className="text-xs sm:text-sm text-gray-900">{item.label}</span>
                 </div>
+
                 <p className="text-xl sm:text-2xl font-semibold ml-4" style={{ color }}>
                   {item.count} students
                 </p>
+
+                {/* Divider ONLY between items */}
+                {i === 0 && (
+                  <div className="h-px bg-slate-100 my-4 w-fit">
+                    <span className="block w-[160px]" />
+                  </div>
+                )}
               </div>
             );
           })}

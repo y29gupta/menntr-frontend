@@ -1,4 +1,6 @@
 'use client';
+
+import { useEffect, useState } from 'react';
 import { DepartmentMetric } from '@/app/components/graphs/DepartmentBarGraph';
 import { buildRequirementItems } from '@/app/lib/departmentUtils';
 import AcademicPerformanceCard from '@/app/components/dashboards/institution-admin/dashboard/AcademicPerformanceCard';
@@ -9,22 +11,57 @@ import PlacementReadinessCard from '@/app/components/dashboards/institution-admi
 import DepartmentSummaryStrip from '@/app/components/dashboards/institution-admin/dashboard/DepartmentSummaryStrip';
 import HighestAvgDepartmentCard from '@/app/components/dashboards/institution-admin/dashboard/HighestAvgDepartmentCard';
 import DashboardWelcomeHeader from '@/app/components/dashboards/institution-admin/dashboard/DashboardWelcomeHeader';
-import { studentMetricsUI } from '@/app/components/dashboards/institution-admin/dashboard/studentMetricsUI';
+import { getStudentMetricsUI } from '@/app/components/dashboards/institution-admin/dashboard/studentMetricsUI';
+import { fetchDashboardData } from '@/app/lib/api/dashboardApi';
+
+type MeContextResponse = {
+  user: {
+    first_name: string | null;
+    last_name: string | null;
+  };
+  institution: {
+    name: string;
+  };
+};
 
 const Page = () => {
-  const departmentData: DepartmentMetric[] = [
-    { department: 'CSE', percentage: 85 },
-    { department: 'EEE', percentage: 55 },
-    { department: 'MECH', percentage: 79 },
-    { department: 'ECE', percentage: 55 },
-    { department: 'CHEM', percentage: 55 },
-  ];
-  return (
-    <div className=" flex flex-col gap-4 w-full">
-      <DashboardWelcomeHeader userName="Javed" showAlert />
+  const [cards, setCards] = useState<any[]>([]);
+  const [departmentData, setDepartmentData] = useState<DepartmentMetric[]>([]);
+  const [deptAnalytics, setDeptAnalytics] = useState<any>(null);
+  const [userName, setUserName] = useState<string>('');
 
+  useEffect(() => {
+    async function loadDashboard() {
+      const [metrics, deptData, meContext] = await Promise.all([
+        getStudentMetricsUI(),
+        fetchDashboardData<any>('/dashboard/academic-performance/departments'),
+        fetchDashboardData<any>('/auth/me/context'),
+      ]);
+
+      setCards(metrics);
+      const displayName = meContext.user.first_name?.trim() || meContext.institution.name;
+      setUserName(displayName);
+      setDepartmentData(
+        deptData.departments.map((d: any) => ({
+          department: d.department,
+          percentage: d.averagePercentage,
+        }))
+      );
+
+      setDeptAnalytics(deptData);
+    }
+
+    loadDashboard();
+  }, []);
+
+  if (!deptAnalytics) return null; // or loader
+
+  return (
+    <div className="flex flex-col gap-4 w-full">
+      {/* <DashboardWelcomeHeader userName={userName} showAlert /> */}
+      <DashboardWelcomeHeader userName={userName} />
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-        {studentMetricsUI.map((item, i) => (
+        {cards.map((item, i) => (
           <DashboardCard key={i} {...item} />
         ))}
       </div>
@@ -33,21 +70,25 @@ const Page = () => {
         <AcademicPerformanceCard />
         <PlacementReadinessCard />
       </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 w-full items-stretch">
         <div className="lg:col-span-3">
           <DepartmentAnalyticsCard data={departmentData} />
         </div>
 
         <div className="lg:col-span-2">
-          <MinimumScoreRequirementCard items={buildRequirementItems(departmentData, 70)} />
+          <MinimumScoreRequirementCard
+            items={buildRequirementItems(departmentData, deptAnalytics.minimumScore)}
+          />
         </div>
       </div>
+
       <DepartmentSummaryStrip data={departmentData} />
 
       <HighestAvgDepartmentCard
         label="Dept. With Highest Avg"
-        valueText="CSE (85%)"
-        percentage={85}
+        valueText={`${deptAnalytics.highestDepartment.name} (${deptAnalytics.highestDepartment.averagePercentage}%)`}
+        percentage={deptAnalytics.highestDepartment.averagePercentage}
         barColor="linear-gradient(90deg, #5BC376 0%, #149436 100%)"
         barBgColor="#DCFCE7"
         footerText="Showing best performance this month"

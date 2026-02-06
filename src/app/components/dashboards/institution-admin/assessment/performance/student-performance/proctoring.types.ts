@@ -12,4 +12,5 @@ export type ProctoringData = {
   cameraOff: boolean;
   tabChanged: boolean;
   interruptions?: Interruption[];
+  videoUrl?: string | null;
 };

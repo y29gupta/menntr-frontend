@@ -7,17 +7,17 @@ export function useTabMonitoring({
   enabled: boolean;
   onCheat: (reason: string) => void;
 }) {
-    const initializedRef = useRef(false);
+  const initializedRef = useRef(false);
   useEffect(() => {
     if (!enabled) return;
 
     const onHidden = () => {
-        if (!initializedRef.current) return;
+      if (!initializedRef.current) return;
       if (document.hidden) onCheat('TAB_SWITCH');
     };
 
     const onBlur = () => {
-        if (!initializedRef.current) return;
+      if (!initializedRef.current) return;
       onCheat('WINDOW_BLUR');
     };
 const initTimer = setTimeout(() => {
@@ -27,9 +27,9 @@ const initTimer = setTimeout(() => {
     window.addEventListener('blur', onBlur);
 
     return () => {
-        clearTimeout(initTimer);
+      clearTimeout(initTimer);
       document.removeEventListener('visibilitychange', onHidden);
       window.removeEventListener('blur', onBlur);
     };
-  }, [enabled, onCheat]); // ✅ IMPORTANT
+  }, [enabled, onCheat]);
 }

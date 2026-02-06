@@ -29,17 +29,23 @@ type CodingQuestionData = {
 };
 
 type Props = {
+  assessmentId: string;
   question: CodingQuestionData;
   onSubmitSuccess: () => void;
 };
 
-export default function CodingQuestion({ question, onSubmitSuccess }: Props) {
+export default function CodingQuestion({ assessmentId,question, onSubmitSuccess }: Props) {
   const [code, setCode] = useState(question.previous_code ?? '');
-
+  const [selectedLanguage, setSelectedLanguage] = useState<string[]>(
+    question.supported_languages.length ? [question.supported_languages[0]] : []
+  );
   const queryClient = useQueryClient();
 
   useEffect(() => {
     setCode(question.previous_code ?? '');
+    setSelectedLanguage(
+      question.supported_languages.length ? [question.supported_languages[0]] : []
+    );
   }, [question.question_id]);
 
   const [result, setResult] = useState<{
@@ -47,40 +53,42 @@ export default function CodingQuestion({ question, onSubmitSuccess }: Props) {
     cases: TestCase[];
   }>({ status: null, cases: [] });
 
-  const runCode = async () => {
-    const res = await assessmentApi.runCodingAnswer('33', {
-      question_id: Number(question.question_id),
-      language: 'python',
-      source_code: code,
-    });
+const runCode = async () => {
+  const res = await assessmentApi.runCodingAnswer(assessmentId, {
+    question_id: Number(question.question_id),
+    language: selectedLanguage,
+    source_code: code,
+  });
 
-    const data = res.data;
+  const data = res.data;
 
-    setResult({
-      status: data.status === 'accepted' ? 'passed' : 'failed',
-      cases: question.examples.map((ex, idx) => ({
-        name: `Sample test case ${idx + 1}`,
-        input: ex.input,
-        expected: ex.output,
-        output: data.outputs?.[idx] ?? null,
-        passed: data.outputs?.[idx] === ex.output,
-      })),
-    });
-  };
+  setResult({
+    status: data.status === 'accepted' ? 'passed' : 'failed',
+    cases: question.examples.map((ex, idx) => ({
+      name: `Sample test case ${idx + 1}`,
+      input: ex.input,
+      expected: ex.output,
+      output: data.outputs?.[idx] ?? null,
+      passed: data.outputs?.[idx] === ex.output,
+    })),
+  });
+};
 
-  const submitCode = async () => {
-    await assessmentApi.saveCodingAnswer('27', {
-      question_id: Number(question.question_id),
-      language: 'python',
-      source_code: code,
-    });
 
-    queryClient.invalidateQueries({
-      queryKey: ['assessment-question'],
-    });
+const submitCode = async () => {
+  await assessmentApi.saveCodingAnswer(assessmentId, {
+    question_id: Number(question.question_id),
+    language: selectedLanguage,
+    source_code: code,
+  });
 
-    onSubmitSuccess();
-  };
+  queryClient.invalidateQueries({
+    queryKey: ['assessment-question', assessmentId, question.question_id],
+  });
+
+  onSubmitSuccess();
+};
+
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-full min-h-0">
@@ -119,6 +127,8 @@ export default function CodingQuestion({ question, onSubmitSuccess }: Props) {
             <CodeEditor
               code={code}
               setCode={setCode}
+              selectedLanguage={selectedLanguage}
+              setSelectedLanguage={setSelectedLanguage}
               onRun={runCode}
               onSubmit={submitCode}
               supportedLanguages={question.supported_languages}
