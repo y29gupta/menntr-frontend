@@ -219,7 +219,7 @@ const page = () => {
             <p>Assessment-wise performance trend for this student</p>
           </div>
           <div className="px-4 ">
-            <ReusableBarChart data={performanceChartData} />
+            <ReusableBarChart data={performanceChartData} enableScoreGradient={true} />
           </div>
         </div>
         <div
