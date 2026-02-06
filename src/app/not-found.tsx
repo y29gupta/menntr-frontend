@@ -11,7 +11,7 @@ export default function NotFound() {
       <p className="mt-4 text-lg text-gray-600">Oops! The page you’re looking for doesn’t exist.</p>
 
       <Link
-        href="/"
+        href="/student/assessment"
         className="mt-6 rounded-md bg-black px-6 py-2 text-white transition hover:bg-gray-800"
       >
         Go back home
