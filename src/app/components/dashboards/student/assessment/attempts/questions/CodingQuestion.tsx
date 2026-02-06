@@ -35,6 +35,8 @@ type Props = {
 
 export default function CodingQuestion({ question, onSubmitSuccess }: Props) {
   const [code, setCode] = useState(question.previous_code ?? '');
+  // const [hasRun, setHasRun] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const queryClient = useQueryClient();
 
@@ -48,7 +50,9 @@ export default function CodingQuestion({ question, onSubmitSuccess }: Props) {
   }>({ status: null, cases: [] });
 
   const runCode = async () => {
-    const res = await assessmentApi.runCodingAnswer('102', {
+    // setHasRun(true);
+
+    const res = await assessmentApi.runCodingAnswer('110', {
       question_id: Number(question.question_id),
       language: 'python',
       source_code: code,
@@ -69,17 +73,23 @@ export default function CodingQuestion({ question, onSubmitSuccess }: Props) {
   };
 
   const submitCode = async () => {
-    await assessmentApi.saveCodingAnswer('102', {
-      question_id: Number(question.question_id),
-      language: 'python',
-      source_code: code,
-    });
+    try {
+      setIsSubmitting(true);
 
-    queryClient.invalidateQueries({
-      queryKey: ['assessment-question'],
-    });
+      await assessmentApi.saveCodingAnswer('110', {
+        question_id: Number(question.question_id),
+        language: 'python',
+        source_code: code,
+      });
 
-    onSubmitSuccess();
+      queryClient.invalidateQueries({
+        queryKey: ['assessment-question'],
+      });
+
+      onSubmitSuccess();
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -122,6 +132,7 @@ export default function CodingQuestion({ question, onSubmitSuccess }: Props) {
               onRun={runCode}
               onSubmit={submitCode}
               supportedLanguages={question.supported_languages}
+              isSubmitting={isSubmitting}
             />
           </div>
 

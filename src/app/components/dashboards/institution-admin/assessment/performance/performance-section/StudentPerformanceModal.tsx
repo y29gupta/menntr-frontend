@@ -94,14 +94,24 @@ export default function StudentPerformanceModal({
 
 /* ================= SUMMARY TAB ================= */
 
+const formatDateTime = (iso: string) =>
+  new Date(iso).toLocaleString('en-IN', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true,
+  });
+
 const OverallSummary = ({ summary }: { summary: StudentPerformance['summary'] }) => (
   <div className="flex flex-col gap-6 text-sm">
     <div>
       <p className="mb-2 text-xs font-medium text-gray-600">Attempt Summary</p>
       <InfoCard>
         <InfoItem label="Completion Status" value={summary.status} showDivider />
-        <InfoItem label="Start Date & Time" value={summary.startTime} showDivider />
-        <InfoItem label="End Date & Time" value={summary.endTime} showDivider />
+        <InfoItem label="Start Date & Time" value={formatDateTime(summary.startTime)} showDivider />
+        <InfoItem label="End Date & Time" value={formatDateTime(summary.endTime)} showDivider />
         <InfoItem label="Duration" value={summary.duration} />
       </InfoCard>
     </div>

@@ -341,10 +341,10 @@ export default function AssessmentAttempt() {
 
   return (
     <>
-      <div className="h-screen pb-6 px-12 bg-[#F7F6FB] flex flex-col">
+      <div className="h-screen px-12 bg-[#F7F6FB] flex flex-col">
         <AssessmentHeader durationMinutes={runtime?.duration_minutes} onTimeUp={submitAssessment} />
 
-        <div className="px-6 mt-6 flex-shrink-0">
+        <div className="px-6 flex-shrink-0">
           <AssessmentStepper
             total={runtime?.total_questions ?? 0}
             currentIndex={currentIndex}
