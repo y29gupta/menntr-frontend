@@ -19,6 +19,8 @@ type Props = {
   setSelectedLanguage: (v: string[]) => void;
   onRun: () => void;
   onSubmit: () => void;
+  supportedLanguages?: string[];
+  isSubmitting?: boolean;
 };
 
 export default function CodeEditor({
@@ -27,8 +29,7 @@ export default function CodeEditor({
   onRun,
   onSubmit,
   supportedLanguages,
-  selectedLanguage,
-  setSelectedLanguage,
+  isSubmitting,
 }: Props) {
   const LANGUAGE_OPTIONS = supportedLanguages?.map((lang) => ({
     label: lang,
@@ -63,9 +64,14 @@ export default function CodeEditor({
           </button>
           <button
             onClick={onSubmit}
-            className="px-6 py-2 rounded-[64px] bg-linear-to-r from-[#904BFF] to-[#C053C2] !text-white text-sm font-medium"
+            disabled={isSubmitting}
+            className={`px-6 py-2 rounded-[64px] text-sm font-medium transition-opacity ${
+              isSubmitting
+                ? 'bg-linear-to-r from-[#904BFF] to-[#C053C2] !text-white opacity-60 cursor-not-allowed'
+                : 'bg-linear-to-r from-[#904BFF] to-[#C053C2] !text-white cursor-pointer'
+            }`}
           >
-            Submit Code
+            {isSubmitting ? 'Submitting...' : 'Submit Code'}
           </button>
         </div>
       </div>

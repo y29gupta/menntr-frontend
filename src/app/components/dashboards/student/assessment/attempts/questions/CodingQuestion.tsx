@@ -38,7 +38,9 @@ export default function CodingQuestion({ assessmentId,question, onSubmitSuccess 
   const [code, setCode] = useState(question.previous_code ?? '');
   const [selectedLanguage, setSelectedLanguage] = useState<string[]>(
     question.supported_languages.length ? [question.supported_languages[0]] : []
-  );
+  );  // const [hasRun, setHasRun] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const queryClient = useQueryClient();
 
   useEffect(() => {
@@ -132,6 +134,7 @@ const submitCode = async () => {
               onRun={runCode}
               onSubmit={submitCode}
               supportedLanguages={question.supported_languages}
+              isSubmitting={isSubmitting}
             />
           </div>
 
