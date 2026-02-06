@@ -23,6 +23,8 @@ type Props = {
 type MicStatus = 'idle' | 'error' | 'analyzing' | 'success';
 export type CameraStatus = 'off' | 'starting' | 'working' | 'aligning' | 'success' | 'error';
 
+/* ================= CONSENT API ================= */
+
 const assessmentConsentApi = {
   giveConsent: async (assessmentId: string) => {
     const res = await api.post(`/student/assessments/${assessmentId}/consent`);

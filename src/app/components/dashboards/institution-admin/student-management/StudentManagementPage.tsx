@@ -101,6 +101,9 @@ import { Plus, Upload } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import CreateStudentForm from './createStudent/CreateStudentForm';
 import AddStudentLayout from './AddStudentLayout';
+import ConfirmModal from '@/app/ui/modals/ConfirmModal';
+import { studentsApi } from '@/app/lib/services/students.api';
+import { useQueryClient } from '@tanstack/react-query';
 
 export default function StudentManagementPage() {
   const [page, setPage] = useState(1);
@@ -111,9 +114,14 @@ export default function StudentManagementPage() {
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [pendingFilters, setPendingFilters] = useState<Record<string, string>>({});
 
+  const [deleteStudentId, setDeleteStudentId] = useState<string | null>(null);
+  const [openDeleteModal, setOpenDeleteModal] = useState(false);
+
   const [showCreateForm, setShowCreateForm] = useState(false);
 
   const { data, isLoading } = useStudents(page, debouncedSearch, filters);
+
+  const queryClient = useQueryClient();
 
   const router = useRouter();
 
@@ -149,96 +157,132 @@ export default function StudentManagementPage() {
   };
 
   return (
-    <div
-      className="w-full space-y-4  p-4 rounded-2xl 
+    <>
+      <div
+        className="w-full space-y-4  p-4 rounded-2xl 
      "
-    >
-      {/* Header (UNCHANGED UI) */}
+      >
+        {/* Header (UNCHANGED UI) */}
 
-      {/* {showCreateForm ? (
+        {/* {showCreateForm ? (
         // <CreateStudentForm mode="create" onCancel={() => setShowCreateForm(false)} />
         <AddStudentLayout onBack={() => setShowCreateForm(false)} />
       ) : (
         <> */}
-      <div>
-        <div className="flex gap-2">
-          <StudentIcon />
-          <h2 className="text-[#1A2C50] text-[20px]">Student Management</h2>
+        <div>
+          <div className="flex gap-2">
+            <StudentIcon />
+            <h2 className="text-[#1A2C50] text-[20px]">Student Management</h2>
+          </div>
+          <p className="text-[14px] text-[#636771]">
+            Manage users,roles,access level and department assignments
+          </p>
         </div>
-        <p className="text-[14px] text-[#636771]">
-          Manage users,roles,access level and department assignments
-        </p>
-      </div>
 
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <h2 className="text-lg font-semibold text-[#1A2C50]">Total Students ({meta.totalCount})</h2>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <h2 className="text-lg font-semibold text-[#1A2C50]">
+            Total Students ({meta.totalCount})
+          </h2>
 
-        <div className="flex gap-2">
-          <button
-            onClick={() => router.push('/admin/student-management/bulk-upload')}
-            className="px-4 flex items-center gap-2 py-2 text-sm rounded-[64px] border border-[#904BFF] !text-[#904BFF] hover:bg-gray-50"
-          >
-            <Upload size={16} /> Bulk Upload
-          </button>
-          <button
-            // onClick={() => setShowCreateForm(true)}
-            onClick={() => router.push('/admin/student-management/add-student')}
-            className="px-4 py-2 flex items-center gap-1 text-sm rounded-[64px]
+          <div className="flex gap-2">
+            <button
+              onClick={() => router.push('/admin/student-management/bulk-upload')}
+              className="px-4 flex items-center gap-2 py-2 text-sm rounded-[64px] border border-[#904BFF] !text-[#904BFF] hover:bg-gray-50"
+            >
+              <Upload size={16} /> Bulk Upload
+            </button>
+            <button
+              // onClick={() => setShowCreateForm(true)}
+              onClick={() => router.push('/admin/student-management/add-student')}
+              className="px-4 py-2 flex items-center gap-1 text-sm rounded-[64px]
             bg-[linear-gradient(90deg,#904BFF_0%,#C053C2_100%)]
             !text-white hover:bg-[#6D28D9]"
+            >
+              <Plus size={15} /> Add Student
+            </button>
+          </div>
+        </div>
+
+        {/* Search & Filter (UNCHANGED UI) */}
+        <div className="flex flex-col sm:flex-row gap-2">
+          <input
+            className="w-full sm:max-w-80 px-3 py-2 border border-gray-300 rounded-md text-sm"
+            placeholder="Search for students"
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+          />
+
+          <button
+            className="px-4 py-2 text-sm border border-gray-300 rounded-md"
+            onClick={() => setShowFilters((prev) => !prev)}
           >
-            <Plus size={15} /> Add Student
+            Filter
           </button>
         </div>
-      </div>
 
-      {/* Search & Filter (UNCHANGED UI) */}
-      <div className="flex flex-col sm:flex-row gap-2">
-        <input
-          className="w-full sm:max-w-80 px-3 py-2 border border-gray-300 rounded-md text-sm"
-          placeholder="Search for students"
-          value={searchInput}
-          onChange={(e) => setSearchInput(e.target.value)}
-        />
-
-        <button
-          className="px-4 py-2 text-sm border border-gray-300 rounded-md"
-          onClick={() => setShowFilters((prev) => !prev)}
-        >
-          Filter
-        </button>
+        {/* Table (ONLY pagination logic updated) */}
+        <div className="relative -mx-4 sm:mx-0 sm:overflow-visible overflow-x-auto">
+          <DataTable
+            columns={studentColumns}
+            data={students}
+            showColumnFilters={showFilters}
+            isLoading={isLoading}
+            columnFilters={pendingFilters}
+            meta={{
+              onRowClick: redirectToPerformancePage,
+              onDeleteClick: (studentId: string) => {
+                setDeleteStudentId(studentId);
+                setOpenDeleteModal(true);
+              },
+            }}
+            onColumnFilterChange={(key, value) => {
+              setPendingFilters((prev) => ({
+                ...prev,
+                [key]: value,
+              }));
+            }}
+            currentPage={meta.currentPage}
+            pageCount={meta.pageCount}
+            canPreviousPage={!meta.isFirstPage}
+            canNextPage={!meta.isLastPage}
+            onPreviousPage={() => {
+              if (meta.previousPage) setPage(meta.previousPage);
+            }}
+            onNextPage={() => {
+              if (meta.nextPage) setPage(meta.nextPage);
+            }}
+          />
+        </div>
+        {/* </> */}
+        {/* )} */}
       </div>
+      <ConfirmModal
+        open={openDeleteModal}
+        title="Delete Student"
+        description="Are you sure you want to delete this student?"
+        warning="This action cannot be undone."
+        confirmText="Delete"
+        cancelText="Cancel"
+        onCancel={() => {
+          setOpenDeleteModal(false);
+          setDeleteStudentId(null);
+        }}
+        onConfirm={async () => {
+          if (!deleteStudentId) return;
 
-      {/* Table (ONLY pagination logic updated) */}
-      <div className="relative -mx-4 sm:mx-0 sm:overflow-visible overflow-x-auto">
-        <DataTable
-          columns={studentColumns}
-          data={students}
-          showColumnFilters={showFilters}
-          columnFilters={pendingFilters}
-          meta={{
-            onRowClick: redirectToPerformancePage,
-          }}
-          onColumnFilterChange={(key, value) => {
-            setPendingFilters((prev) => ({
-              ...prev,
-              [key]: value,
-            }));
-          }}
-          currentPage={meta.currentPage}
-          pageCount={meta.pageCount}
-          canPreviousPage={!meta.isFirstPage}
-          canNextPage={!meta.isLastPage}
-          onPreviousPage={() => {
-            if (meta.previousPage) setPage(meta.previousPage);
-          }}
-          onNextPage={() => {
-            if (meta.nextPage) setPage(meta.nextPage);
-          }}
-        />
-      </div>
-      {/* </> */}
-      {/* )} */}
-    </div>
+          try {
+            await studentsApi.deleteStudent(deleteStudentId);
+
+            // ✅ invalidate ALL students queries
+            queryClient.invalidateQueries({ queryKey: ['students'] });
+
+            setOpenDeleteModal(false);
+            setDeleteStudentId(null);
+          } catch (error) {
+            console.error(error);
+          }
+        }}
+      />
+    </>
   );
 }

@@ -12,11 +12,27 @@ import { AssessmentRow } from '../assessment.types';
 //   Completed: number;
 // };
 
+// type props = {
+//   // setTabsCount: React.Dispatch<React.SetStateAction<TabsCount>>;
+//   data: AssessmentRow[];
+// };
 type props = {
-  // setTabsCount: React.Dispatch<React.SetStateAction<TabsCount>>;
   data: AssessmentRow[];
+  currentPage: number;
+  pageCount: number;
+  onPageChange: (page: number) => void;
+  pendingFilters: Record<string, string>;
+  setPendingFilters: React.Dispatch<React.SetStateAction<Record<string, string>>>;
 };
-export default function ActiveAssessments({ data }: props) {
+
+export default function ActiveAssessments({
+  data,
+  currentPage,
+  pageCount,
+  onPageChange,
+  pendingFilters,
+  setPendingFilters,
+}: props) {
   const [globalFilter, setGlobalFilter] = useState('');
   const [showColumnFilters, setShowColumnFilters] = useState(false);
 
@@ -33,12 +49,30 @@ export default function ActiveAssessments({ data }: props) {
   // }, [data.length, setTabsCount]);
 
   return (
+    // <ActiveAssessmentsTable
+    //   data={data}
+    //   isLoading={false}
+    //   globalFilter={globalFilter}
+    //   onGlobalFilterChange={setGlobalFilter}
+    //   showColumnFilters={showColumnFilters}
+    //   currentPage={currentPage}
+    //   pageCount={pageCount}
+    //   onPageChange={onPageChange}
+    // />
     <ActiveAssessmentsTable
       data={data}
       isLoading={false}
-      globalFilter={globalFilter}
-      onGlobalFilterChange={setGlobalFilter}
       showColumnFilters={showColumnFilters}
+      currentPage={currentPage}
+      pageCount={pageCount}
+      onPageChange={onPageChange}
+      columnFilters={pendingFilters}
+      onColumnFilterChange={(key: any, value: any) =>
+        setPendingFilters((prev) => ({
+          ...prev,
+          [key]: value,
+        }))
+      }
     />
   );
 }

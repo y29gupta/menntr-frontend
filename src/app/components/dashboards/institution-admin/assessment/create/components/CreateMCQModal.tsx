@@ -149,9 +149,11 @@ export default function CreateMCQModal({
   const disableAddOption = !isQuestionTypeSelected || (isTrueFalse && options.length >= 2);
 
   return (
-    <>
+    <div className="flex flex-col h-full">
       {/* BODY */}
-      <div className="space-y-6">
+      {/* <div className="space-y-6"> */}
+      {/* BODY */}
+      <div className="flex-1 overflow-y-auto space-y-6 pr-1">
         {/* Dropdowns */}
         <div className="flex gap-3">
           <div className="w-[180px]">
@@ -383,6 +385,6 @@ export default function CreateMCQModal({
           </button>
         </div>
       </div>
-    </>
+    </div>
   );
 }

@@ -9,7 +9,7 @@ export type Institution = {
   plan: string;
   students: string;
   status: string;
-  contactEmail?: string;
+  contact_email?: string;
 };
 
 export const institutionColumns = (
@@ -38,10 +38,10 @@ export const institutionColumns = (
     },
   },
   {
-    accessorKey: 'contactEmail',
+    accessorKey: 'contact_email',
     header: 'Email',
     cell: ({ row }) => {
-      return row.original.contactEmail;
+      return row.original.contact_email;
     },
   },
   {

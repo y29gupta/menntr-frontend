@@ -115,6 +115,7 @@ updatePlatformAccess: (
         data: Partial<StudentFormValues>
       ) => {
     const payload: Record<string, any> = {};
+    console.log(studentId,"stud")
 
     if (data.firstName !== undefined) payload.first_name = data.firstName;
     if (data.lastName !== undefined) payload.last_name = data.lastName;
@@ -128,9 +129,14 @@ updatePlatformAccess: (
 
     return api.put(`/students/${studentId}`, payload);
   },
+  
+  deleteStudent: (studentId: string) => {
+  return api.delete(`/students/${studentId}`);
+},
 
 
 };
+
 
 export const getPrograms = async () => {
   const res = await api.get('/students/academic/meta');

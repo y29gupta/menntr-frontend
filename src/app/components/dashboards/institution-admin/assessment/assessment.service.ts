@@ -11,7 +11,7 @@ import { api } from "@/app/lib/api";
 // import { AssessmentQuestionResponse, getAssessmentListResponse } from "./assessment.schema";
 import { AssessmentAccessPayload, AssessmentListResult, AssessmentMetaResponse, AssessmentQuestionResponse, CreateAssessmentPayload, CreateCodingQuestionPayload, getAssessmentListResponse, QuestionMetaType, UpdateQuestionPayload } from "./assessment.types";
 
-export type AssessmentTab = "active" | "draft" | "closed";
+export type AssessmentTab = "active" | "draft" | "completed";
 
 export const assessmentApi = {
   // getAssessmentList: async (
@@ -22,23 +22,37 @@ export const assessmentApi = {
   //   });
   //   return res.data;
   // },
+getAssessmentList: async (
+  tab: 'active' | 'draft' | 'completed',
+  page = 1,
+  search?: string,
+  filters: Record<string, string> = {}
+): Promise<AssessmentListResult> => {
 
-   getAssessmentList: async (
-    tab: 'active' | 'draft' | 'closed',
-    page = 1
-  ): Promise<AssessmentListResult> => {
-    const res = await api.get('/assessments', {
-      params: {
-        tab,
-        page,
-      },
-    });
+  const params: Record<string, any> = {
+    tab,
+    page,
+  };
 
-    return {
-      rows: res.data.data, // 👈 array for table
-      meta: res.data.meta, // 👈 pagination
-    };
-  },
+  // ✅ Only attach search if exists
+  if (search && search.trim() !== '') {
+    params.search = search;
+  }
+
+  // ✅ Attach column filters only if exist
+  Object.entries(filters).forEach(([key, value]) => {
+    if (value) params[key] = value;
+  });
+
+  const res = await api.get('/assessments', { params });
+
+  return {
+    rows: res.data.data,
+    meta: res.data.meta,
+  };
+},
+
+
    getAssessmentMeta: async (): Promise<AssessmentMetaResponse> => {
     const res = await api.get("/assessments/meta");
     return res.data;

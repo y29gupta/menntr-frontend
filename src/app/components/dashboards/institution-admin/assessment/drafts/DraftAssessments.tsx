@@ -6,10 +6,13 @@ import { assessmentApi } from '../assessment.service';
 // import DraftAssessmentCard from './DraftAssessmentsCard';
 import DraftAssessmentsTable from './DraftAssessmentTable';
 import { AssessmentRow } from '../assessment.types';
-
 type props = {
-  // setTabsCount: React.Dispatch<React.SetStateAction<TabsCount>>;
   data: AssessmentRow[];
+  currentPage: number;
+  pageCount: number;
+  onPageChange: (page: number) => void;
+  pendingFilters: Record<string, string>;
+  setPendingFilters: React.Dispatch<React.SetStateAction<Record<string, string>>>;
 };
 
 export default function DraftAssessments({ data }: props) {

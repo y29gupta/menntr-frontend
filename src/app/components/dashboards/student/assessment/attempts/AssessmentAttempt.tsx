@@ -53,7 +53,25 @@ export default function AssessmentAttempt() {
     enabled: !!assessmentId,
   });
 
-  console.log(runtime, 'runtime');
+  useEffect(() => {
+    const fromPreview = sessionStorage.getItem('return-from-preview');
+    if (!fromPreview || !runtime?.total_questions) return;
+
+    setCurrentIndex(runtime.total_questions - 1);
+
+    sessionStorage.removeItem('return-from-preview');
+  }, [runtime?.total_questions]);
+
+  useEffect(() => {
+    const saved = sessionStorage.getItem('assessment-attempt-state');
+    if (!saved) return;
+
+    const parsed = JSON.parse(saved);
+
+    setCurrentIndex(parsed.currentIndex);
+    setQuestionStatus(parsed.questionStatus);
+    setSelectedOptionsMap(parsed.selectedOptionsMap);
+  }, []);
 
   const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -69,17 +87,32 @@ export default function AssessmentAttempt() {
     >
   >({});
 
+  // useEffect(() => {
+  //   if (!runtime?.total_questions) return;
+
+  //   setQuestionStatus(
+  //     Object.fromEntries(
+  //       Array.from({ length: runtime.total_questions }).map((_, i) => [
+  //         i,
+  //         { attempted: false, visited: i === 0, review: false },
+  //       ])
+  //     )
+  //   );
+  // }, [runtime?.total_questions]);
+
   useEffect(() => {
     if (!runtime?.total_questions) return;
 
-    setQuestionStatus(
-      Object.fromEntries(
+    setQuestionStatus((prev) => {
+      if (Object.keys(prev).length > 0) return prev;
+
+      return Object.fromEntries(
         Array.from({ length: runtime.total_questions }).map((_, i) => [
           i,
           { attempted: false, visited: i === 0, review: false },
         ])
-      )
-    );
+      );
+    });
   }, [runtime?.total_questions]);
 
   /* ================= Fetch Question ================= */
@@ -280,6 +313,14 @@ export default function AssessmentAttempt() {
     try {
       if (currentQuestion?.type === 'single_correct') {
         await saveCurrentAnswer();
+        sessionStorage.setItem(
+          'assessment-attempt-state',
+          JSON.stringify({
+            currentIndex,
+            questionStatus,
+            selectedOptionsMap,
+          })
+        );
       }
 
       if (currentQuestion?.type === 'coding') {
