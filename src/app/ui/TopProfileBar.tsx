@@ -24,38 +24,6 @@ const TopProfileBar = ({ userRole, RoleIcon }: topBarSchema) => {
   const [open, setOpen] = useState(false);
   const [hasNew, setHasNew] = useState(false);
 
-  // const notifications: Notification[] = [
-  //   {
-  //     id: 1,
-  //     title: 'New assessment published',
-  //     description: 'A new assessment has been assigned to you.',
-  //     time: '5 mins ago',
-  //     createdAt: new Date(),
-  //     isNew: true,
-  //   },
-  //   {
-  //     id: 2,
-  //     title: 'Results published for Practice Test – Python',
-  //     description: 'Evaluation is complete. Results are now available.',
-  //     time: '8:15 AM',
-  //     createdAt: new Date(),
-  //   },
-  //   {
-  //     id: 3,
-  //     title: 'New assessment published',
-  //     description: 'A new assessment has been assigned to you.',
-  //     time: '8:15 AM',
-  //     createdAt: new Date(Date.now() - 86400000),
-  //   },
-  //   {
-  //     id: 4,
-  //     title: 'Results published for Practice Test – Python',
-  //     description: 'Evaluation is complete. Results are now available.',
-  //     time: '8:15 AM',
-  //     createdAt: new Date(Date.now() - 86400000),
-  //   },
-  // ];
-
   const { data, isLoading } = useNotifications();
 
   const notifications = useMemo(() => {

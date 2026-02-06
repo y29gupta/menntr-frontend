@@ -86,7 +86,6 @@ const Dashboard = ({ onCreateInstitution, onEditInstitution }: Props) => {
   } = useQuery({
     queryKey: ['institutions', filters],
     queryFn: () => fetchInstitutions(filters),
-    placeholderData: (previousData) => previousData,
   });
 
   const institutions: Institution[] = mapInstitutions(data.data);

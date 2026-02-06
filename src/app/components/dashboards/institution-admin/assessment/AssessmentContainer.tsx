@@ -196,21 +196,21 @@ export default function AssessmentContainer() {
         queryFn: () =>
           assessmentApi.getAssessmentList('active', activePage, debouncedSearch, filters),
         placeholderData: keepPreviousData,
-        enabled: activeTab === 'Active',
+        // enabled: activeTab === 'Active',
       },
       {
         queryKey: ['assessments', 'drafts', draftPage, debouncedSearch, filters],
         queryFn: () =>
           assessmentApi.getAssessmentList('draft', draftPage, debouncedSearch, filters),
         placeholderData: keepPreviousData,
-        enabled: activeTab === 'Drafts',
+        // enabled: activeTab === 'Drafts',
       },
       {
         queryKey: ['assessments', 'completed', completedPage, debouncedSearch, filters],
         queryFn: () =>
           assessmentApi.getAssessmentList('completed', completedPage, debouncedSearch, filters),
         placeholderData: keepPreviousData,
-        enabled: activeTab === 'Completed',
+        // enabled: activeTab === 'Completed',
       },
     ],
   });

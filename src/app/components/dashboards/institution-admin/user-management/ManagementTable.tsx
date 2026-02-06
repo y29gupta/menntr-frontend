@@ -96,6 +96,7 @@ export default function ManagementTable({
 
     const res = await fetch(`/api/institutionsadmin/user-management/users?${params.toString()}`, {
       credentials: 'include',
+      cache: 'no-store'
     });
 
     if (!res.ok) {
