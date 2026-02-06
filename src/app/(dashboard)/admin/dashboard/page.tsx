@@ -85,14 +85,16 @@ const Page = () => {
 
       <DepartmentSummaryStrip data={departmentData} />
 
-      <HighestAvgDepartmentCard
-        label="Dept. With Highest Avg"
-        valueText={`${deptAnalytics.highestDepartment.name} (${deptAnalytics.highestDepartment.averagePercentage}%)`}
-        percentage={deptAnalytics.highestDepartment.averagePercentage}
-        barColor="linear-gradient(90deg, #5BC376 0%, #149436 100%)"
-        barBgColor="#DCFCE7"
-        footerText="Showing best performance this month"
-      />
+      {deptAnalytics.highestDepartment && (
+        <HighestAvgDepartmentCard
+          label="Dept. With Highest Avg"
+          valueText={`${deptAnalytics.highestDepartment.name} (${deptAnalytics.highestDepartment.averagePercentage}%)`}
+          percentage={deptAnalytics.highestDepartment.averagePercentage}
+          barColor="linear-gradient(90deg, #5BC376 0%, #149436 100%)"
+          barBgColor="#DCFCE7"
+          footerText="Showing best performance this month"
+        />
+      )}
     </div>
   );
 };
