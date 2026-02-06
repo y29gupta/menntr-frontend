@@ -51,7 +51,7 @@ function PerformanceSection({ assessmentId }: Props) {
       <QuestionPerformance
         data={questionData}
         title="Average time per question"
-        tooltipMode="percentage"
+        tooltipMode="marks"
         yDomain={[0, 100]}
         yTicks={[0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]}
       />
