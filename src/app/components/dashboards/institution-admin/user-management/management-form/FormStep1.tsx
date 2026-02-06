@@ -130,7 +130,7 @@ const ProfileForm = ({ onBack, onNext, mode }: Props) => {
               type="submit"
               className="px-10 py-2.5 rounded-full text-sm font-medium 
               bg-[linear-gradient(90deg,#904BFF_0%,#C053C2_100%)]
-              text-white"
+              text-white!"
             >
               {mode === 'edit' ? 'Save & Go Next' : 'Go Next'}
             </button>

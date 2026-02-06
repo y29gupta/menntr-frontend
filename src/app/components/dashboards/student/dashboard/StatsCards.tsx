@@ -20,12 +20,14 @@ const stats = [
     sub: 'Out of 58 students',
   },
 ];
-
 export default function StatsCards() {
   return (
-    <div className="grid grid-cols-4 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
       {stats.map((card) => (
-        <div key={card.title} className="bg-white p-4 rounded-xl border shadow-sm">
+        <div
+          key={card.title}
+          className="bg-white p-4 rounded-xl border border-[#DBE3E9] shadow-[0px_0px_8px_0px_#0F172A1F]"
+        >
           <p className="text-sm text-gray-500">{card.title}</p>
 
           <h3 className="text-xl font-semibold mt-2">{card.value}</h3>
