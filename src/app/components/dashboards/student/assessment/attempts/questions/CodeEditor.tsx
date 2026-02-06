@@ -19,7 +19,6 @@ type Props = {
   setSelectedLanguage: (v: string[]) => void;
   onRun: () => void;
   onSubmit: () => void;
-  supportedLanguages?: string[];
   isSubmitting?: boolean;
 };
 
@@ -29,6 +28,8 @@ export default function CodeEditor({
   onRun,
   onSubmit,
   supportedLanguages,
+  selectedLanguage,
+  setSelectedLanguage,
   isSubmitting,
 }: Props) {
   const LANGUAGE_OPTIONS = supportedLanguages?.map((lang) => ({

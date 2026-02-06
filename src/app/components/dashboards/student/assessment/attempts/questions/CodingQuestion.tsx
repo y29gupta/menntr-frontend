@@ -40,7 +40,6 @@ export default function CodingQuestion({ assessmentId,question, onSubmitSuccess 
     question.supported_languages.length ? [question.supported_languages[0]] : []
   );  // const [hasRun, setHasRun] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
   const queryClient = useQueryClient();
 
   useEffect(() => {
@@ -78,7 +77,9 @@ const runCode = async () => {
 
 
 const submitCode = async () => {
-  await assessmentApi.saveCodingAnswer(assessmentId, {
+  try {
+    setIsSubmitting(true);
+    await assessmentApi.saveCodingAnswer(assessmentId, {
     question_id: Number(question.question_id),
     language: selectedLanguage,
     source_code: code,
@@ -89,6 +90,9 @@ const submitCode = async () => {
   });
 
   onSubmitSuccess();
+  } finally {
+    setIsSubmitting(false);
+  }
 };
 
 
