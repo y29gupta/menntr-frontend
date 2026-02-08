@@ -2,13 +2,16 @@
 
 import { ConfigProvider } from 'antd';
 import QueryProvider from './QueryProvider';
+import { AuthProvider } from './AuthProvider';
 import { ToastContainer, Bounce } from 'react-toastify';
 
 export default function Providers({ children }: { children: React.ReactNode }) {
   return (
     <ConfigProvider>
       <QueryProvider>
-        {children}
+        <AuthProvider>
+          {children}
+        </AuthProvider>
         <ToastContainer
           position="top-right"
           autoClose={3000}

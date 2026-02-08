@@ -2,11 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import Sidebar from './Sidebar';
-import { Role } from '@/app/lib/roles';
-// import { Role } from '@/lib/roles';
 
 type Props = {
-  role: Role | null;
+  role: string | null;
   children: React.ReactNode;
 };
 
@@ -20,7 +18,6 @@ export default function DashboardShell({ role, children }: Props) {
     window.addEventListener('resize', resize);
     return () => window.removeEventListener('resize', resize);
   }, []);
-  console.log(role, 'role is ');
 
   return (
     <div className="flex w-full min-h-screen bg-white">

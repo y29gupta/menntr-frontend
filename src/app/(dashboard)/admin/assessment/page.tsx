@@ -1,19 +1,15 @@
-// import AssessmentContainer from '@/app/components/dashboards/institution-admin/assessment/AssessmentContainer';
+'use client';
+
 import AssessmentContainer from '@/app/components/dashboards/institution-admin/assessment/AssessmentContainer';
-import { SearchParams } from 'next/dist/server/request/search-params';
-import { redirect } from 'next/navigation';
-import React from 'react';
+import ModuleRoute from '@/app/components/auth/ModuleRoute';
+import { PERMISSIONS } from '@/app/constants/permissions';
 
-const page = ({ searchParams }: { searchParams: { tab?: string } }) => {
-  // if (!searchParams.tab) {
-  //   redirect('/admin/assessment?tab=active');
-  // }
-
+const Page = () => {
   return (
-    <>
+    <ModuleRoute module={PERMISSIONS.ASSESSMENT.MODULE}>
       <AssessmentContainer />
-    </>
+    </ModuleRoute>
   );
 };
 
-export default page;
+export default Page;

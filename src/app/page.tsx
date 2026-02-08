@@ -6,7 +6,6 @@ import CampusUserCard from './components/layout/CampusUserCard';
 // import { useRouter } from 'next/navigation';
 // import RobotCard from './ui/RobotCard';
 
-import { ROLE_REDIRECT } from './lib/roles';
 import RobotClient from './components/RobotClient';
 
 export default function Page() {

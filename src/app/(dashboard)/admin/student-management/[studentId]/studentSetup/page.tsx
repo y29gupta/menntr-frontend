@@ -1,12 +1,17 @@
-import StudentSetupForm from '@/app/components/dashboards/institution-admin/student-management/createStudent/StudentSetupForm';
-import React from 'react';
+'use client';
 
-const page = () => {
+import StudentSetupForm from '@/app/components/dashboards/institution-admin/student-management/createStudent/StudentSetupForm';
+import ModuleRoute from '@/app/components/auth/ModuleRoute';
+import { PERMISSIONS } from '@/app/constants/permissions';
+
+const Page = () => {
   return (
-    <div className=" w-full ">
-      <StudentSetupForm />
-    </div>
+    <ModuleRoute module={PERMISSIONS.STUDENT_MANAGEMENT.MODULE}>
+      <div className="w-full">
+        <StudentSetupForm />
+      </div>
+    </ModuleRoute>
   );
 };
 
-export default page;
+export default Page;

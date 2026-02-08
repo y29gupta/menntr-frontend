@@ -13,18 +13,10 @@ import HighestAvgDepartmentCard from '@/app/components/dashboards/institution-ad
 import DashboardWelcomeHeader from '@/app/components/dashboards/institution-admin/dashboard/DashboardWelcomeHeader';
 import { getStudentMetricsUI } from '@/app/components/dashboards/institution-admin/dashboard/studentMetricsUI';
 import { fetchDashboardData } from '@/app/lib/api/dashboardApi';
+import ModuleRoute from '@/app/components/auth/ModuleRoute';
+import { PERMISSIONS } from '@/app/constants/permissions';
 
-type MeContextResponse = {
-  user: {
-    first_name: string | null;
-    last_name: string | null;
-  };
-  institution: {
-    name: string;
-  };
-};
-
-const Page = () => {
+const DashboardContent = () => {
   const [cards, setCards] = useState<any[]>([]);
   const [departmentData, setDepartmentData] = useState<DepartmentMetric[]>([]);
   const [deptAnalytics, setDeptAnalytics] = useState<any>(null);
@@ -54,11 +46,10 @@ const Page = () => {
     loadDashboard();
   }, []);
 
-  if (!deptAnalytics) return null; // or loader
+  if (!deptAnalytics) return null;
 
   return (
     <div className="flex flex-col gap-4 w-full">
-      {/* <DashboardWelcomeHeader userName={userName} showAlert /> */}
       <DashboardWelcomeHeader userName={userName} />
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
         {cards.map((item, i) => (
@@ -96,6 +87,14 @@ const Page = () => {
         />
       )}
     </div>
+  );
+};
+
+const Page = () => {
+  return (
+    <ModuleRoute module={PERMISSIONS.DASHBOARD.MODULE}>
+      <DashboardContent />
+    </ModuleRoute>
   );
 };
 

@@ -3,31 +3,17 @@ import OrganizationIcon from '../../icons/OrganizationIcon';
 type Props = {
   activeTab: 'Categories' | 'Departments' | 'Batches' | 'Role Hierarchy';
   onTabChange: (tab: Props['activeTab']) => void;
+  visibleTabs?: Props['activeTab'][];
 };
 
-const tabs: Props['activeTab'][] = ['Categories', 'Departments', 'Batches', 'Role Hierarchy'];
+const defaultTabs: Props['activeTab'][] = ['Categories', 'Departments', 'Batches', 'Role Hierarchy'];
 
-export default function OrganizationHeader({ activeTab, onTabChange }: Props) {
+export default function OrganizationHeader({ activeTab, onTabChange, visibleTabs }: Props) {
+  const tabs = visibleTabs ?? defaultTabs;
+
   return (
     <div className="w-full  px-4 pt-4 flex flex-col gap-6  ">
-      {/* <div className="flex justify-between items-center ">
-            <div className="">
-              <div className="flex space-x-2 text-xl items-center">
-                <OrganizationIcon />
-                <h2 className="text-[#1A2C50]">Organization</h2>
-              </div>
-              <p>Manage categories departments and batches</p>
-            </div>
-
-            <div className="flex space-x-2 text-[#C46800]">
-              <WarningIcon /> <p>Your plan going to expire</p>
-            </div>
-          </div> */}
-
       <div className="w-full    flex flex-col   ">
-        {/* Top Row */}
-        {/* <div className="flex  justify-between"> */}
-        {/* Left: Title */}
         <div className="flex  gap-2">
           <span className="">
             <OrganizationIcon />
@@ -36,7 +22,6 @@ export default function OrganizationHeader({ activeTab, onTabChange }: Props) {
             <h2 className="text-[20px] font-semibold text-gray-900">Organization</h2>
           </div>
         </div>
-        {/* </div> */}
         <p className="text-sm text-gray-500">Manage categories, departments and batches</p>
 
         {/* Tabs */}

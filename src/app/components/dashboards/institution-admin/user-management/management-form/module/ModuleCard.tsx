@@ -123,16 +123,16 @@ const ModuleCard = ({
   roleId?: number;
 }) => {
   const { data, isLoading, isError } = useQuery({
-    queryKey: ["features", module.id],
-    queryFn: () => fetchModuleFeatures(module.id),
+    queryKey: ["features", module.code],
+    queryFn: () => fetchModuleFeatures(module.code),
   });
 
   const features: Feature[] = data?.data || [];
-  const [selected, setSelected] = useState<number[]>([]);
-  const [featuresWithDefaults, setFeaturesWithDefaults] = useState<Set<number>>(new Set());
+  const [selected, setSelected] = useState<string[]>([]);
+  const [featuresWithDefaults, setFeaturesWithDefaults] = useState<Set<string>>(new Set());
 
-  // Use feature IDs as dependency instead of the array itself to avoid infinite loops
-  const featureIds = features.map((f) => f.id).join(',');
+  // Use feature codes as dependency instead of the array itself to avoid infinite loops
+  const featureCodes = features.map((f) => f.code).join(',');
 
   // Fetch default permissions for each feature to determine which ones should be selected
   useEffect(() => {
@@ -142,8 +142,8 @@ const ModuleCard = ({
     }
 
     // By default, select all features
-    const allFeatureIds = features.map((f) => f.id);
-    setSelected(allFeatureIds);
+    const allFeatureCodes = features.map((f) => f.code);
+    setSelected(allFeatureCodes);
 
     // If roleId is available, check each feature for default permissions
     if (!roleId) {
@@ -152,7 +152,7 @@ const ModuleCard = ({
 
     // Check each feature for default permissions and uncheck those without defaults
     const checkFeaturesForDefaults = async () => {
-      const featuresToKeep = new Set<number>();
+      const featuresToKeep = new Set<string>();
 
       await Promise.all(
         features.map(async (feature) => {
@@ -163,38 +163,35 @@ const ModuleCard = ({
             );
             if (res.ok) {
               const data = await res.json();
-              // Keep feature if it has default permissions
               if (data.defaultSelectedPermissions && data.defaultSelectedPermissions.length > 0) {
-                featuresToKeep.add(feature.id);
+                featuresToKeep.add(feature.code);
               }
             }
           } catch (error) {
             console.error(`Error checking defaults for feature ${feature.code}:`, error);
-            // On error, keep the feature selected (fail-safe)
-            featuresToKeep.add(feature.id);
+            featuresToKeep.add(feature.code);
           }
         })
       );
 
-      // Update selected to only include features with default permissions
       setSelected(Array.from(featuresToKeep));
       setFeaturesWithDefaults(featuresToKeep);
     };
 
     checkFeaturesForDefaults();
-  }, [featureIds, roleId]);
+  }, [featureCodes, roleId]);
 
   const toggleSelectAll = () => {
     if (selected.length === features.length) {
       setSelected([]);
     } else {
-      setSelected(features.map((f) => f.id));
+      setSelected(features.map((f) => f.code));
     }
   };
 
-  const toggleFeature = (id: number) => {
+  const toggleFeature = (code: string) => {
     setSelected((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+      prev.includes(code) ? prev.filter((x) => x !== code) : [...prev, code]
     );
   };
 
@@ -202,7 +199,7 @@ const ModuleCard = ({
     features.length > 0 && selected.length === features.length;
 
   const selectedFeatures = features.filter((f) =>
-    selected.includes(f.id)
+    selected.includes(f.code)
   );
 
   return (
@@ -231,11 +228,11 @@ const ModuleCard = ({
             </label>
 
             {features.map((f) => (
-              <label key={f.id} className="flex items-center gap-3 cursor-pointer">
+              <label key={f.code} className="flex items-center gap-3 cursor-pointer">
                 <input
                   type="checkbox"
-                  checked={selected.includes(f.id)}
-                  onChange={() => toggleFeature(f.id)}
+                  checked={selected.includes(f.code)}
+                  onChange={() => toggleFeature(f.code)}
                   className="w-5 h-5 shrink-0 rounded border-2 border-gray-300"
                 />
                 <span className="text-gray-700">{f.name}</span>
