@@ -1,0 +1,40 @@
+import { api } from '@/app/lib/api';
+import { BatchApiResponse } from './batches.columns';
+import { BatchListResponse, CreateBatchPayload } from './batches.types';
+
+// export const getBatches = async (): Promise<BatchApiResponse> => {
+//   const res = await api.get('/organization/batches');
+//   return res.data;
+// };
+ 
+
+export const getBatches = async (
+  page = 1,
+  limit = 10,
+  filters: Record<string, any> = {}
+): Promise<BatchListResponse> => {
+  const res = await api.get('/organization/batches', {
+    params: {
+      page,
+      limit,
+      ...filters,
+    },
+  });
+
+  return res.data;
+};
+export const createBatch = (payload: CreateBatchPayload) =>
+  api.post('/organization/batches', payload);
+
+export const updateBatch = ({
+  id,
+  payload,
+}: {
+  id: number;
+  payload: Partial<CreateBatchPayload>;
+}) => api.put(`/organization/batches/${id}`, payload);
+
+export const getBatchMeta = () => api.get('/organization/batches/meta');
+
+
+
