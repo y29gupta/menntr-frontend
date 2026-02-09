@@ -23,6 +23,8 @@ type Props = {
 type MicStatus = 'idle' | 'error' | 'analyzing' | 'success';
 export type CameraStatus = 'off' | 'starting' | 'working' | 'aligning' | 'success' | 'error';
 
+/* ================= CONSENT API ================= */
+
 const assessmentConsentApi = {
   giveConsent: async (assessmentId: string) => {
     const res = await api.post(`/student/assessments/${assessmentId}/consent`);
@@ -90,14 +92,14 @@ export default function AssessmentStepModal({ open, onClose, assessmentId }: Pro
   if (!open) return null;
 
   const nextStep = () => {
-if (step === 1) {
-  if (!consentChecked) return;
-  if (!assessmentIdFromUrl || consentMutation.isPending) return;
+    if (step === 1) {
+      if (!consentChecked) return;
+      if (!assessmentIdFromUrl || consentMutation.isPending) return;
 
-  consentMutation.mutate(assessmentIdFromUrl);
-  return;
-}
-    
+      consentMutation.mutate(assessmentIdFromUrl);
+      return;
+    }
+
     if (step === 4) {
       if (!assessmentId || startAssessmentMutation.isPending) return;
 

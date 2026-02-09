@@ -7,8 +7,8 @@ import { MetricCard } from '@/app/components/dashboards/super-admin/MetricCard';
 import { institutionColumns } from './institution.columns';
 import DataTable from '../../table/DataTable';
 import { Search, Filter } from 'lucide-react';
-import Profile from '@/app/ui/Profile';
 import { Spin } from 'antd';
+import axios from 'axios';
 
 import {
   fetchInstitutions,
@@ -16,7 +16,6 @@ import {
   Institution,
   FilterParams,
 } from '@/app/lib/institutions.api';
-import { logout } from '@/app/lib/loginService';
 import TopProfileBar from '@/app/ui/TopProfileBar';
 
 type Props = {
@@ -29,7 +28,7 @@ const DEBOUNCE_DELAY = 500;
 
 const Dashboard = ({ onCreateInstitution, onEditInstitution }: Props) => {
   const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(ITEMS_PER_PAGE);
+  const [limit] = useState(ITEMS_PER_PAGE);
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [showColumnFilters, setShowColumnFilters] = useState(false);
@@ -37,6 +36,7 @@ const Dashboard = ({ onCreateInstitution, onEditInstitution }: Props) => {
   const [debouncedColumnFilters, setDebouncedColumnFilters] = useState<Record<string, string>>({});
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
+  /* -------------------- DEBOUNCE -------------------- */
   useEffect(() => {
     if (debounceTimerRef.current) {
       clearTimeout(debounceTimerRef.current);
@@ -55,6 +55,7 @@ const Dashboard = ({ onCreateInstitution, onEditInstitution }: Props) => {
     };
   }, [search, columnFilters]);
 
+  /* -------------------- INSTITUTION QUERY -------------------- */
   const filters: FilterParams = {
     page,
     limit,
@@ -85,12 +86,28 @@ const Dashboard = ({ onCreateInstitution, onEditInstitution }: Props) => {
   } = useQuery({
     queryKey: ['institutions', filters],
     queryFn: () => fetchInstitutions(filters),
-    placeholderData: (previousData) => previousData,
   });
 
-  const institutions: Institution[] = data ? mapInstitutions(data.data) : [];
-  const totalCount = data?.meta?.totalCount ?? 0;
+  const institutions: Institution[] = mapInstitutions(data.data);
+  const totalCount = data.meta.totalCount ?? 0;
 
+  /* -------------------- STUDENT COUNT QUERY -------------------- */
+  const {
+    data: studentCountData,
+    isLoading: isStudentCountLoading,
+    isError: isStudentCountError,
+  } = useQuery({
+    queryKey: ['student-count'],
+    queryFn: async () => {
+      const res = await axios.get('api/users/student-count', {
+        withCredentials: true,
+      });
+      return res.data;
+    },
+    staleTime: 60 * 1000,
+  });
+
+  /* -------------------- HANDLERS -------------------- */
   const handleColumnFilterChange = (columnName: string, value: string) => {
     setColumnFilters((prev) => ({
       ...prev,
@@ -103,50 +120,47 @@ const Dashboard = ({ onCreateInstitution, onEditInstitution }: Props) => {
   };
 
   const handlePreviousPage = () => {
-    if (data?.meta?.previousPage) {
+    if (data.meta.previousPage) {
       setPage(data.meta.previousPage);
     }
   };
 
   const handleNextPage = () => {
-    if (data?.meta?.nextPage) {
+    if (data.meta.nextPage) {
       setPage(data.meta.nextPage);
     }
   };
 
   return (
-    <main className=" h-full px-4 sm:px-6 lg:px-8 xl:px-10 py-5 flex flex-col gap-6 text-[13px] sm:text-sm lg:text-base overflow-y-auto [&::-webkit-scrollbar]:hidden scrollbar-none1">
-      {/* <div className="flex border items-center justify-between gap-4 min-w-0">
-        <h1 className="flex items-center gap-2 font-semibold text-gray-800 text-base whitespace-nowrap overflow-hidden text-ellipsis">
-          <SuperAdminIcon />
-          <span className="truncate">
-            Super Admin Portal –
-            <span className="text-gray-500 ml-1 hidden sm:inline">System admin</span>
-          </span>
-        </h1>
-
-        <div className="shrink-0">
-          <Profile />
-        </div>
-      </div> */}
+    <main className="h-full px-4 sm:px-6 lg:px-8 xl:px-10 py-5 flex flex-col gap-6 text-[13px] sm:text-sm lg:text-base overflow-y-auto [&::-webkit-scrollbar]:hidden scrollbar-none1">
       <TopProfileBar userRole="Super Admin Portal- System Admin" RoleIcon={<SuperAdminIcon />} />
 
+      {/* -------------------- METRICS -------------------- */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <MetricCard
           title="Total Institutions"
-          value={isLoading ? '—' : String(totalCount ?? 0)}
+          value={isLoading ? '—' : String(totalCount)}
           bg="bg-[linear-gradient(106.82deg,#F2F7FF_3.46%,#D2E3FE_96.84%)]"
         />
+
         <MetricCard
           title="Active students"
-          value="15,000"
+          value={
+            isStudentCountLoading
+              ? '—'
+              : isStudentCountError
+                ? 'N/A'
+                : String(studentCountData?.count ?? 0)
+          }
           bg="bg-[linear-gradient(106.63deg,#FAFFF2_3.48%,#FFFAD0_96.61%)]"
         />
+
         <MetricCard
           title="Revenue (MRR)"
           value="₹ 4.5L"
           bg="bg-[linear-gradient(106.5deg,#F8F2FF_2.99%,#E2C9FF_96.75%)]"
         />
+
         <MetricCard
           title="System Health"
           value="99.8%"
@@ -154,11 +168,10 @@ const Dashboard = ({ onCreateInstitution, onEditInstitution }: Props) => {
         />
       </div>
 
+      {/* -------------------- TABLE -------------------- */}
       <div className="w-full rounded-3xl border border-[#DBDFE7] bg-white p-4 sm:p-6 lg:p-8">
         <div className="flex items-center justify-between gap-4 mb-4">
-          <h2 className="hidden sm:block font-semibold text-gray-800 text-sm sm:text-base lg:text-lg">
-            All Institutions
-          </h2>
+          <h2 className="hidden sm:block font-semibold text-gray-800">All Institutions</h2>
 
           <button
             onClick={onCreateInstitution}
@@ -194,6 +207,7 @@ const Dashboard = ({ onCreateInstitution, onEditInstitution }: Props) => {
             <Spin size="large" />
           </div>
         )}
+
         {isError && <p className="text-red-500">Failed to load institutions</p>}
 
         {!isError && (
@@ -203,12 +217,12 @@ const Dashboard = ({ onCreateInstitution, onEditInstitution }: Props) => {
             columnFilters={columnFilters}
             onColumnFilterChange={handleColumnFilterChange}
             showColumnFilters={showColumnFilters}
-            currentPage={data?.meta?.currentPage ?? 1}
-            pageCount={data?.meta?.pageCount ?? 1}
+            currentPage={data.meta.currentPage}
+            pageCount={data.meta.pageCount}
             onPreviousPage={handlePreviousPage}
             onNextPage={handleNextPage}
-            canPreviousPage={!!data?.meta?.previousPage}
-            canNextPage={!!data?.meta?.nextPage}
+            canPreviousPage={!!data.meta.previousPage}
+            canNextPage={!!data.meta.nextPage}
           />
         )}
       </div>

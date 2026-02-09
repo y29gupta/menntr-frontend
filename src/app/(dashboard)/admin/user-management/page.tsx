@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { Search, Filter, Upload } from 'lucide-react';
 import { useForm, FormProvider } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { showApiError, showSuccess } from '@/app/ui/apiToast';
 
 import ManagementTable from '@/app/components/dashboards/institution-admin/user-management/ManagementTable';
@@ -314,7 +314,7 @@ const Page = () => {
       showApiError(error);
     },
   });
-
+  const queryClient = useQueryClient();
   const updateUserMutation = useMutation({
     mutationFn: async (payload: {
       firstName?: string;
@@ -364,6 +364,10 @@ const Page = () => {
 
     onSuccess: () => {
       showSuccess('User updated successfully');
+      queryClient.invalidateQueries({
+        queryKey: ['users'],
+        exact: false,
+      })
       setView('list');
       setStep(1);
       setModulePermissions({});

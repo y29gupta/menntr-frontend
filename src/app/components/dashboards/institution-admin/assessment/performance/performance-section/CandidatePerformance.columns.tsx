@@ -5,20 +5,20 @@ import { FileText } from 'lucide-react';
 
 export type CandidatePerformance = {
   id: number;
+  attemptId: number;
   name: string;
   email: string;
   avatarUrl?: string;
   duration: string;
   score: string;
   percentage: number;
-  status: 'Completed' | 'In Progress' | 'Not Started';
+  status: 'Not Started' | 'In Progress' | 'Submitted' | 'Evaluated';
   assessmentName: string;
 };
 
 /* ========= COLUMNS ========= */
 
 export const candidatePerformanceColumns = (
-  onRowClick: (row: CandidatePerformance) => void,
   onViewReport: (row: CandidatePerformance) => void
 ): ColumnDef<CandidatePerformance>[] => [
   {
@@ -66,9 +66,10 @@ export const candidatePerformanceColumns = (
       const status = getValue() as CandidatePerformance['status'];
 
       const map = {
-        Completed: 'bg-green-100 text-green-700',
-        'In Progress': 'bg-yellow-100 text-yellow-700',
         'Not Started': 'bg-gray-200 text-gray-600',
+        'In Progress': 'bg-yellow-100 text-yellow-700',
+        Submitted: 'bg-blue-100 text-blue-700',
+        Evaluated: 'bg-green-100 text-green-700',
       };
 
       return (

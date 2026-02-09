@@ -10,7 +10,8 @@ type Props = {
   onGoBack: () => void;
   onSubmitNow: () => void;
   stats: {
-    attended: number;
+    totalQuestions: number;
+    // attended: number;
     answered: number;
     unanswered: number;
     timeTaken: string;
@@ -50,7 +51,7 @@ export default function PrevSubmit({
 
         {/* Stats */}
         <div className="rounded-xl border border-[#CBD5FF] bg-[#FBFCFF] grid grid-cols-4 overflow-hidden py-4 mb-5">
-          <Stat label="Attended Questions" value={stats.attended} />
+          <Stat label="Total Questions" value={stats.totalQuestions} />
           <Stat label="Answered" value={stats.answered} />
           <Stat label="Unanswered" value={stats.unanswered} />
           <Stat label="Time Taken" value={stats.timeTaken} />

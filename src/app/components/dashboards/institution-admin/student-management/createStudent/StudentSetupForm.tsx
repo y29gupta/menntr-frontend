@@ -195,7 +195,7 @@ const StudentSetupForm = () => {
                     <button
                       type="submit"
                       className=" bg-[linear-gradient(90deg,#904BFF_0%,#C053C2_100%)]
-            !text-white hover:bg-[#6D28D9] py-2 px-4 rounded-[64px]"
+                      !text-white! hover:bg-[#6D28D9] py-2 px-4 rounded-[64px]"
                       // disabled={mutation.isPending}
                     >
                       {academicMutation.isPending ? 'Saving...' : 'Go Next'}

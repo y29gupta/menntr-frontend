@@ -1,9 +1,12 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
+import { Trash2Icon } from 'lucide-react';
+
 import DataTable from '@/app/components/table/DataTable';
 import { Management, ManagementColumn } from './usermanagement.column';
+import ConfirmModal from '@/app/ui/modals/ConfirmModal';
 
 /* =========================================================
    DEBOUNCE HOOK
@@ -65,20 +68,24 @@ export default function ManagementTable({
 }: Props) {
   /* ---------------- STATE ---------------- */
 
+  const queryClient = useQueryClient();
+
   const [page, setPage] = useState(1);
   const [limit] = useState(10);
   const [columnFilters, setColumnFilters] = useState<Record<string, string>>({});
 
+  const [selectedUser, setSelectedUser] = useState<Management | null>(null);
+
   const debouncedSearch = useDebounce(globalFilter, 500);
   const debouncedColumnFilters = useDebounce(columnFilters, 500);
 
-  /* ---------------- RESET PAGE ON FILTER CHANGE ---------------- */
+  /* ---------------- RESET PAGE ---------------- */
 
   useEffect(() => {
     setPage(1);
   }, [debouncedSearch, debouncedColumnFilters]);
 
-  /* ---------------- API CALL ---------------- */
+  /* ---------------- FETCH USERS ---------------- */
 
   const fetchUsers = async (): Promise<UsersApiResponse> => {
     const params = new URLSearchParams();
@@ -96,6 +103,7 @@ export default function ManagementTable({
 
     const res = await fetch(`/api/institutionsadmin/user-management/users?${params.toString()}`, {
       credentials: 'include',
+      cache: 'no-store',
     });
 
     if (!res.ok) {
@@ -105,12 +113,10 @@ export default function ManagementTable({
     return res.json();
   };
 
-  /* ---------------- QUERY (FIXED FOR v5) ---------------- */
-
   const { data, isLoading } = useQuery<UsersApiResponse>({
     queryKey: ['users', page, debouncedSearch, debouncedColumnFilters],
     queryFn: fetchUsers,
-    placeholderData: (prev) => prev, // ✅ v5 replacement
+    placeholderData: (prev) => prev,
     refetchOnWindowFocus: false,
   });
 
@@ -128,7 +134,7 @@ export default function ManagementTable({
 
   const meta = data?.meta;
 
-  /* ---------------- COLUMN FILTER HANDLER ---------------- */
+  /* ---------------- COLUMN FILTER ---------------- */
 
   const onColumnFilterChange = (column: string, value: string) => {
     setColumnFilters((prev) => ({
@@ -137,32 +143,100 @@ export default function ManagementTable({
     }));
   };
 
+  /* =========================================================
+     🔥 CHANGE USER STATUS (ONLY { status })
+  ========================================================= */
+
+  const changeStatusMutation = useMutation({
+    mutationFn: async ({ userId, status }: { userId: number; status: 'active' | 'suspended' }) => {
+      const res = await fetch(`/api/users/status/${userId}`, {
+        method: 'PATCH',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          status,
+        }),
+      });
+
+      if (!res.ok) {
+        throw new Error('Failed to update user status');
+      }
+
+      return res.json();
+    },
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['users'],
+      });
+    },
+  });
+
+  /* ---------------- DELETE FLOW ---------------- */
+
+  const onSuspendUser = (row: Management) => {
+    setSelectedUser(row);
+  };
+
+  const onConfirmSuspend = () => {
+    if (!selectedUser) return;
+
+    changeStatusMutation.mutate({
+      userId: selectedUser.id,
+      status: 'suspended',
+    });
+
+    setSelectedUser(null);
+  };
+
   /* ---------------- LOADING ---------------- */
 
   if (isLoading) {
     return <div className="text-sm text-gray-500">Loading users…</div>;
   }
 
-  /* ---------------- TABLE ---------------- */
+  /* ---------------- RENDER ---------------- */
 
   return (
-    <DataTable<Management>
-      data={users}
-      columns={ManagementColumn(
-        (row) => onEdit(row),
-        () => {}
-      )}
-      columnFilters={columnFilters}
-      onColumnFilterChange={onColumnFilterChange}
-      showColumnFilters={showColumnFilters}
-      currentPage={meta?.currentPage ?? 1}
-      pageCount={meta?.pageCount ?? 1}
-      canPreviousPage={!meta?.isFirstPage}
-      canNextPage={!meta?.isLastPage}
-      onPreviousPage={() => setPage((p) => Math.max(p - 1, 1))}
-      onNextPage={() => {
-        if (meta?.nextPage) setPage(meta.nextPage);
-      }}
-    />
+    <>
+      <DataTable<Management>
+        data={users}
+        columns={ManagementColumn(
+          (row) => onEdit(row),
+          (row) => onSuspendUser(row)
+        )}
+        columnFilters={columnFilters}
+        onColumnFilterChange={onColumnFilterChange}
+        showColumnFilters={showColumnFilters}
+        currentPage={meta?.currentPage ?? 1}
+        pageCount={meta?.pageCount ?? 1}
+        canPreviousPage={!meta?.isFirstPage}
+        canNextPage={!meta?.isLastPage}
+        onPreviousPage={() => setPage((p) => Math.max(p - 1, 1))}
+        onNextPage={() => {
+          if (meta?.nextPage) setPage(meta.nextPage);
+        }}
+      />
+
+      {/* CONFIRM MODAL */}
+      <ConfirmModal
+        open={!!selectedUser}
+        title="Suspend User"
+        icon={<Trash2Icon color="#0F172A" />}
+        description={
+          <>
+            Are you sure you want to suspend{' '}
+            <span className="font-semibold">{selectedUser?.name}</span>?
+          </>
+        }
+        warning="Suspended users will lose access immediately."
+        confirmText={changeStatusMutation.isPending ? 'Suspending...' : 'Yes, Suspend'}
+        cancelText="No, Cancel"
+        onConfirm={onConfirmSuspend}
+        onCancel={() => setSelectedUser(null)}
+      />
+    </>
   );
 }

@@ -12,7 +12,8 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import React, { useState } from 'react';
-type AssessmentStatus = 'Completed' | 'In Progress' | 'Not Started';
+
+type AssessmentStatus = 'Evaluated' | 'Submitted' | 'In Progress' | 'Not Started';
 
 type AssessmentCategory = 'Aptitude' | 'Domain';
 
@@ -33,7 +34,7 @@ const assessmentTableData: AssessmentRow[] = [
     duration: '25 mins',
     score: 85,
     scorePercent: 85,
-    status: 'Completed',
+    status: 'Submitted',
   },
   {
     assessmentName: 'Aptitude Mock – Jan 2025',
@@ -109,6 +110,7 @@ const page = () => {
       id: Number(row.attempt), // or any unique id
       name: 'Arun Kumar',
       email: 'arun.kumar@college.edu',
+      attemptId: row.attempt,
 
       assessmentName: row.assessmentName,
       duration: row.duration, // ✅ ADD THIS
@@ -217,7 +219,7 @@ const page = () => {
             <p>Assessment-wise performance trend for this student</p>
           </div>
           <div className="px-4 ">
-            <ReusableBarChart data={performanceChartData} />
+            <ReusableBarChart data={performanceChartData} enableScoreGradient={true} />
           </div>
         </div>
         <div

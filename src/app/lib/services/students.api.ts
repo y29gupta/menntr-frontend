@@ -129,9 +129,14 @@ updatePlatformAccess: (
 
     return api.put(`/students/${studentId}`, payload);
   },
+  
+  deleteStudent: (studentId: string) => {
+  return api.delete(`/students/${studentId}`);
+},
 
 
 };
+
 
 export const getPrograms = async () => {
   const res = await api.get('/students/academic/meta');
