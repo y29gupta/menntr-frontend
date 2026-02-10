@@ -29,19 +29,24 @@ type CodingQuestionData = {
 };
 
 type Props = {
+  assessmentId: string;
   question: CodingQuestionData;
   onSubmitSuccess: () => void;
 };
 
-export default function CodingQuestion({ question, onSubmitSuccess }: Props) {
+export default function CodingQuestion({ assessmentId, question, onSubmitSuccess }: Props) {
   const [code, setCode] = useState(question.previous_code ?? '');
-  // const [hasRun, setHasRun] = useState(false);
+  const [selectedLanguage, setSelectedLanguage] = useState<string[]>(
+    question.supported_languages.length ? [question.supported_languages[0]] : []
+  ); // const [hasRun, setHasRun] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
   const queryClient = useQueryClient();
 
   useEffect(() => {
     setCode(question.previous_code ?? '');
+    setSelectedLanguage(
+      question.supported_languages.length ? [question.supported_languages[0]] : []
+    );
   }, [question.question_id]);
 
   const [result, setResult] = useState<{
@@ -50,11 +55,9 @@ export default function CodingQuestion({ question, onSubmitSuccess }: Props) {
   }>({ status: null, cases: [] });
 
   const runCode = async () => {
-    // setHasRun(true);
-
-    const res = await assessmentApi.runCodingAnswer('110', {
+    const res = await assessmentApi.runCodingAnswer(assessmentId, {
       question_id: Number(question.question_id),
-      language: 'python',
+      language: selectedLanguage,
       source_code: code,
     });
 
@@ -75,15 +78,14 @@ export default function CodingQuestion({ question, onSubmitSuccess }: Props) {
   const submitCode = async () => {
     try {
       setIsSubmitting(true);
-
-      await assessmentApi.saveCodingAnswer('110', {
+      await assessmentApi.saveCodingAnswer(assessmentId, {
         question_id: Number(question.question_id),
-        language: 'python',
+        language: selectedLanguage,
         source_code: code,
       });
 
       queryClient.invalidateQueries({
-        queryKey: ['assessment-question'],
+        queryKey: ['assessment-question', assessmentId, question.question_id],
       });
 
       onSubmitSuccess();
@@ -129,6 +131,8 @@ export default function CodingQuestion({ question, onSubmitSuccess }: Props) {
             <CodeEditor
               code={code}
               setCode={setCode}
+              selectedLanguage={selectedLanguage}
+              setSelectedLanguage={setSelectedLanguage}
               onRun={runCode}
               onSubmit={submitCode}
               supportedLanguages={question.supported_languages}

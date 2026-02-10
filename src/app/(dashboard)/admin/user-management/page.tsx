@@ -16,6 +16,9 @@ import UserPermission from '@/app/components/dashboards/institution-admin/user-m
 import UserCredentials from '@/app/components/dashboards/institution-admin/user-management/management-form/FornStep3';
 import BulkUploadInterface from '@/app/components/dashboards/institution-admin/user-management/Bulkupload';
 import { CategoryKey } from '@/app/constants/roleConfig';
+import ModuleRoute from '@/app/components/auth/ModuleRoute';
+import PermissionGate from '@/app/components/auth/PermissionGate';
+import { PERMISSIONS } from '@/app/constants/permissions';
 
 /* ---------- TYPES ---------- */
 
@@ -32,7 +35,7 @@ type UserFormData = {
     roleBatch?: string;
     roleId?: number;
     batchIds?: number[]; // For faculty batch assignments
-    permissionIds?: number[];
+    permissionCodes?: string[];
     selectedModules: string[];
     userRoleAndManagement: string[];
     organizationStructure: string[];
@@ -54,14 +57,14 @@ const roleNormalize: Record<string, string> = {
   Faculty: 'Faculty',
 };
 
-const Page = () => {
+const UserManagementContent = () => {
   const [view, setView] = useState<'list' | 'form' | 'bulk'>('list');
   const [formData, setFormData] = useState<UserFormData>({});
   const [formMode, setFormMode] = useState<'create' | 'edit'>('create');
   const [search, setSearch] = useState('');
   const [showColumnFilters, setShowColumnFilters] = useState(false);
   const [step, setStep] = useState<1 | 2 | 3>(1);
-  const [modulePermissions, setModulePermissions] = useState<Record<string, number[]>>({});
+  const [modulePermissions, setModulePermissions] = useState<Record<string, string[]>>({});
 
   /* ---------- FORMS ---------- */
 
@@ -136,105 +139,80 @@ const Page = () => {
         mobile: '', // API doesn't return mobile
       });
 
-      // Fetch modules to map codes to IDs
-      fetch('/api/institutionsadmin/modules', { credentials: 'include' })
-        .then((res) => res.json())
-        .then((modulesData) => {
-          const modules = modulesData?.data || [];
-          const moduleCodeToIdMap = new Map<string, number>();
-          modules.forEach((m: any) => {
-            moduleCodeToIdMap.set(m.code, m.id);
-          });
+      // Build modulePermissions map using codes directly (no ID mapping needed)
+      const newModulePermissions: Record<string, string[]> = {};
+      const selectedModuleCodes: string[] = [];
 
-          // Extract selected modules from permissions tree - ONLY modules with checked permissions
-          // Build modulePermissions map and collect modules that have at least one checked permission
-          const newModulePermissions: Record<string, number[]> = {};
-          const modulesWithPermissions = new Set<string>();
-          
-          permissions.forEach((module: any) => {
-            const moduleId = moduleCodeToIdMap.get(module.moduleCode);
-            if (!moduleId) return;
-            
-            const allPermissionIds: number[] = [];
-            
-            module.features.forEach((feature: any) => {
-              feature.permissions.forEach((perm: any) => {
-                if (perm.checked) {
-                  allPermissionIds.push(perm.permissionId);
-                }
-              });
-            });
-            
-            // Only include module if it has at least one checked permission
-            if (allPermissionIds.length > 0) {
-              newModulePermissions[String(moduleId)] = allPermissionIds;
-              modulesWithPermissions.add(module.moduleCode);
+      permissions.forEach((module: any) => {
+        const permCodes: string[] = [];
+
+        module.features.forEach((feature: any) => {
+          feature.permissions.forEach((perm: any) => {
+            if (perm.checked) {
+              permCodes.push(perm.permissionCode);
             }
           });
-          
-          // Map module codes to IDs - only for modules that have checked permissions
-          const selectedModuleIds = Array.from(modulesWithPermissions)
-            .map((code: string) => moduleCodeToIdMap.get(code))
-            .filter((id: number | undefined): id is number => id !== undefined)
-            .map((id: number) => String(id));
-
-          // Prefill permission form with role hierarchy, role category, role ID, and batch IDs
-          // First set roleHierarchy and roleCategory, then roleId will be set automatically by useEffect
-          permissionForm.reset({
-            roleHierarchy: role?.roleHierarchyId ? String(role.roleHierarchyId) : undefined,
-            roleCategory: role?.name || undefined,
-            roleId: role?.id || undefined,
-            batchIds: batchIds || [],
-            selectedModules: selectedModuleIds,
-            userRoleAndManagement: [],
-            organizationStructure: [],
-            studentManagement: [],
-            assessmentManagement: [],
-            reportAndAnalytics: [],
-          });
-          
-          // Manually set values to ensure they're set even if reset doesn't work
-          if (role?.roleHierarchyId) {
-            permissionForm.setValue('roleHierarchy', String(role.roleHierarchyId));
-          }
-          if (role?.name) {
-            permissionForm.setValue('roleCategory', role.name);
-          }
-          if (role?.id) {
-            permissionForm.setValue('roleId', role.id);
-          }
-          if (batchIds && batchIds.length > 0) {
-            permissionForm.setValue('batchIds', batchIds);
-          }
-
-          // Set module permissions
-          setModulePermissions(newModulePermissions);
-
-          // Update formData
-          setFormData({
-            id: Number(user.id),
-            status: user.status,
-            firstName: user.firstName,
-            lastName: user.lastName,
-            email: user.email,
-            permissions: {
-              roleId: role?.id,
-              roleHierarchy: role?.roleHierarchyId ? String(role.roleHierarchyId) : undefined,
-              roleCategory: (role?.name as CategoryKey) || undefined,
-              batchIds: batchIds || [],
-              selectedModules: selectedModuleIds,
-              permissionIds: Object.values(newModulePermissions).flat(),
-              userRoleAndManagement: [],
-              organizationStructure: [],
-              studentManagement: [],
-              assessmentManagement: [],
-              reportAndAnalytics: [],
-            },
-          });
-        })
-        .catch((error) => {
-          console.error('Failed to fetch modules for mapping:', error);
         });
+
+        // Only include module if it has at least one checked permission
+        if (permCodes.length > 0) {
+          newModulePermissions[module.moduleCode] = permCodes;
+          selectedModuleCodes.push(module.moduleCode);
+        }
+      });
+
+      // Prefill permission form
+      permissionForm.reset({
+        roleHierarchy: role?.roleHierarchyId ? String(role.roleHierarchyId) : undefined,
+        roleCategory: role?.name || undefined,
+        roleId: role?.id || undefined,
+        batchIds: batchIds || [],
+        selectedModules: selectedModuleCodes,
+        userRoleAndManagement: [],
+        organizationStructure: [],
+        studentManagement: [],
+        assessmentManagement: [],
+        reportAndAnalytics: [],
+      });
+
+      // Manually set values to ensure they're set even if reset doesn't work
+      if (role?.roleHierarchyId) {
+        permissionForm.setValue('roleHierarchy', String(role.roleHierarchyId));
+      }
+      if (role?.name) {
+        permissionForm.setValue('roleCategory', role.name);
+      }
+      if (role?.id) {
+        permissionForm.setValue('roleId', role.id);
+      }
+      if (batchIds && batchIds.length > 0) {
+        permissionForm.setValue('batchIds', batchIds);
+      }
+
+      // Set module permissions
+      setModulePermissions(newModulePermissions);
+
+      // Update formData
+      setFormData({
+        id: Number(user.id),
+        status: user.status,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        permissions: {
+          roleId: role?.id,
+          roleHierarchy: role?.roleHierarchyId ? String(role.roleHierarchyId) : undefined,
+          roleCategory: (role?.name as CategoryKey) || undefined,
+          batchIds: batchIds || [],
+          selectedModules: selectedModuleCodes,
+          permissionCodes: Object.values(newModulePermissions).flat(),
+          userRoleAndManagement: [],
+          organizationStructure: [],
+          studentManagement: [],
+          assessmentManagement: [],
+          reportAndAnalytics: [],
+        },
+      });
     }
   }, [userEditData, formMode, profileForm, permissionForm]);
 
@@ -248,7 +226,7 @@ const Page = () => {
       password: string;
       roleId?: number;
       batchIds?: number[];
-      permissionIds: number[];
+      permissionCodes: string[];
     }) => {
       const res = await fetch(
         `/api/institutionsadmin/create-user`,
@@ -321,7 +299,7 @@ const Page = () => {
       lastName?: string;
       roleId?: number;
       batchIds?: number[];
-      permissionIds: number[];
+      permissionCodes: string[];
     }) => {
       if (!formData.id) throw new Error('User ID is required for update');
       
@@ -394,26 +372,30 @@ const Page = () => {
               </h2>
 
               <div className="flex gap-2">
-                <label
-                  className="inline-flex items-center justify-center h-10 px-6 rounded-full text-sm font-medium text-purple-600 border border-current gap-2 cursor-pointer"
-                  onClick={() => setView('bulk')}
-                >
-                  <Upload className="w-4 h-4 text-[#904BFF]" />
-                  Bulk Upload
-                </label>
+                <PermissionGate permission={PERMISSIONS.USER_MANAGEMENT.USERS.BULK_UPLOAD}>
+                  <label
+                    className="inline-flex items-center justify-center h-10 px-6 rounded-full text-sm font-medium text-purple-600 border border-current gap-2 cursor-pointer"
+                    onClick={() => setView('bulk')}
+                  >
+                    <Upload className="w-4 h-4 text-[#904BFF]" />
+                    Bulk Upload
+                  </label>
+                </PermissionGate>
 
-                <button
-                  onClick={() => {
-                    setFormMode('create');
-                    setFormData({});
-                    setModulePermissions({});
-                    setStep(1);
-                    setView('form');
-                  }}
-                  className="inline-flex items-center justify-center h-10 px-6 rounded-full text-sm font-medium !text-white bg-[linear-gradient(90deg,#904BFF_0%,#C053C2_100%)]"
-                >
-                  + Add User
-                </button>
+                <PermissionGate permission={PERMISSIONS.USER_MANAGEMENT.USERS.CREATE}>
+                  <button
+                    onClick={() => {
+                      setFormMode('create');
+                      setFormData({});
+                      setModulePermissions({});
+                      setStep(1);
+                      setView('form');
+                    }}
+                    className="inline-flex items-center justify-center h-10 px-6 rounded-full text-sm font-medium !text-white bg-[linear-gradient(90deg,#904BFF_0%,#C053C2_100%)]"
+                  >
+                    + Add User
+                  </button>
+                </PermissionGate>
               </div>
             </div>
 
@@ -482,7 +464,7 @@ const Page = () => {
                     permissions: {
                       ...permissionValues,
                       roleCategory: permissionValues.roleCategory as CategoryKey | undefined,
-                      permissionIds: Object.values(modulePermissions).flat(),
+                      permissionCodes: Object.values(modulePermissions).flat(),
                     },
                   }));
                   setStep(3);
@@ -506,7 +488,7 @@ const Page = () => {
                       lastName: formData.lastName,
                       roleId: formData.permissions?.roleId,
                       batchIds: formData.permissions?.batchIds ?? [],
-                      permissionIds: formData.permissions?.permissionIds ?? [],
+                      permissionCodes: formData.permissions?.permissionCodes ?? [],
                     });
                   } else {
                     // Create new user
@@ -517,7 +499,7 @@ const Page = () => {
                       password: 'sample@123',
                       roleId: formData.permissions?.roleId,
                       batchIds: formData.permissions?.batchIds ?? [],
-                      permissionIds: formData.permissions?.permissionIds ?? [],
+                      permissionCodes: formData.permissions?.permissionCodes ?? [],
                     });
                   }
                 }}
@@ -529,6 +511,14 @@ const Page = () => {
 
       {view === 'bulk' && <BulkUploadInterface onBack={() => setView('list')} />}
     </div>
+  );
+};
+
+const Page = () => {
+  return (
+    <ModuleRoute module={PERMISSIONS.USER_MANAGEMENT.MODULE}>
+      <UserManagementContent />
+    </ModuleRoute>
   );
 };
 

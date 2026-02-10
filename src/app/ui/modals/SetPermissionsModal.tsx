@@ -183,7 +183,7 @@ import { Feature } from '@/app/lib/api/fetchModules';
 
 export const SetPermissionsModal = ({
   open,
-  moduleId,
+  moduleCode,
   moduleName,
   onClose,
   onConfirm,
@@ -192,17 +192,17 @@ export const SetPermissionsModal = ({
   existingPermissions = [],
 }: {
   open: boolean;
-  moduleId: number | null;
+  moduleCode: string | null;
   moduleName: string | null;
   onClose: () => void;
   roleId?: number;
   selectedFeatures?: Feature[];
-  onConfirm: (moduleName: string, permissions: number[]) => void;
-  existingPermissions?: number[];
+  onConfirm: (moduleName: string, permissions: string[]) => void;
+  existingPermissions?: string[];
 }) => {
   const [selectedFeature, setSelectedFeature] = useState<Feature | null>(null);
-  const [selectedPermissions, setSelectedPermissions] = useState<number[]>([]);
-  const [featurePermissionsMap, setFeaturePermissionsMap] = useState<Record<string, number[]>>({});
+  const [selectedPermissions, setSelectedPermissions] = useState<string[]>([]);
+  const [featurePermissionsMap, setFeaturePermissionsMap] = useState<Record<string, string[]>>({});
 
   // Initialize selected feature from passed features
   useEffect(() => {
@@ -232,8 +232,8 @@ export const SetPermissionsModal = ({
           );
           if (res.ok) {
             const data = await res.json();
-            const defaults = data.defaultSelectedPermissions || [];
-            
+            const defaults: string[] = data.defaultSelectedPermissions || [];
+
             // Store defaults in the map (even if empty array, to mark as fetched)
             setFeaturePermissionsMap((prev) => ({
               ...prev,
@@ -284,37 +284,28 @@ export const SetPermissionsModal = ({
     if (!open || !selectedFeature || !permissionResponse || permissions.length === 0 || !roleId) return;
 
     const featureKey = selectedFeature.code;
-    const featurePermissionIds = permissions.map((p: any) => p.id);
-    
+    const featurePermissionCodes = permissions.map((p: any) => p.code);
+
     // If we have stored permissions for this feature, use them
-    // But if stored permissions are empty and we have defaults, use defaults instead
     const storedPermissions = featurePermissionsMap[featureKey];
     if (storedPermissions !== undefined) {
-      // If stored permissions exist (even if empty), use them
-      // But if they're empty and we have defaults, prefer defaults
       if (storedPermissions.length > 0 || defaultSelectedPermissions.length === 0) {
         setSelectedPermissions(storedPermissions);
         return;
       }
-      // If stored is empty but we have defaults, fall through to set defaults
     }
-    
-    // Otherwise, start with default permissions from API (role defaults)
-    // existingPermissions contains all permissions selected for the module, 
-    // but we need to filter for this specific feature
-    const existingForThisFeature = existingPermissions.filter((id) => 
-      featurePermissionIds.includes(id)
+
+    // Filter existing permissions to only those belonging to this feature
+    const existingForThisFeature = existingPermissions.filter((code) =>
+      featurePermissionCodes.includes(code)
     );
-    
-    // By default, select default permissions from API (role defaults)
-    // Merge with any existing permissions for this feature
-    const merged = existingForThisFeature.length > 0 
+
+    // Merge defaults with any existing permissions for this feature
+    const merged = existingForThisFeature.length > 0
       ? [...new Set([...defaultSelectedPermissions, ...existingForThisFeature])]
-      : [...defaultSelectedPermissions]; // Always use defaults
-    
-    // Always set permissions (even if empty, defaults will be empty array)
+      : [...defaultSelectedPermissions];
+
     setSelectedPermissions(merged);
-    // Store in map
     setFeaturePermissionsMap((prev) => ({
       ...prev,
       [featureKey]: merged,
@@ -425,10 +416,10 @@ export const SetPermissionsModal = ({
             ) : (
               <ul className="space-y-2 text-sm">
                 {selectedFeatures.map((f: Feature) => {
-                  const active = selectedFeature?.id === f.id;
+                  const active = selectedFeature?.code === f.code;
                   return (
                     <li
-                      key={f.id}
+                      key={f.code}
                       onClick={() => handleFeatureChange(f)}
                       className={`px-3 py-2 rounded-lg cursor-pointer transition-colors ${
                         active
@@ -466,18 +457,17 @@ export const SetPermissionsModal = ({
               <div className="flex flex-wrap gap-2">
                 {permissions.map(
                   (p: {
-                    id: number;
                     code: string;
                     name: string;
                     description: string;
-                    action_type: string;
+                    actionType: string;
                   }) => {
-                    const selected = selectedPermissions.includes(p.id);
-                    const isDefault = defaultSelectedPermissions.includes(p.id);
+                    const selected = selectedPermissions.includes(p.code);
+                    const isDefault = defaultSelectedPermissions.includes(p.code);
 
                     return (
                       <label
-                        key={p.id}
+                        key={p.code}
                         className={`flex items-center gap-2 px-4 py-2 rounded-full cursor-pointer text-sm transition-all relative ${
                           selected
                             ? isDefault
@@ -492,9 +482,9 @@ export const SetPermissionsModal = ({
                           checked={selected}
                           onChange={() =>
                             setSelectedPermissions((prev) =>
-                              prev.includes(p.id)
-                                ? prev.filter((id) => id !== p.id)
-                                : [...prev, p.id]
+                              prev.includes(p.code)
+                                ? prev.filter((c) => c !== p.code)
+                                : [...prev, p.code]
                             )
                           }
                           className="cursor-pointer"

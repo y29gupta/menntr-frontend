@@ -104,6 +104,8 @@ import AddStudentLayout from './AddStudentLayout';
 import ConfirmModal from '@/app/ui/modals/ConfirmModal';
 import { studentsApi } from '@/app/lib/services/students.api';
 import { useQueryClient } from '@tanstack/react-query';
+import PermissionGate from '@/app/components/auth/PermissionGate';
+import { PERMISSIONS } from '@/app/constants/permissions';
 
 export default function StudentManagementPage() {
   const [page, setPage] = useState(1);
@@ -185,21 +187,24 @@ export default function StudentManagementPage() {
           </h2>
 
           <div className="flex gap-2">
-            <button
-              onClick={() => router.push('/admin/student-management/bulk-upload')}
-              className="px-4 flex items-center gap-2 py-2 text-sm rounded-[64px] border border-[#904BFF] !text-[#904BFF] hover:bg-gray-50"
-            >
-              <Upload size={16} /> Bulk Upload
-            </button>
-            <button
-              // onClick={() => setShowCreateForm(true)}
-              onClick={() => router.push('/admin/student-management/add-student')}
-              className="px-4 py-2 flex items-center gap-1 text-sm rounded-[64px]
-            bg-[linear-gradient(90deg,#904BFF_0%,#C053C2_100%)]
-            !text-white hover:bg-[#6D28D9]"
-            >
-              <Plus size={15} /> Add Student
-            </button>
+            <PermissionGate permission={PERMISSIONS.STUDENT_MANAGEMENT.STUDENTS.BULK_UPLOAD}>
+              <button
+                onClick={() => router.push('/admin/student-management/bulk-upload')}
+                className="px-4 flex items-center gap-2 py-2 text-sm rounded-[64px] border border-[#904BFF] !text-[#904BFF] hover:bg-gray-50"
+              >
+                <Upload size={16} /> Bulk Upload
+              </button>
+            </PermissionGate>
+            <PermissionGate permission={PERMISSIONS.STUDENT_MANAGEMENT.STUDENTS.CREATE}>
+              <button
+                onClick={() => router.push('/admin/student-management/add-student')}
+                className="px-4 py-2 flex items-center gap-1 text-sm rounded-[64px]
+              bg-[linear-gradient(90deg,#904BFF_0%,#C053C2_100%)]
+              !text-white hover:bg-[#6D28D9]"
+              >
+                <Plus size={15} /> Add Student
+              </button>
+            </PermissionGate>
           </div>
         </div>
 

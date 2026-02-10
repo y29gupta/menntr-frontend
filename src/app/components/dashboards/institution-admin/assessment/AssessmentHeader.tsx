@@ -1,7 +1,8 @@
 'use client';
 
 import AssessmentIcon from '@/app/components/icons/AssessmentIcon';
-import Buttons from '@/app/ui/Button';
+import PermissionGate from '@/app/components/auth/PermissionGate';
+import { PERMISSIONS } from '@/app/constants/permissions';
 
 type Props = {
   activeTab: 'Active' | 'Drafts' | 'Completed';
@@ -26,12 +27,14 @@ export default function AssessmentHeader({ activeTab, onTabChange, onCreate, tab
           </p>
         </div>
 
-        <button
-          onClick={onCreate}
-          className="w-full sm:w-auto whitespace-nowrap text-xs sm:text-sm !text-white bg-[linear-gradient(90deg,#904BFF_0%,#C053C2_100%)] px-6 py-2.5 rounded-full flex items-center justify-center gap-2 font-medium"
-        >
-          <span>+</span> Create Assessment
-        </button>
+        <PermissionGate permission={PERMISSIONS.ASSESSMENT.ASSESSMENTS.CREATE}>
+          <button
+            onClick={onCreate}
+            className="w-full sm:w-auto whitespace-nowrap text-xs sm:text-sm !text-white bg-[linear-gradient(90deg,#904BFF_0%,#C053C2_100%)] px-6 py-2.5 rounded-full flex items-center justify-center gap-2 font-medium"
+          >
+            <span>+</span> Create Assessment
+          </button>
+        </PermissionGate>
       </div>
 
       <div className="ml-2 flex gap-4 border-b border-[#616573] whitespace-nowrap scrollbar-hide">

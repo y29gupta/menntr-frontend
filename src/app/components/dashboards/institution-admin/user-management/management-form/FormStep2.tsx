@@ -34,8 +34,8 @@ type Props = {
   mode: 'create' | 'edit';
   onBack: () => void;
   onNext: () => void;
-  modulePermissions: Record<string, number[]>;
-  setModulePermissions: React.Dispatch<React.SetStateAction<Record<string, number[]>>>;
+  modulePermissions: Record<string, string[]>;
+  setModulePermissions: React.Dispatch<React.SetStateAction<Record<string, string[]>>>;
 };
 
 /* ---------------- FETCH ROLES BY HIERARCHY ---------------- */

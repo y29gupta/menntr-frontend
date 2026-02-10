@@ -182,12 +182,16 @@ export default function BulkUpload({
               <FormDropdown
                 key={d.key}
                 value={values[d.key] ?? ''}
-                onChange={(v) =>
+                onChange={(v) => {
+                  const value = Array.isArray(v) ? (v[0] ?? '') : v;
+
                   setValues((prev) => ({
                     ...prev,
-                    [d.key]: Array.isArray(v) ? (v[0] ?? '') : v,
-                  }))
-                }
+                    [d.key]: value,
+                  }));
+
+                  d.onChangeCapture?.(value);
+                }}
                 options={d.options}
                 placeholder={d.label}
                 searchable={d.searchable}

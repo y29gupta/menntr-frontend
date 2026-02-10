@@ -1,5 +1,4 @@
 export type Module = {
-  id: number;
   code: string;
   name: string;
   description: string;
@@ -13,7 +12,6 @@ export type ModulesResponse = {
 };
 
 export type Feature = {
-  id: number;
   code: string;
   name: string;
   description: string;
@@ -41,13 +39,13 @@ export const fetchModules = async (): Promise<ModulesResponse> => {
 /**
  * Fetch features for a specific module
  */
-export const fetchModuleFeatures = async (moduleId: number): Promise<FeaturesResponse> => {
-  const response = await fetch(`/api/institutionsadmin/modules/features/${moduleId}`, {
+export const fetchModuleFeatures = async (moduleCode: string): Promise<FeaturesResponse> => {
+  const response = await fetch(`/api/institutionsadmin/modules/features/${moduleCode}`, {
     credentials: 'include',
   });
 
   if (!response.ok) {
-    throw new Error(`Failed to fetch features for module ${moduleId}`);
+    throw new Error(`Failed to fetch features for module ${moduleCode}`);
   }
 
   return response.json();

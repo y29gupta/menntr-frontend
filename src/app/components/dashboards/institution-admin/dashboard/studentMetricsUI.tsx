@@ -1,43 +1,40 @@
-import { studentMetricBackend } from '@/app/constants/studentMetric';
+import { GraduationCap, Users, ClipboardList } from 'lucide-react';
 import { DashboardCardUI } from './dashboardCard.types';
-import { ClipboardList, GraduationCap, Users } from 'lucide-react';
+import { fetchDashboardData } from '@/app/lib/api/dashboardApi';
 
-export const studentMetricsUI: DashboardCardUI[] = studentMetricBackend
-  .map((item): DashboardCardUI | null => {
-    switch (item.label) {
-      case 'STUDENTS':
-        return {
-          title: 'Total Students',
-          total: item.count,
-          percentage: item.delta,
-          trend: item.history,
-          icon: GraduationCap,
-          showComparisonText: true,
-        };
+export async function getStudentMetricsUI(): Promise<DashboardCardUI[]> {
+  const [students, faculty, assessments] = await Promise.all([
+    fetchDashboardData<any>('/dashboard/students'),
+    fetchDashboardData<any>('/dashboard/faculty'),
+    fetchDashboardData<any>('/dashboard/assessments'),
+  ]);
 
-      case 'FACULTY':
-        return {
-          title: 'Faculty Members',
-          total: item.count,
-          percentage: item.delta,
-          trend: item.history,
-          icon: Users,
-          showComparisonText: true,
-        };
+  return [
+    {
+      title: 'Total Students',
+      total: students.total,
+      percentage: students.percentageChange,
+      trend: students.history ?? [],
+      icon: GraduationCap,
+      showComparisonText: true,
+    },
+    {
+      title: 'Faculty Members',
+      total: faculty.total,
+      percentage: faculty.percentageChange,
+      trend: faculty.history ?? [],
+      icon: Users,
+      showComparisonText: true,
+    },
+    {
+      title: 'Assessments',
+      total: assessments.total,
+      percentage: assessments.percentageChange,
+      trend: assessments.history ?? [], // ✅ now exists
+      subText: `${assessments.dueToday} due today`,
+      icon: ClipboardList,
+      showComparisonText: true,
+    },
+  ];
+}
 
-      case 'ASSESSMENTS':
-        return {
-          title: 'Assessments',
-          total: item.count,
-          percentage: item.delta,
-          trend: item.history,
-          subText: `${item.dueToday} due today`,
-          icon: ClipboardList,
-          showComparisonText: true,
-        };
-
-      default:
-        return null;
-    }
-  })
-  .filter((item): item is DashboardCardUI => item !== null);

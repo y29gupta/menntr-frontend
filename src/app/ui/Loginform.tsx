@@ -16,7 +16,7 @@ import {
   SetPasswordForm,
 } from '@/app/lib/loginSchema';
 
-import { ROLE_REDIRECT } from '../lib/roles';
+import { getRedirectForRole } from '../lib/roles';
 
 type LoginFormValues = StudentAdminLogin | SuperAdminLogin;
 // type LoginFormValues = StudentAdminLogin | SuperAdminLogin | SetPasswordForm;
@@ -90,7 +90,7 @@ const Loginform = ({ role, setupToken }: LoginFormProps) => {
       console.log(res, 'resp');
       if (res.status == true) {
         console.log('true');
-        const redirectPath = ROLE_REDIRECT[expectedRole as keyof typeof ROLE_REDIRECT];
+        const redirectPath = getRedirectForRole(expectedRole);
         console.log(redirectPath, 'path');
 
         navigate.push(redirectPath);

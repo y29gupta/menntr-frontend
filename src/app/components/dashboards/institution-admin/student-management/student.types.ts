@@ -9,6 +9,7 @@ export interface StudentApi {
   assessmentsTaken: number;
   status: 'active' | 'inactive';
   lastLogin: string;
+  averageScore: number;
 }
 
 export interface StudentMeta {

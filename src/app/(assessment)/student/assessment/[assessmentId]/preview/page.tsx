@@ -1,16 +1,18 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import PrevSubmit from '@/app/components/dashboards/student/assessment/attempts/PrevSubmit';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { assessmentApi } from '@/app/components/dashboards/student/assessment/attempts/assessment.service';
+import { assessmentApi, attemptsApi } from '@/app/components/dashboards/student/assessment/attempts/assessment.service';
 
 export default function Page() {
   const router = useRouter();
   const [showPrevSubmit, setShowPrevSubmit] = useState(true);
   const params = useParams();
+const searchParams = useSearchParams();
 
+const attemptId = searchParams.get('attemptId') ?? sessionStorage.getItem('attemptId');
   const assessmentId = typeof params.assessmentId === 'string' ? params.assessmentId : '';
 
   const { data, isLoading } = useQuery({
@@ -60,7 +62,7 @@ export default function Page() {
           onGoBack={() => {
             sessionStorage.setItem('return-from-preview', 'true');
             setShowPrevSubmit(false);
-            router.push(`/student/assessment/${assessmentId}`);
+            router.push(`/student/assessment/${assessmentId}?attemptId=${attemptId}`);
           }}
           onSubmitNow={submitAssessment}
           stats={{

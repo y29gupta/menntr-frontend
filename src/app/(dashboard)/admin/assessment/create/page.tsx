@@ -1,11 +1,13 @@
-// 'use client';
+'use client';
 
 import CreateAssessment from '@/app/components/dashboards/institution-admin/assessment/create/CreateAssessment';
-// import { useRouter } from 'next/navigation';
+import ModuleRoute from '@/app/components/auth/ModuleRoute';
+import { PERMISSIONS } from '@/app/constants/permissions';
 
 export default function Page() {
-  // const router = useRouter();
-
-  // return <CreateAssessment onCancel={() => router.replace('/admin/assessment?tab=active')} />;
-  return <CreateAssessment />;
+  return (
+    <ModuleRoute module={PERMISSIONS.ASSESSMENT.MODULE}>
+      <CreateAssessment />
+    </ModuleRoute>
+  );
 }

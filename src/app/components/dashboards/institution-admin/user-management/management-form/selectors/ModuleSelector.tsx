@@ -41,11 +41,11 @@ const ModuleSelector = ({
 }) => (
   <div className="flex flex-wrap gap-2 mb-6">
     {modules.map((m: Module) => {
-      const isSelected = selectedModules.includes(String(m.id));
+      const isSelected = selectedModules.includes(m.code);
 
       return (
         <label
-          key={m.id}
+          key={m.code}
           className={`px-4 py-2 rounded-full cursor-pointer text-sm border transition-all ${
             isSelected
               ? 'bg-purple-100 text-purple-700 border-purple-300'
@@ -54,7 +54,7 @@ const ModuleSelector = ({
         >
           <input
             type="checkbox"
-            value={m.id}
+            value={m.code}
             {...register('selectedModules')}
             className="sr-only"
           />

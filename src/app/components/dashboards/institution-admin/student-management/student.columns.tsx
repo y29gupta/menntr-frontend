@@ -45,12 +45,11 @@ export const studentColumns: ColumnDef<StudentApi>[] = [
   {
     header: 'Average score',
     cell: ({ row }) => {
-      //   const score = row.original.averageScore;
-      const score = 28;
+      const score = row.original.averageScore;
 
-      //   if (score === null) {
-      //     return <span className="text-xs text-gray-400">-</span>;
-      //   }
+      if (score === null || score === undefined) {
+        return <span className="text-xxl text-gray-700">-</span>;
+      }
 
       let styles = 'bg-[#FFE6E6] text-[#8E0000]';
       if (score >= 75) styles = 'bg-[#F2FDEE] text-[#008E2D]';
@@ -58,11 +57,12 @@ export const studentColumns: ColumnDef<StudentApi>[] = [
 
       return (
         <span className={`inline-flex px-2 py-[2px] rounded-md text-xs font-semibold ${styles}`}>
-          {score}%{/* 56% */}
+          {score}%
         </span>
       );
     },
   },
+
   {
     header: 'Status',
     cell: ({ row }) => (

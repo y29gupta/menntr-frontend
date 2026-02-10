@@ -4,12 +4,21 @@ import { useState } from 'react';
 import Editor from '@monaco-editor/react';
 import FormDropdown from '@/app/ui/FormDropdown';
 
+// type Props = {
+//   code: string;
+//   setCode: (v: string) => void;
+//   onRun: () => void;
+//   onSubmit: () => void;
+//   supportedLanguages?: string[];
+// };
 type Props = {
   code: string;
   setCode: (v: string) => void;
+  supportedLanguages: string[];
+  selectedLanguage: string[];
+  setSelectedLanguage: (v: string[]) => void;
   onRun: () => void;
   onSubmit: () => void;
-  supportedLanguages?: string[];
   isSubmitting?: boolean;
 };
 
@@ -19,6 +28,8 @@ export default function CodeEditor({
   onRun,
   onSubmit,
   supportedLanguages,
+  selectedLanguage,
+  setSelectedLanguage,
   isSubmitting,
 }: Props) {
   const LANGUAGE_OPTIONS = supportedLanguages?.map((lang) => ({
@@ -29,7 +40,7 @@ export default function CodeEditor({
     { label: 'JavaScript', value: 'javascript' },
   ];
 
-  const [language, setLanguage] = useState(LANGUAGE_OPTIONS[0].value);
+  // const [language, setLanguage] = useState(LANGUAGE_OPTIONS[0].value);
 
   return (
     <div className="h-full border border-[#C3CAD9] rounded-xl bg-white flex flex-col">
@@ -39,10 +50,10 @@ export default function CodeEditor({
 
         <div className="flex items-center gap-3">
           <FormDropdown
-            value={language}
+            value={selectedLanguage[0]}
             placeholder="Language"
             options={LANGUAGE_OPTIONS}
-            onChange={(v) => setLanguage(v as string)}
+            onChange={(v) => setSelectedLanguage([v as string])}
             triggerClassName="border-none px-5 py-0 text-sm text-[#636771]"
           />
 
@@ -72,7 +83,7 @@ export default function CodeEditor({
       <div className="flex-1 min-h-0 overflow-hidden">
         <Editor
           height="100%"
-          language={language}
+          language={selectedLanguage[0]}
           value={code}
           onChange={(v) => setCode(v ?? '')}
           options={{

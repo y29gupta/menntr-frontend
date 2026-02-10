@@ -3,30 +3,34 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import clsx from 'clsx';
-import { SIDEBAR_CONFIG } from '@/app/lib/sidebar.config';
-import { Role, ROLE_TO_SIDEBAR_KEY } from '@/app/lib/roles';
+import { SIDEBAR_CONFIG, SidebarItem, buildSidebarFromModules } from '@/app/lib/sidebar.config';
+import { getSidebarKey, isModuleDrivenRole } from '@/app/lib/roles';
+import { useAuth } from '@/app/providers/AuthProvider';
 import CollapseIcon from '../icons/CollapseIcon';
 import ExpandMenuIcon from '../icons/ExpandMenuIcon';
 import MenntrCollapsedIcon from '../icons/MenntrCollapsedIcon';
 
-type SidebarItem = {
-  label: string;
-  path: string;
-  icon: React.ReactNode;
-  disabled?: boolean;
-};
-
 type Props = {
-  role: Role | null;
+  role: string | null;
   collapsed: boolean;
   onToggle: () => void;
 };
 
 export default function Sidebar({ role, collapsed, onToggle }: Props) {
   const pathname = usePathname();
+  const { modules, isLoading } = useAuth();
 
-  const sidebarKey = role ? ROLE_TO_SIDEBAR_KEY[role] : undefined;
-  const menu: readonly SidebarItem[] = sidebarKey ? (SIDEBAR_CONFIG[sidebarKey] ?? []) : [];
+  // Determine sidebar items based on role type
+  let menu: readonly SidebarItem[] = [];
+
+  if (isModuleDrivenRole(role)) {
+    // Module-driven: build from user's assigned modules
+    menu = isLoading ? [] : buildSidebarFromModules(modules);
+  } else {
+    // Static: super-admin, student
+    const sidebarKey = getSidebarKey(role);
+    menu = sidebarKey ? (SIDEBAR_CONFIG[sidebarKey] ?? []) : [];
+  }
 
   // split items
   const activeItems = menu.filter((item) => !item.disabled);

@@ -11,6 +11,7 @@ import PerformanceTabs from '../PerformanceTabs';
 import Reponses from './Reponses';
 import Insights from './Insights';
 import ProctoringInsights from './Insights';
+import { useProctoringData } from '@/app/hooks/useProctoringData';
 
 const attemptOptions = [
   { label: 'Attempt 1', value: '1' },
@@ -31,7 +32,8 @@ export default function ViewReportModal({ open, onClose, candidate, onNext, onPr
   const { control } = useForm({
     defaultValues: { attempt: '1' },
   });
-
+const attemptId = Number(control._formValues.attempt);
+const { screenshots, videoUrl, cameraOff, tabChanged } = useProctoringData(attemptId);
   const tabs = [
     { key: 'responses', label: 'Responses & Scores' },
     { key: 'proctoring', label: 'Proctoring Insights' },
@@ -125,29 +127,11 @@ export default function ViewReportModal({ open, onClose, candidate, onNext, onPr
           {activeTab === 'responses' && <Reponses />}
           {activeTab === 'proctoring' && (
             <ProctoringInsights
-              screenshots={Array.from({ length: 13 }).map(
-                (_, i) => `https://placehold.co/160x120?text=${i + 1}`
-              )}
-              cameraOff={false}
-              tabChanged={false}
-              interruptions={[
-                {
-                  id: 1,
-                  title: 'Interruption 1',
-                  events: [
-                    { time: '19:03', description: 'Test Interrupted at question 1' },
-                    { time: '19:05', description: 'Test continued from Question 1' },
-                  ],
-                },
-                {
-                  id: 2,
-                  title: 'Interruption 2',
-                  events: [
-                    { time: '19:15', description: 'Test Interrupted at question 3' },
-                    { time: '19:16', description: 'Test continued from Question 3' },
-                  ],
-                },
-              ]}
+              screenshots={screenshots}
+              cameraOff={cameraOff}
+              tabChanged={tabChanged}
+              interruptions={[]}
+              videoUrl={videoUrl}
             />
           )}
         </div>

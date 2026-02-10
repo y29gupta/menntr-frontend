@@ -13,11 +13,21 @@ import DepartmentsTable from '@/app/components/dashboards/institution-admin/orga
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { createDepartment, updateDepartment, getDepartments } from '@/app/lib/institutions.api';
 import Batches from '@/app/components/dashboards/institution-admin/organization/batches/Batches';
+import ModuleRoute from '@/app/components/auth/ModuleRoute';
+import PermissionGate from '@/app/components/auth/PermissionGate';
+import { PERMISSIONS } from '@/app/constants/permissions';
+import { useAuth } from '@/app/providers/AuthProvider';
+import { TAB_PERMISSIONS, OrgTab } from './constants';
+import { getVisibleTabs } from './helpers';
 
-const Page = () => {
+const OrganizationContent = () => {
+  const { permissions, isSuperAdmin } = useAuth();
+  const visibleTabs = isSuperAdmin
+    ? (['Categories', 'Departments', 'Batches', 'Role Hierarchy'] as OrgTab[])
+    : getVisibleTabs(permissions);
   const [activeTab, setActiveTab] = useState<
     'Categories' | 'Departments' | 'Batches' | 'Role Hierarchy'
-  >('Categories');
+  >(visibleTabs[0] ?? 'Categories');
   const [departmentView, setDepartmentView] = useState<'list' | 'form'>('list');
   const [categoryView, setCategoryView] = useState<'list' | 'form'>('list');
   const [batchView, setBatchView] = useState<'list' | 'form'>('list');
@@ -84,7 +94,7 @@ const Page = () => {
   return (
     <div className="flex rounded-2xl   flex-1  flex-col  gap-4  shadow-[0_0_16px_0_#0F172A26] w-full">
       {!hideOrganizationHeader && (
-        <OrganizationHeader activeTab={activeTab} onTabChange={setActiveTab} />
+        <OrganizationHeader activeTab={activeTab} onTabChange={setActiveTab} visibleTabs={visibleTabs} />
       )}
 
       {/* <OrganizationHeader
@@ -105,16 +115,18 @@ const Page = () => {
                     Total Departments <span>({totalDepartments})</span>
                   </h2>
 
-                  <button
-                    onClick={() => {
-                      setFormMode('create');
-                      setSelectedDepartment(null);
-                      setDepartmentView('form');
-                    }}
-                    className="w-full sm:w-auto whitespace-nowrap text-xs sm:text-sm !text-white bg-[linear-gradient(90deg,#904BFF_0%,#C053C2_100%)] px-6 py-2.5 rounded-full flex items-center justify-center gap-2 font-medium"
-                  >
-                    <span>+</span> Add Department
-                  </button>
+                  <PermissionGate permission={PERMISSIONS.ORGANIZATION.DEPARTMENTS.CREATE}>
+                    <button
+                      onClick={() => {
+                        setFormMode('create');
+                        setSelectedDepartment(null);
+                        setDepartmentView('form');
+                      }}
+                      className="w-full sm:w-auto whitespace-nowrap text-xs sm:text-sm !text-white bg-[linear-gradient(90deg,#904BFF_0%,#C053C2_100%)] px-6 py-2.5 rounded-full flex items-center justify-center gap-2 font-medium"
+                    >
+                      <span>+</span> Add Department
+                    </button>
+                  </PermissionGate>
                 </div>
 
                 {/* Search + Filter */}
@@ -199,6 +211,14 @@ const Page = () => {
         </div>
       )}
     </div>
+  );
+};
+
+const Page = () => {
+  return (
+    <ModuleRoute module={PERMISSIONS.ORGANIZATION.MODULE}>
+      <OrganizationContent />
+    </ModuleRoute>
   );
 };
 

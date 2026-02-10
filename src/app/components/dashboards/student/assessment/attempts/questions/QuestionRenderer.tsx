@@ -12,7 +12,7 @@ type Props = {
   question: any;
   onSelectOption: (ids: number[]) => void;
   selectedOptions: number[];
-
+assessmentId:string;
   onToggleReview: (index: number) => void; // ✅ ADD
   isReviewed: boolean;
 
@@ -24,7 +24,7 @@ export function QuestionRenderer({
   question,
   onSelectOption,
   selectedOptions,
-
+assessmentId,
   onToggleReview,
   isReviewed,
   onCodingAttempted,
@@ -97,6 +97,7 @@ export function QuestionRenderer({
             onSubmitSuccess={() => {
               onCodingAttempted(currentIndex);
             }}
+            assessmentId={assessmentId}
           />
         )}
       </div>

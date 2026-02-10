@@ -48,7 +48,7 @@ export const assessmentApi = {
     assessmentId: string,
     payload: {
       question_id: number;
-      language: string;
+      language: string[];
       source_code: string;
     }
   ) => {
@@ -71,7 +71,7 @@ export const assessmentApi = {
     assessmentId: string,
     payload: {
       question_id: number;
-      language: string;
+      language: string[];
       source_code: string;
     }
   ) => {

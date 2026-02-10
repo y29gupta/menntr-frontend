@@ -139,8 +139,8 @@ type Props = {
   register: any;
   selectedModules: string[];
   onNext?: () => void;
-  modulePermissions: Record<string, number[]>;
-  setModulePermissions: React.Dispatch<React.SetStateAction<Record<string, number[]>>>;
+  modulePermissions: Record<string, string[]>;
+  setModulePermissions: React.Dispatch<React.SetStateAction<Record<string, string[]>>>;
   roleId?: number;
 };
 
@@ -169,26 +169,22 @@ const ModulesSection = ({
     if (!roleId || selectedModules.length === 0 || modules.length === 0) return;
 
     const fetchDefaultsForModules = async () => {
-      const selectedModuleIds = selectedModules.map(id => parseInt(id));
-      const selectedModulesData = modules.filter(m => selectedModuleIds.includes(m.id));
+      const selectedModulesData = modules.filter(m => selectedModules.includes(m.code));
 
-      // Fetch default permissions for all features in all selected modules
-      for (const module of selectedModulesData) {
-        // Skip if we already have permissions for this module (to avoid re-fetching)
-        if (modulePermissions[String(module.id)]?.length > 0) {
+      for (const mod of selectedModulesData) {
+        // Skip if we already have permissions for this module
+        if (modulePermissions[mod.code]?.length > 0) {
           continue;
         }
 
         try {
-          // Fetch features for this module
-          const featuresRes = await fetchModuleFeatures(module.id);
+          const featuresRes = await fetchModuleFeatures(mod.code);
           const features: Feature[] = featuresRes?.data || [];
 
           if (features.length === 0) continue;
 
-          // Fetch default permissions for each feature
-          const allModulePermissions: number[] = [];
-          
+          const allModulePermissions: string[] = [];
+
           await Promise.all(
             features.map(async (feature) => {
               try {
@@ -198,7 +194,7 @@ const ModulesSection = ({
                 );
                 if (res.ok) {
                   const data = await res.json();
-                  const defaults = data.defaultSelectedPermissions || [];
+                  const defaults: string[] = data.defaultSelectedPermissions || [];
                   allModulePermissions.push(...defaults);
                 }
               } catch (error) {
@@ -207,16 +203,15 @@ const ModulesSection = ({
             })
           );
 
-          // Save to modulePermissions (only if we got permissions)
           if (allModulePermissions.length > 0) {
             const uniquePermissions = [...new Set(allModulePermissions)];
             setModulePermissions((prev) => ({
               ...prev,
-              [String(module.id)]: uniquePermissions,
+              [mod.code]: uniquePermissions,
             }));
           }
         } catch (error) {
-          console.error(`Error fetching defaults for module ${module.id}:`, error);
+          console.error(`Error fetching defaults for module ${mod.code}:`, error);
         }
       }
     };
@@ -263,12 +258,12 @@ const ModulesSection = ({
     setSelectedFeatures([]);
   };
 
-  const handleConfirmPermissions = (moduleName: string, permissions: number[]) => {
+  const handleConfirmPermissions = (moduleName: string, permissions: string[]) => {
     if (!activeModule) return;
 
     setModulePermissions((prev) => ({
       ...prev,
-      [String(activeModule.id)]: permissions,
+      [activeModule.code]: permissions,
     }));
 
     handleClosePermissions();
@@ -305,11 +300,11 @@ const ModulesSection = ({
 
       <SetPermissionsModal
         open={openPermissions}
-        moduleId={activeModule?.id ?? null}
+        moduleCode={activeModule?.code ?? null}
         moduleName={activeModule?.name ?? null}
         roleId={roleId}
         selectedFeatures={selectedFeatures}
-        existingPermissions={activeModule ? (modulePermissions[String(activeModule.id)] ?? []) : []}
+        existingPermissions={activeModule ? (modulePermissions[activeModule.code] ?? []) : []}
         onClose={handleClosePermissions}
         onConfirm={handleConfirmPermissions}
       />

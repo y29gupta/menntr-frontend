@@ -46,10 +46,10 @@ const ModulesGrid = ({
       style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))' }}
     >
       {modules
-        .filter((m: Module) => selectedModules.includes(String(m.id)))
+        .filter((m: Module) => selectedModules.includes(m.code))
         .map((m: Module) => (
           <ModuleCard
-            key={m.id}
+            key={m.code}
             module={m}
             roleId={roleId}
             onSetPermissions={(features: Feature[]) => onOpenPermissions(m, features)}
