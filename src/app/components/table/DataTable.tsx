@@ -9,8 +9,7 @@ import {
 import DataTableSkeleton from './DatatableSkeleton';
 
 export type DataTableMeta<TData extends RowData> = TableMeta<TData> & {
-  onRowClick?: (row: TData) => void;
-  onDeleteClick?: (id: string) => void;
+  setPage?: (page: number) => void;
 };
 
 interface DataTableProps<T extends RowData> {
@@ -19,7 +18,6 @@ interface DataTableProps<T extends RowData> {
   isLoading?: boolean;
   columnFilters: Record<string, string>;
   onColumnFilterChange: (key: string, value: string) => void;
-
   showColumnFilters: boolean;
   currentPage: number;
   pageCount: number;
@@ -56,33 +54,16 @@ function DataTable<T extends RowData>({
     meta,
   });
 
-  const jumpPages = (steps: number, direction: 'next' | 'prev') => {
-    if (steps <= 0) return;
-
-    let remaining = steps;
-
-    const step = () => {
-      if (remaining <= 0) return;
-
-      direction === 'next' ? onNextPage() : onPreviousPage();
-      remaining--;
-
-      requestAnimationFrame(step);
-    };
-
-    requestAnimationFrame(step);
-  };
-
   return (
     <>
       <div className="w-full h-full overflow-auto scrollbar-thin">
         <table className="min-w-[900px] h-full w-full border border-gray-200 rounded-lg text-xs sm:text-sm">
-          <thead className="bg-gray-50  border-b border-gray-200 sticky top-0 z-20">
+          <thead className="bg-gray-50 border-b border-gray-200 sticky top-0 z-20">
             {table.getHeaderGroups().map((hg) => (
               <tr key={hg.id}>
                 {hg.headers.map((header) => (
                   <th
-                    key={`${hg.id}-${header.id}`}
+                    key={header.id}
                     className="px-4 py-3 text-left font-semibold !text-[#1A2C50] bg-gray-50"
                   >
                     {flexRender(header.column.columnDef.header, header.getContext())}
@@ -91,66 +72,32 @@ function DataTable<T extends RowData>({
               </tr>
             ))}
 
-            {showColumnFilters && typeof onColumnFilterChange === 'function' && (
-              <tr
-                className={`transition-all duration-500 ease-in-out sticky top-[48px] z-10 bg-gray-50 ${
-                  showColumnFilters ? 'max-h-12 opacity-100' : 'max-h-0 opacity-0'
-                }`}
-              >
-                {table.getHeaderGroups()[0].headers.map((header) => {
-                  const columnId = header.column.id;
-                  const colName = String(header.column.columnDef.header);
-
-                  return (
-                    <th key={header.id} className="px-2 py-2">
-                      <input
-                        className="w-full px-3 py-2 text-[11px] sm:text-xs rounded-md border border-gray-300 bg-gray-50 focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-300 outline-none transition-all duration-300 placeholder:text-gray-400 shadow-sm"
-                        placeholder={colName}
-                        value={columnFilters[columnId] ?? ''}
-                        onChange={(e) => onColumnFilterChange(columnId, e.target.value)}
-                      />
-                    </th>
-                  );
-                })}
+            {showColumnFilters && (
+              <tr className="sticky top-[48px] z-10 bg-gray-50">
+                {table.getHeaderGroups()[0].headers.map((header) => (
+                  <th key={header.id} className="px-2 py-2">
+                    <input
+                      className="w-full px-3 py-2 text-[11px] sm:text-xs rounded-md border border-gray-300 bg-gray-50 focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-300 outline-none"
+                      placeholder={String(header.column.columnDef.header)}
+                      value={columnFilters[header.column.id] ?? ''}
+                      onChange={(e) => onColumnFilterChange(header.column.id, e.target.value)}
+                    />
+                  </th>
+                ))}
               </tr>
             )}
           </thead>
 
           <tbody>
-            {table.getRowModel().rows.map((row) => {
-              const onRowClick = table.options.meta?.onRowClick;
-              const hasRowClick = typeof onRowClick === 'function';
-
-              return (
-                <tr
-                  key={row.id}
-                  onClick={hasRowClick ? () => onRowClick(row.original) : undefined}
-                  title={hasRowClick ? 'Click to view performance' : undefined}
-                  className={`border-b border-gray-200 last:border-none transition-colors duration-200
-                    ${hasRowClick ? 'cursor-pointer hover:bg-purple-50' : ''}
-                  `}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <td key={cell.id} className="px-4 py-3 ">
-                      {(() => {
-                        const rendered = flexRender(cell.column.columnDef.cell, cell.getContext());
-
-                        if (
-                          typeof rendered === 'object' &&
-                          rendered !== null &&
-                          !Array.isArray(rendered) &&
-                          !('$$typeof' in rendered)
-                        ) {
-                          return (rendered as any)?.name ?? '';
-                        }
-
-                        return rendered;
-                      })()}
-                    </td>
-                  ))}
-                </tr>
-              );
-            })}
+            {table.getRowModel().rows.map((row) => (
+              <tr key={row.id} className="border-b border-gray-200">
+                {row.getVisibleCells().map((cell) => (
+                  <td key={cell.id} className="px-4 py-3">
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </td>
+                ))}
+              </tr>
+            ))}
 
             {table.getRowModel().rows.length === 0 && (
               <tr>
@@ -164,19 +111,14 @@ function DataTable<T extends RowData>({
       </div>
 
       <div className="flex justify-center items-center gap-2 mt-3 text-xs sm:text-sm select-none text-gray-600">
-        {/* First */}
         <button
-          onClick={() => {
-            if (!canPreviousPage) return;
-            jumpPages(currentPage - 1, 'prev');
-          }}
+          onClick={() => meta?.setPage?.(1)}
           disabled={!canPreviousPage}
           className="px-1 disabled:opacity-30"
         >
           «
         </button>
 
-        {/* Prev */}
         <button
           onClick={onPreviousPage}
           disabled={!canPreviousPage}
@@ -185,51 +127,31 @@ function DataTable<T extends RowData>({
           ‹
         </button>
 
-        {/* Pages */}
         {Array.from({ length: pageCount }, (_, i) => i + 1)
-          .filter((page) => {
-            return page === 1 || page === pageCount || Math.abs(page - currentPage) <= 2;
-          })
-          .map((page, index, arr) => {
-            const prev = arr[index - 1];
-            const showDots = prev && page - prev > 1;
+          .filter((p) => p === 1 || p === pageCount || Math.abs(p - currentPage) <= 2)
+          .map((p) => (
+            <button
+              key={p}
+              onClick={() => meta?.setPage?.(p)}
+              className={`w-7 h-7 flex items-center justify-center rounded-[64px]
+                ${
+                  p === currentPage
+                    ? 'bg-purple-100 text-[#7B3AEC] font-extrabold'
+                    : 'hover:text-purple-600'
+                }`}
+            >
+              {p}
+            </button>
+          ))}
 
-            return (
-              <span key={page} className="flex items-center gap-2">
-                {showDots && <span className="px-1">…</span>}
-                <button
-                  onClick={() => {
-                    if (page === currentPage) return;
-                    const diff = page - currentPage;
-
-                    jumpPages(Math.abs(diff), diff > 0 ? 'next' : 'prev');
-                  }}
-                  className={`w-7 h-7 p-2 gap-8 flex items-center justify-center rounded-[64px]
-                    ${
-                      page === currentPage
-                        ? 'bg-purple-100 text-[#7B3AEC] font-extrabold'
-                        : 'hover:text-purple-600'
-                    }`}
-                >
-                  {page}
-                </button>
-              </span>
-            );
-          })}
-
-        {/* Next */}
         <button onClick={onNextPage} disabled={!canNextPage} className="px-1 disabled:opacity-30">
           ›
         </button>
 
-        {/* Last */}
         <button
-          onClick={() => {
-            if (!canNextPage) return;
-            jumpPages(pageCount - currentPage, 'next');
-          }}
+          onClick={() => meta?.setPage?.(pageCount)}
           disabled={!canNextPage}
-          className="px-1 disabled:opacity-30 font-bold "
+          className="px-1 disabled:opacity-30 font-bold"
         >
           »
         </button>

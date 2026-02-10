@@ -15,11 +15,15 @@ import {
 
 export const PLAN_CODE_TO_ID = {
   BASIC: 1,
+  PRO: 2,
+  ENTERPRISE: 3,
   PREMIUM: 4,
 } as const;
 
 export const PLAN_ID_TO_CODE = {
   1: 'BASIC',
+  2: 'PRO',
+  3: 'ENTERPRISE',
   4: 'PREMIUM',
 } as const;
 
@@ -108,7 +112,7 @@ export async function fetchInstitutions(
   const res = await fetch(url, {
     method: 'GET',
     credentials: 'include',
-    cache: 'no-store'
+    cache: 'no-store',
   });
 
   if (!res.ok) throw new Error('Failed to fetch institutions');
@@ -300,8 +304,10 @@ export const createProgram = async (payload: {
 
 import axios from 'axios';
 export const institutionsApi = {
-  getById: (id: number) => axios.get(
-  `${process.env.NEXT_PUBLIC_API_BASE_URL}/super-admin/institutions/${id}`,
-  { withCredentials: true }
-).then(res => res.data)
+  getById: (id: number) =>
+    axios
+      .get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/super-admin/institutions/${id}`, {
+        withCredentials: true,
+      })
+      .then((res) => res.data),
 };
