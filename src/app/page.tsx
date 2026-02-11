@@ -1,21 +1,15 @@
-// 'use client';
-
 import Topbar from './components/layout/Topbar';
 import CampusUserCard from './components/layout/CampusUserCard';
 
-// import { useRouter } from 'next/navigation';
-// import RobotCard from './ui/RobotCard';
-
 import RobotClient from './components/RobotClient';
+import Image from 'next/image';
 
 export default function Page() {
-  // const router = useRouter();
-
   return (
     <div
       className="
        
-        min-h-screen
+        h-screen
     w-full
     max-w-[1366px]
     mx-auto
@@ -27,10 +21,13 @@ export default function Page() {
     flex-col
     relative
     overflow-y-auto
+    lg:overflow-hidden
       "
     >
+      {/* MESH BACKGROUND (Behind Cards Only) */}
+
       {/* CONTENT CONTAINER */}
-      <div className=" relative w-full max-w-[1206px]  flex flex-col gap-6">
+      <div className=" relative w-full max-w-[1206px] z-10 flex flex-col gap-6">
         <Topbar />
 
         {/* FLOATING ROBOT (LEFT) */}
@@ -76,8 +73,13 @@ export default function Page() {
         </div>
 
         {/* ROLE CARDS */}
-        <div className="w-full py-12 flex justify-center">
-          <div className="w-full flex flex-col items-center gap-6">
+        <div className="relative w-full pt-12 flex justify-center">
+          {/* MESH BACKGROUND (Anchored to Cards) */}
+          <div className="absolute inset-0 pointer-events-none z-[1] overflow-hidden">
+            <div className="mesh-blob" />
+          </div>
+
+          <div className="relative z-[2] w-full flex flex-col items-center gap-6">
             <div className="flex flex-wrap justify-center gap-6 w-full">
               <CampusUserCard
                 label="For Campus User"
@@ -102,7 +104,7 @@ export default function Page() {
 
             {/* CTA PILL */}
             <div className="w-full flex justify-end">
-              <div className="max-w-lg rounded-full border border-[#E5E7EB] bg-white shadow-sm px-4 py-2 flex items-center gap-3">
+              {/* <div className="max-w-lg  rounded-full border border-[#648bd9] bg-white shadow-sm px-4 py-2 flex items-center gap-3">
                 <div className="w-[19px] h-6 flex-shrink-0">
                   <img src="/assets/cursorIcon.png" alt="" />
                 </div>
@@ -123,7 +125,8 @@ export default function Page() {
                 >
                   Exactly. Let&apos;s begin
                 </span>
-              </div>
+              </div> */}
+              <Image src="assets/quoteImage.png" alt="quotes" width={300} height={50} />
             </div>
           </div>
         </div>

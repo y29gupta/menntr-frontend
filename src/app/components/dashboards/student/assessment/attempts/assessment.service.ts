@@ -25,6 +25,37 @@ export type AssessmentRuntimeResponse = {
 };
 
 export const attemptsApi = {
+
+  
+  getMicCheck: async (assessmentId: string) => {
+  const res = await api.get(
+    `/student/assessments/${assessmentId}/mic-check`
+  );
+  return res.data;
+  },
+  startMicCheck: async (assessmentId: string) => {
+  const res = await api.post(
+    `/student/assessments/${assessmentId}/mic-check/start`
+  );
+  return res.data as {
+    status: string;
+    message: string;
+  };
+  },
+  
+  submitMicResult: async (
+  assessmentId: string,
+  payload: { success: boolean }
+) => {
+  const res = await api.post(
+    `/student/assessments/${assessmentId}/mic-check/result`,
+    payload
+  );
+  return res.data;
+},
+
+
+
   startAssessment: async (assessmentId: string): Promise<StartAssessmentResponse> => {
     const res = await api.post(`/student/assessments/${assessmentId}/start`);
     return res.data;

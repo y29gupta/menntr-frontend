@@ -1,8 +1,8 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { message } from 'antd';
 
 import StepPrivacyConsent from './StepPrivacyConsent';
@@ -12,7 +12,10 @@ import StepStartTest from './StepStartTest';
 import ProctoringClient from '@/proctoring/ProctoringClient';
 
 import { api } from '@/app/lib/api';
-import { attemptsApi } from '@/app/components/dashboards/student/assessment/attempts/assessment.service';
+import {
+  assessmentApi,
+  attemptsApi,
+} from '@/app/components/dashboards/student/assessment/attempts/assessment.service';
 
 type Props = {
   open: boolean;
@@ -55,6 +58,15 @@ export default function AssessmentStepModal({ open, onClose, assessmentId }: Pro
   // ID ALWAYS COMES FROM URL
 
   const assessmentIdFromUrl = (params?.id as string) || assessmentId;
+  const {
+    data: micMeta,
+    isLoading: micLoading,
+    isError: micError,
+  } = useQuery({
+    queryKey: ['mic-check', assessmentIdFromUrl],
+    queryFn: () => attemptsApi.getMicCheck(assessmentIdFromUrl!),
+    enabled: step === 2 && !!assessmentIdFromUrl,
+  });
 
   /* ================= CONSENT MUTATION ================= */
 
@@ -155,7 +167,14 @@ export default function AssessmentStepModal({ open, onClose, assessmentId }: Pro
             />
           )}
 
-          {step === 2 && <StepMicCheck micStatus={micStatus} setMicStatus={setMicStatus} />}
+          {step === 2 && (
+            <StepMicCheck
+              micStatus={micStatus}
+              setMicStatus={setMicStatus}
+              micMeta={micMeta}
+              assessmentId={assessmentIdFromUrl!}
+            />
+          )}
 
           {step === 3 && (
             <StepCameraCheck
@@ -189,8 +208,14 @@ export default function AssessmentStepModal({ open, onClose, assessmentId }: Pro
 
           <button
             onClick={nextStep}
+            // disabled={
+            //   (step === 1 && !consentChecked) ||
+            //   consentMutation.isPending ||
+            //   startAssessmentMutation.isPending
+            // }
             disabled={
               (step === 1 && !consentChecked) ||
+              (step === 2 && micStatus !== 'success') || // 👈 ADD THIS
               consentMutation.isPending ||
               startAssessmentMutation.isPending
             }

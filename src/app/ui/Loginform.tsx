@@ -138,7 +138,14 @@ const Loginform = ({ role, setupToken }: LoginFormProps) => {
 
             <div className="flex-1 lg:flex-none">
               {/* HEADER */}
-              <div className="flex items-center gap-4 sm:gap-7 bg-white max-w-xs mb-6 sm:mb-8 rounded-3xl px-4 sm:px-5 shadow-[0px_0px_24px_0px_#0F172A40]">
+              {/* <div className="flex items-center gap-4 sm:gap-7 bg-white max-w-xs mb-6 sm:mb-8 rounded-3xl px-4 sm:px-5 shadow-[0px_0px_24px_0px_#0F172A40]"> */}
+              <div
+                className="flex items-center gap-4 sm:gap-7  max-w-xs mb-6 sm:mb-8 rounded-3xl px-4 sm:px-5 
+border border-[#FFFFFF]
+shadow-[0px_0px_8px_rgba(15,23,42,0.12),inset_0px_0px_8px_rgba(70,93,149,0.12),inset_-1px_-1px_0px_rgba(70,93,149,0.12)]
+
+]"
+              >
                 <img src={'/vector.svg'} alt="loading" />
                 {/* <p className="text-[#0F172A] text-[16px] sm:text-[20px] font-semibold pt-4">
                   {role === 'student'
@@ -147,7 +154,7 @@ const Loginform = ({ role, setupToken }: LoginFormProps) => {
                       ? 'Super Admin Login'
                       : 'Admin Login'}
                 </p> */}
-                <p className="text-[#0F172A] text-[16px] sm:text-[20px] font-semibold pt-4">
+                <p className="!text-[#1A2C50] text-[16px] sm:text-[20px] font-semibold pt-4">
                   {isOneTimeLogin
                     ? 'Institution Admin Setup'
                     : role === 'Student'

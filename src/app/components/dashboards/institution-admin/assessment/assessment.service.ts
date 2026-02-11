@@ -1,27 +1,12 @@
-// import { api } from "@/app/lib/api";
-// import { getAssessmentListResponse } from "./assessment.schema";
 
-// export const assessmentApi = {
-//     getAssessmentList: async ():Promise<getAssessmentListResponse[]> => {
-//         const res = await api.get('/assessments')
-//              return res.data
-//     }
-// }
 import { api } from "@/app/lib/api";
-// import { AssessmentQuestionResponse, getAssessmentListResponse } from "./assessment.schema";
+
 import { AssessmentAccessPayload, AssessmentListResult, AssessmentMetaResponse, AssessmentQuestionResponse, CreateAssessmentPayload, CreateCodingQuestionPayload, getAssessmentListResponse, QuestionMetaType, UpdateQuestionPayload } from "./assessment.types";
 
 export type AssessmentTab = "active" | "draft" | "completed";
 
 export const assessmentApi = {
-  // getAssessmentList: async (
-  //   tab: AssessmentTab
-  // ): Promise<getAssessmentListResponse[]> => {
-  //   const res = await api.get("/assessments", {
-  //     params: { tab }
-  //   });
-  //   return res.data;
-  // },
+ 
 getAssessmentList: async (
   tab: 'active' | 'draft' | 'completed',
   page = 1,
