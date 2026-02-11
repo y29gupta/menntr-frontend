@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from 'react';
 import { Camera, CameraOff, CheckCircle, X } from 'lucide-react';
 import FaceAlignmentOverlay from './FaceAlignmentOverlay';
 import { getFaceDetector } from '@/app/lib/mediapipeFaceDetector';
+import { useMutation } from '@tanstack/react-query';
+import { attemptsApi } from '@/app/components/dashboards/student/assessment/attempts/assessment.service';
 
 export type CameraStatus = 'off' | 'starting' | 'working' | 'aligning' | 'success' | 'error';
 
@@ -27,6 +29,16 @@ type Props = {
   setVideoStream: React.Dispatch<React.SetStateAction<MediaStream | null>>;
   onCameraReady?: () => void;
   videoRef: React.RefObject<HTMLVideoElement | null>;
+  cameraMeta?: {
+    step: {
+      current: number;
+      total: number;
+      label: string;
+    };
+    instructions: string;
+    can_start_camera: boolean;
+  } | null;
+  assessmentId: string;
 };
 
 export default function StepCameraCheck({
@@ -36,6 +48,8 @@ export default function StepCameraCheck({
   setVideoStream,
   onCameraReady,
   videoRef,
+  cameraMeta,
+  assessmentId,
 }: Props) {
   // const videoRef = useRef<HTMLVideoElement | null>(null);
   const detectorRef = useRef<any>(null);
@@ -44,6 +58,8 @@ export default function StepCameraCheck({
 
   const [waitSecondsLeft, setWaitSecondsLeft] = useState(Math.ceil(MAX_WAIT_TIME / 1000));
   const [alignSecondsLeft, setAlignSecondsLeft] = useState(Math.ceil(ALIGN_TIME_REQUIRED / 1000));
+
+  const [backendMessage, setBackendMessage] = useState<string | null>(null);
 
   /* ================= HELPERS ================= */
 
@@ -112,7 +128,13 @@ export default function StepCameraCheck({
         if (resolved) return;
 
         const elapsedWait = Date.now() - waitStart;
+
         setWaitSecondsLeft(Math.max(0, Math.ceil((MAX_WAIT_TIME - elapsedWait) / 1000)));
+        if (elapsedWait >= MAX_WAIT_TIME) {
+          resolved = true;
+          resultMutation.mutate(false);
+          return;
+        }
 
         const detection = results?.detections?.[0];
         if (!detection) {
@@ -133,8 +155,7 @@ export default function StepCameraCheck({
 
           if (elapsedAlign >= ALIGN_TIME_REQUIRED) {
             resolved = true;
-            setCameraStatus('success');
-            onCameraReady?.();
+            resultMutation.mutate(true);
           }
         } else {
           alignedSince = null;
@@ -147,7 +168,7 @@ export default function StepCameraCheck({
 
         const now = performance.now();
 
-        // 🔒 HARD THROTTLE → 5 FPS (SAFE)
+        // HARD THROTTLE → 5 FPS (SAFE)
         if (now - lastSent > 200 && videoRef.current.readyState >= 2) {
           lastSent = now;
           detector.send({ image: videoRef.current });
@@ -164,6 +185,27 @@ export default function StepCameraCheck({
       cancelAnimationFrame(rafId);
     };
   }, [cameraStatus]);
+
+  const startCameraMutation = useMutation({
+    mutationFn: () => attemptsApi.startCameraCheck(assessmentId),
+    onSuccess: (data) => {
+      setBackendMessage(data.message);
+      startCamera(); // existing function
+    },
+    onError: () => setCameraStatus('error'),
+  });
+  const resultMutation = useMutation({
+    mutationFn: (success: boolean) => attemptsApi.submitCameraResult(assessmentId, { success }),
+    onSuccess: (data) => {
+      setBackendMessage(data.message);
+
+      if (data.success) {
+        setCameraStatus('success');
+      } else {
+        setCameraStatus('error');
+      }
+    },
+  });
 
   /* ================= UI ================= */
 
@@ -197,37 +239,39 @@ export default function StepCameraCheck({
       {/* Messages & Actions */}
       <div className="mt-4 flex flex-col items-center gap-3 min-h-[80px]">
         {/* OFF */}
-        {cameraStatus === 'off' && (
+        {cameraStatus === 'off' && cameraMeta?.can_start_camera && (
           <>
-            <p className="text-[#4F46E5] text-sm font-medium">Please turn on your camera</p>
+            <p className="text-[#4F46E5] text-sm font-medium">
+              {backendMessage || cameraMeta?.instructions || 'Please turn on your camera'}
+            </p>
+
             <button
-              onClick={startCamera}
+              disabled={startCameraMutation.isPending}
+              onClick={() => startCameraMutation.mutate()}
               className="flex items-center gap-2 border border-[#904BFF] text-[#904BFF]! px-5 py-2 rounded-full text-sm"
             >
               <Camera size={16} />
-              Turn on Camera
+              {startCameraMutation.isPending ? 'Starting...' : 'Turn on Camera'}
             </button>
           </>
         )}
 
         {/* ALIGNING */}
-        {cameraStatus === 'aligning' &&
-          (alignSecondsLeft < Math.ceil(ALIGN_TIME_REQUIRED / 1000) ? (
-            <p className="text-[#4F46E5] text-sm font-medium">
-              Please align your face ({alignSecondsLeft}s)
-            </p>
-          ) : (
-            <p className="text-[#667085] text-sm font-medium">
-              Waiting for face… ({waitSecondsLeft}s)
-            </p>
-          ))}
+        {cameraStatus === 'aligning' && (
+          <p className="text-[#4F46E5] text-sm font-medium">
+            {backendMessage || 'Please align your face'}
+            {alignSecondsLeft < Math.ceil(ALIGN_TIME_REQUIRED / 1000)
+              ? ` (${alignSecondsLeft}s)`
+              : ` (${waitSecondsLeft}s)`}
+          </p>
+        )}
 
         {/* SUCCESS */}
         {cameraStatus === 'success' && (
           <>
             <div className="flex items-center gap-1 text-green-600 text-sm font-medium">
               <CheckCircle size={16} />
-              <span>Camera working – you’re good to go</span>
+              <span>{backendMessage || 'Camera working – you’re good to go'}</span>
             </div>
 
             <button
@@ -245,11 +289,11 @@ export default function StepCameraCheck({
           <>
             <div className="flex items-center gap-1 text-red-500 text-sm font-medium">
               <X size={16} />
-              <span>Camera not detected – enable access</span>
+              <span>{backendMessage || 'Camera not detected – enable access'}</span>
             </div>
 
             <button
-              onClick={startCamera}
+              onClick={() => startCameraMutation.mutate()}
               className="flex items-center gap-2 border border-[#904BFF] text-[#904BFF]! px-5 py-2 rounded-full text-sm"
             >
               <Camera size={16} />

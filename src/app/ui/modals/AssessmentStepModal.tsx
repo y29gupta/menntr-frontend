@@ -51,6 +51,15 @@ export default function AssessmentStepModal({ open, onClose, assessmentId }: Pro
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const cameraCheckVideoRef = useRef<HTMLVideoElement | null>(null);
   const [proctoringEnabled, setProctoringEnabled] = useState(false);
+  const [cameraMeta, setCameraMeta] = useState<{
+    step: {
+      current: number;
+      total: number;
+      label: string;
+    };
+    instructions: string;
+    can_start_camera: boolean;
+  } | null>(null);
 
   const router = useRouter();
   const params = useParams();
@@ -66,6 +75,17 @@ export default function AssessmentStepModal({ open, onClose, assessmentId }: Pro
     queryKey: ['mic-check', assessmentIdFromUrl],
     queryFn: () => attemptsApi.getMicCheck(assessmentIdFromUrl!),
     enabled: step === 2 && !!assessmentIdFromUrl,
+  });
+
+  const cameraStepMutation = useMutation({
+    mutationFn: () => attemptsApi.getCameraCheck(assessmentIdFromUrl!),
+    onSuccess: (data) => {
+      setCameraMeta(data);
+      setStep(3);
+    },
+    onError: () => {
+      message.error('Unable to load camera step');
+    },
   });
 
   /* ================= CONSENT MUTATION ================= */
@@ -110,6 +130,10 @@ export default function AssessmentStepModal({ open, onClose, assessmentId }: Pro
       if (!assessmentIdFromUrl || consentMutation.isPending) return;
 
       consentMutation.mutate(assessmentIdFromUrl);
+      return;
+    }
+    if (step === 2) {
+      cameraStepMutation.mutate();
       return;
     }
 
@@ -184,6 +208,8 @@ export default function AssessmentStepModal({ open, onClose, assessmentId }: Pro
               setVideoStream={setVideoStream}
               videoRef={cameraCheckVideoRef}
               onCameraReady={() => setProctoringEnabled(true)}
+              cameraMeta={cameraMeta}
+              assessmentId={assessmentIdFromUrl!}
             />
           )}
 
@@ -215,7 +241,9 @@ export default function AssessmentStepModal({ open, onClose, assessmentId }: Pro
             // }
             disabled={
               (step === 1 && !consentChecked) ||
-              (step === 2 && micStatus !== 'success') || // 👈 ADD THIS
+              (step === 2 && micStatus !== 'success') ||
+              (step === 3 && cameraStatus !== 'success') || //  ADD THIS
+              cameraStepMutation.isPending ||
               consentMutation.isPending ||
               startAssessmentMutation.isPending
             }
@@ -229,13 +257,15 @@ export default function AssessmentStepModal({ open, onClose, assessmentId }: Pro
               disabled:opacity-40
             "
           >
-            {step === 4
-              ? startAssessmentMutation.isPending
-                ? 'Starting...'
-                : 'Start Assessment'
-              : step === 1 && consentMutation.isPending
-                ? 'Verifying...'
-                : 'Next'}
+            {step === 1 && consentMutation.isPending
+              ? 'Verifying...'
+              : step === 2 && cameraStepMutation.isPending
+                ? 'Loading...'
+                : step === 4
+                  ? startAssessmentMutation.isPending
+                    ? 'Starting...'
+                    : 'Start Assessment'
+                  : 'Next'}
           </button>
         </div>
       </div>
