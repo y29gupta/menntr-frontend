@@ -7,7 +7,6 @@ import { MetricCard } from '@/app/components/dashboards/super-admin/MetricCard';
 import { institutionColumns } from './institution.columns';
 import DataTable from '../../table/DataTable';
 import { Search, Filter } from 'lucide-react';
-import { Spin } from 'antd';
 import axios from 'axios';
 
 import {
@@ -26,6 +25,13 @@ type Props = {
 const ITEMS_PER_PAGE = 3;
 const DEBOUNCE_DELAY = 500;
 
+type PaginationMeta = {
+  currentPage?: number;
+  page?: number;
+  totalCount?: number;
+  total?: number;
+};
+
 const Dashboard = ({ onCreateInstitution, onEditInstitution }: Props) => {
   const [page, setPage] = useState(1);
   const [limit] = useState(ITEMS_PER_PAGE);
@@ -34,13 +40,12 @@ const Dashboard = ({ onCreateInstitution, onEditInstitution }: Props) => {
   const [showColumnFilters, setShowColumnFilters] = useState(false);
   const [columnFilters, setColumnFilters] = useState<Record<string, string>>({});
   const [debouncedColumnFilters, setDebouncedColumnFilters] = useState<Record<string, string>>({});
+
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   /* -------------------- DEBOUNCE -------------------- */
   useEffect(() => {
-    if (debounceTimerRef.current) {
-      clearTimeout(debounceTimerRef.current);
-    }
+    if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
 
     debounceTimerRef.current = setTimeout(() => {
       setDebouncedSearch(search);
@@ -49,13 +54,11 @@ const Dashboard = ({ onCreateInstitution, onEditInstitution }: Props) => {
     }, DEBOUNCE_DELAY);
 
     return () => {
-      if (debounceTimerRef.current) {
-        clearTimeout(debounceTimerRef.current);
-      }
+      if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
     };
   }, [search, columnFilters]);
 
-  /* -------------------- INSTITUTION QUERY -------------------- */
+  /* -------------------- FILTERS -------------------- */
   const filters: FilterParams = {
     page,
     limit,
@@ -63,24 +66,13 @@ const Dashboard = ({ onCreateInstitution, onEditInstitution }: Props) => {
     name: debouncedColumnFilters.name || undefined,
     code: debouncedColumnFilters.code || undefined,
     status: debouncedColumnFilters.status || undefined,
-    contactEmail: debouncedColumnFilters.contactEmail || undefined,
+    contactEmail: debouncedColumnFilters.contact_email || undefined,
     planCode: debouncedColumnFilters.plan || undefined,
   };
 
+  /* -------------------- INSTITUTIONS QUERY -------------------- */
   const {
-    data = {
-      data: [],
-      meta: {
-        isFirstPage: true,
-        isLastPage: false,
-        currentPage: 1,
-        previousPage: null,
-        nextPage: null,
-        pageCount: 0,
-        totalCount: 0,
-        currentPageCount: 0,
-      },
-    },
+    data = { data: [], meta: {} },
     isLoading,
     isError,
   } = useQuery({
@@ -88,15 +80,25 @@ const Dashboard = ({ onCreateInstitution, onEditInstitution }: Props) => {
     queryFn: () => fetchInstitutions(filters),
   });
 
-  const institutions: Institution[] = mapInstitutions(data.data);
-  const totalCount = data.meta.totalCount ?? 0;
+  const institutions: Institution[] = mapInstitutions(data.data ?? []);
 
-  /* -------------------- STUDENT COUNT QUERY -------------------- */
-  const {
-    data: studentCountData,
-    isLoading: isStudentCountLoading,
-    isError: isStudentCountError,
-  } = useQuery({
+  /* -------------------- META (FIXED) -------------------- */
+  const rawMeta = (data.meta ?? {}) as PaginationMeta;
+
+  const totalCount = rawMeta.totalCount ?? rawMeta.total ?? 0;
+  const pageCount = Math.max(1, Math.ceil(totalCount / limit));
+
+  const normalizedMeta = {
+    currentPage: rawMeta.currentPage ?? rawMeta.page ?? page,
+    pageCount,
+    totalCount,
+  };
+
+  const canPreviousPage = normalizedMeta.currentPage > 1;
+  const canNextPage = normalizedMeta.currentPage < normalizedMeta.pageCount;
+
+  /* -------------------- STUDENT COUNT -------------------- */
+  const { data: studentCountData, isLoading: isStudentCountLoading } = useQuery({
     queryKey: ['student-count'],
     queryFn: async () => {
       const res = await axios.get('api/users/student-count', {
@@ -108,50 +110,36 @@ const Dashboard = ({ onCreateInstitution, onEditInstitution }: Props) => {
   });
 
   /* -------------------- HANDLERS -------------------- */
-  const handleColumnFilterChange = (columnName: string, value: string) => {
+  const handleColumnFilterChange = (key: string, value: string) => {
     setColumnFilters((prev) => ({
       ...prev,
-      [columnName]: value,
+      [key]: value,
     }));
   };
 
-  const handleGlobalSearchChange = (value: string) => {
-    setSearch(value);
-  };
-
   const handlePreviousPage = () => {
-    if (data.meta.previousPage) {
-      setPage(data.meta.previousPage);
-    }
+    if (canPreviousPage) setPage((p) => p - 1);
   };
 
   const handleNextPage = () => {
-    if (data.meta.nextPage) {
-      setPage(data.meta.nextPage);
-    }
+    if (canNextPage) setPage((p) => p + 1);
   };
 
+  /* -------------------- UI -------------------- */
   return (
     <main className="h-full px-4 sm:px-6 lg:px-8 xl:px-10 py-5 flex flex-col gap-6 text-[13px] sm:text-sm lg:text-base overflow-y-auto [&::-webkit-scrollbar]:hidden scrollbar-none1">
       <TopProfileBar userRole="Super Admin Portal- System Admin" RoleIcon={<SuperAdminIcon />} />
 
-      {/* -------------------- METRICS -------------------- */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <MetricCard
           title="Total Institutions"
-          value={isLoading ? '—' : String(totalCount)}
+          value={String(normalizedMeta.totalCount)}
           bg="bg-[linear-gradient(106.82deg,#F2F7FF_3.46%,#D2E3FE_96.84%)]"
         />
 
         <MetricCard
           title="Active students"
-          value={
-            isStudentCountLoading
-              ? '—'
-              : isStudentCountError
-                ? 'N/A'
-                : String(studentCountData?.count ?? 0)
-          }
+          value={isStudentCountLoading ? '—' : String(studentCountData?.count ?? 0)}
           bg="bg-[linear-gradient(106.63deg,#FAFFF2_3.48%,#FFFAD0_96.61%)]"
         />
 
@@ -168,25 +156,24 @@ const Dashboard = ({ onCreateInstitution, onEditInstitution }: Props) => {
         />
       </div>
 
-      {/* -------------------- TABLE -------------------- */}
       <div className="w-full rounded-3xl border border-[#DBDFE7] bg-white p-4 sm:p-6 lg:p-8">
         <div className="flex items-center justify-between gap-4 mb-4">
           <h2 className="hidden sm:block font-semibold text-gray-800">All Institutions</h2>
 
           <button
             onClick={onCreateInstitution}
-            className="w-full sm:w-auto whitespace-nowrap text-xs sm:text-sm !text-white bg-[linear-gradient(90deg,#904BFF_0%,#C053C2_100%)] px-4 sm:px-6 !py-2.5 sm:py-1 rounded-full flex items-center justify-center gap-2 font-medium"
+            className="w-full sm:w-auto whitespace-nowrap text-xs sm:text-sm text-white! bg-[linear-gradient(90deg,#904BFF_0%,#C053C2_100%)] px-3 sm:px-5 py-2.5 sm:py-1.5 rounded-full flex items-center justify-center gap-2 font-medium"
           >
-            <span>+</span> Onboard Institution
+            <span className="text-xl pb-0.5">+</span> Onboard Institution
           </button>
         </div>
 
         <div className="flex flex-col sm:flex-row gap-3 mb-4">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-2.5 text-gray-400 w-4 h-4" />
+            <Search className="absolute left-3.5 top-3 text-gray-400 w-4 h-4" />
             <input
               value={search}
-              onChange={(e) => handleGlobalSearchChange(e.target.value)}
+              onChange={(e) => setSearch(e.target.value)}
               type="text"
               placeholder="Search for Institution"
               className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
@@ -194,7 +181,7 @@ const Dashboard = ({ onCreateInstitution, onEditInstitution }: Props) => {
           </div>
 
           <button
-            onClick={() => setShowColumnFilters((prev) => !prev)}
+            onClick={() => setShowColumnFilters((p) => !p)}
             className="flex items-center justify-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-xs sm:text-sm hover:bg-gray-50"
           >
             <Filter className="w-4 h-4" />
@@ -202,29 +189,23 @@ const Dashboard = ({ onCreateInstitution, onEditInstitution }: Props) => {
           </button>
         </div>
 
-        {isLoading && (
-          <div className="flex items-center justify-center min-h-[60vh]">
-            <Spin size="large" />
-          </div>
-        )}
-
         {isError && <p className="text-red-500">Failed to load institutions</p>}
 
-        {!isError && (
-          <DataTable
-            columns={institutionColumns(onEditInstitution)}
-            data={institutions}
-            columnFilters={columnFilters}
-            onColumnFilterChange={handleColumnFilterChange}
-            showColumnFilters={showColumnFilters}
-            currentPage={data.meta.currentPage}
-            pageCount={data.meta.pageCount}
-            onPreviousPage={handlePreviousPage}
-            onNextPage={handleNextPage}
-            canPreviousPage={!!data.meta.previousPage}
-            canNextPage={!!data.meta.nextPage}
-          />
-        )}
+        <DataTable
+          columns={institutionColumns(onEditInstitution)}
+          data={institutions}
+          isLoading={isLoading}
+          columnFilters={columnFilters}
+          onColumnFilterChange={handleColumnFilterChange}
+          showColumnFilters={showColumnFilters}
+          currentPage={normalizedMeta.currentPage}
+          pageCount={normalizedMeta.pageCount}
+          onPreviousPage={handlePreviousPage}
+          onNextPage={handleNextPage}
+          canPreviousPage={canPreviousPage}
+          canNextPage={canNextPage}
+          meta={{ setPage }}
+        />
       </div>
     </main>
   );
