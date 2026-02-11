@@ -61,7 +61,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 // ---- Fetcher ----
 
 async function fetchAuthContext() {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/me/context`, {
+  const res = await fetch(`/api/auth/me/context`, {
     credentials: 'include',
     cache: 'no-store',
   });
