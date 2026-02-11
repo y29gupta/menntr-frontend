@@ -1,5 +1,5 @@
 export async function fetchDashboardData<T>(url: string, options?: RequestInit): Promise<T> {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}${url}`, {
+  const res = await fetch(`/api/${url}`, {
     credentials: 'include',
     cache: 'no-store',
     ...options,
