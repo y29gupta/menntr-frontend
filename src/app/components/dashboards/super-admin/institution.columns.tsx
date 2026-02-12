@@ -29,12 +29,25 @@ export const institutionColumns = (
     accessorKey: 'plan',
     header: 'Plan',
     cell: ({ getValue }) => {
-      const plan = getValue() as string;
+      const plan = (getValue() as string) || '';
 
-      const bg = plan === 'Premium' ? 'bg-[#C89A2A]' : 'bg-[#E8F0FF]';
-      const text = plan === 'Premium' ? 'text-white' : 'text-black';
+      const planStyles: Record<string, string> = {
+        'Premium Plan': 'bg-[#C89A2A] text-white',
+        'Basic Plan': 'bg-[#E8F0FF] text-black',
+        'Enterprise Plan': 'bg-[#1A2E66] text-white',
+        'Professional Plan': 'bg-[#2563EB] text-white',
+        'Free Trial': 'bg-[#EB2595] text-white',
+      };
 
-      return <span className={`${bg} ${text} px-3 py-1 rounded text-xs font-medium`}>{plan}</span>;
+      const classes = planStyles[plan] ?? 'bg-gray-200 text-black';
+
+      return (
+        <span
+          className={`${classes} inline-flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium`}
+        >
+          {plan}
+        </span>
+      );
     },
   },
   {

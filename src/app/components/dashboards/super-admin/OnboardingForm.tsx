@@ -197,7 +197,7 @@ export default function OnboardingForm({ mode, defaultValues, onCancel, onSubmit
                         key={planItem.id}
                         type="button"
                         onClick={() => setValue('plan_id', planCode)}
-                        className={`w-full max-w-[260px] mx-auto px-10 py-3 rounded-full border flex items-center justify-center gap-3 cursor-pointer transition-all duration-300 ease-in-out hover:!text-white hover:bg-[linear-gradient(90deg,#7F3FFF_0%,#A844B3_100%)] ${isSelected ? 'border-purple-500 !text-purple-600' : 'border-gray-300 text-gray-700'} ${isLastOdd ? 'sm:col-span-2 sm:justify-self-center' : ''}`}
+                        className={`w-full max-w-[260px] mx-auto px-10 py-3 rounded-full border flex items-center justify-center gap-3 cursor-pointer transition-all duration-300 ease-in-out hover:!text-white hover:bg-[linear-gradient(90deg,#7F3FFF_0%,#A844B3_100%)] ${isSelected ? 'border-purple-500 !text-purple-600 bg-[#F6F0FF]' : 'border-gray-300 text-gray-700 bg-[#FFFFFF]'} ${isLastOdd ? 'sm:col-span-2 sm:justify-self-center' : ''}`}
                       >
                         {isSelected && <CheckedIcon />}
                         {planItem.name}
