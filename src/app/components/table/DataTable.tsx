@@ -157,7 +157,8 @@ function DataTable<T extends RowData>({
         </table>
       </div>
 
-      <div className="flex justify-center items-center gap-2 mt-3 text-xs sm:text-sm select-none text-gray-600">
+      <div className="flex justify-center items-center gap-2 mt-3 text-xs sm:text-[16px] select-none text-[#616570]">
+        {/* First */}
         <button
           onClick={() => meta?.setPage?.(1)}
           disabled={!canPreviousPage}
@@ -166,6 +167,7 @@ function DataTable<T extends RowData>({
           «
         </button>
 
+        {/* Prev */}
         <button
           onClick={onPreviousPage}
           disabled={!canPreviousPage}
@@ -174,27 +176,47 @@ function DataTable<T extends RowData>({
           ‹
         </button>
 
+        {/* Page numbers */}
         {Array.from({ length: pageCount }, (_, i) => i + 1)
-          .filter((p) => p === 1 || p === pageCount || Math.abs(p - currentPage) <= 2)
-          .map((p) => (
-            <button
-              key={p}
-              onClick={() => meta?.setPage?.(p)}
-              className={`w-7 h-7 flex items-center justify-center rounded-[64px]
-                ${
-                  p === currentPage
-                    ? 'bg-purple-100 text-[#7B3AEC] font-extrabold'
-                    : 'hover:text-purple-600'
-                }`}
-            >
-              {p}
-            </button>
-          ))}
+          .filter((p) => {
+            if (p === 1 || p === pageCount) return true;
+            if (p >= currentPage - 2 && p <= currentPage + 2) return true;
+            return false;
+          })
+          .reduce<(number | 'ellipsis')[]>((acc, p, i, arr) => {
+            if (i > 0 && p !== arr[i - 1] + 1) {
+              acc.push('ellipsis');
+            }
+            acc.push(p);
+            return acc;
+          }, [])
+          .map((item, idx) =>
+            item === 'ellipsis' ? (
+              <span key={`e-${idx}`} className="px-1">
+                …
+              </span>
+            ) : (
+              <button
+                key={item}
+                onClick={() => meta?.setPage?.(item)}
+                className={`w-7 h-7 flex items-center justify-center rounded-full
+            ${
+              item === currentPage
+                ? 'bg-purple-100 text-[#7B3AEC] font-extrabold'
+                : 'hover:text-purple-600'
+            }`}
+              >
+                {item}
+              </button>
+            )
+          )}
 
+        {/* Next */}
         <button onClick={onNextPage} disabled={!canNextPage} className="px-1 disabled:opacity-30">
           ›
         </button>
 
+        {/* Last */}
         <button
           onClick={() => meta?.setPage?.(pageCount)}
           disabled={!canNextPage}

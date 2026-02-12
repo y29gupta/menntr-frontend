@@ -29,37 +29,25 @@ export const institutionColumns = (
     accessorKey: 'plan',
     header: 'Plan',
     cell: ({ getValue }) => {
-      const plan = getValue() as string;
+      const plan = (getValue() as string) || '';
 
-      const planStyles: Record<string, { bg: string; text: string }> = {
-        'Free Trial': {
-          bg: 'bg-black',
-          text: 'text-white',
-        },
-        'Basic Plan': {
-          bg: 'bg-[#E8F0FF]',
-          text: 'text-[#0F172A]',
-        },
-        'Premium Plan': {
-          bg: 'bg-[#C89A2A]',
-          text: 'text-white',
-        },
-        'Professional Plan': {
-          bg: 'bg-[#2563EB]',
-          text: 'text-white',
-        },
-        'Enterprise Plan': {
-          bg: 'bg-[#1A2E66]',
-          text: 'text-white',
-        },
+      const planStyles: Record<string, string> = {
+        'Premium Plan': 'bg-[#C89A2A] text-white',
+        'Basic Plan': 'bg-[#E8F0FF] text-black',
+        'Enterprise Plan': 'bg-[#1A2E66] text-white',
+        'Professional Plan': 'bg-[#2563EB] text-white',
+        'Free Trial': 'bg-[#EB2595] text-white',
       };
 
-      const { bg, text } = planStyles[plan] ?? {
-        bg: 'bg-gray-100',
-        text: 'text-gray-700',
-      };
+      const classes = planStyles[plan] ?? 'bg-gray-200 text-black';
 
-      return <span className={`${bg} ${text} px-3 py-1 rounded text-xs font-medium`}>{plan}</span>;
+      return (
+        <span
+          className={`${classes} inline-flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium`}
+        >
+          {plan}
+        </span>
+      );
     },
   },
   {
