@@ -10,6 +10,8 @@ import DataTableSkeleton from './DatatableSkeleton';
 
 export type DataTableMeta<TData extends RowData> = TableMeta<TData> & {
   setPage?: (page: number) => void;
+  onRowClick?: (row: TData) => void;
+  onDeleteClick?: (id: string) => void;
 };
 
 interface DataTableProps<T extends RowData> {
