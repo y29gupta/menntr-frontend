@@ -54,9 +54,9 @@ export default function Categories({ setCategoryView }: Props) {
             setSelectedFormData(null);
             setView('add');
           }}
-          className="flex items-center gap-2 bg-gradient-to-r from-purple-500 to-purple-600 !text-white px-5 py-2 rounded-full text-sm font-medium shadow"
+          className="rounded-full  bg-[linear-gradient(90deg,#904BFF_0%,#C053C2_100%)] px-5 py-2 text-sm !text-white"
         >
-          <span className="text-lg leading-none">+</span>
+          <span className="text-lg pr-2 leading-none">+</span>
           Add Categories
         </button>
       </div>

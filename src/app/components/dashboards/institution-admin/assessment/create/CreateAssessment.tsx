@@ -36,8 +36,6 @@ export default function CreateAssessment({ mode = 'create', editAssessmentId }: 
   const [tags, setTags] = useState<string[] | undefined>();
   const [durationMinutes, setDurationMinutes] = useState<number | undefined>();
 
-  // const [activeQuestionType, setActiveQuestionType] = useState<QuestionType | null>(null);
-
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [deleteQuestionId, setDeleteQuestionId] = useState<string | null>(null);
 
@@ -45,10 +43,6 @@ export default function CreateAssessment({ mode = 'create', editAssessmentId }: 
   const [isHydrated, setIsHydrated] = useState(false);
 
   const isEdit = mode === 'edit';
-
-  // const closeQuestionModal = () => {
-  //   setActiveQuestionType(null);
-  // };
 
   const router = useRouter();
 
@@ -240,9 +234,8 @@ export default function CreateAssessment({ mode = 'create', editAssessmentId }: 
     <>
       <div
         className="w-full  bg-white/60
-  backdrop-blur-[100px]
   h-full
-  supports-[backdrop-filter]:backdrop-blur-[100px]
+ 
   shadow-[0px_0px_8px_0px_#0F172A1F] p-4 rounded-2xl "
       >
         <h2 className="text-xl font-semibold text-[#101828]">Create Assessment</h2>

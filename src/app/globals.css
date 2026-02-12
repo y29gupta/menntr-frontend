@@ -50,6 +50,51 @@ body {
   color: var(--foreground);
   font-family: var(--font-geist-sans);
 }
+/* .mesh-blob {
+  position: absolute;
+  top: 65%;
+  left: -10%;
+  width: 250px;
+  height: 200px;
+  transform: translateY(-80%);
+
+  background:
+    radial-gradient(circle at 10% 20%, #DFC718 0%, rgba(223,199,24,0.9) 10%, rgba(223,199,24,0.6) 35%, transparent 65%),
+    radial-gradient(circle at 42% 20%, #BB338B 0%, rgba(187,51,139,0.7) 35%, transparent 70%);
+
+  filter: blur(120px);
+  opacity: 1;
+
+  animation: moveBlob 2s ease-in-out infinite alternate;
+} */
+
+.mesh-blob {
+  position: absolute;
+  top: 60%;
+  left: 0;
+  width: 400px;
+  height: 350px;
+
+  background:
+   
+    radial-gradient(circle at 25% 20%, #BB338B 0%, rgba(187,51,139,0.7) 10%, transparent 20%);
+
+  filter: blur(100px);
+  opacity: 1;
+
+  transform: translateY(-70%);
+  animation: moveBlob 6s ease-in-out infinite alternate;
+}
+
+
+@keyframes moveBlob {
+  0% {
+    transform: translate(170px, -50%);
+  }
+  100% {
+    transform: translate(820px, -50%);
+  }
+}
 
 /* Set Expiry Toggle – AntD Switch override */
 .expiry-switch.ant-switch {

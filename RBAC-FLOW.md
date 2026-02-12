@@ -54,7 +54,7 @@ UI Components use guards
 
 ### Permission format
 
-```
+```hata ,
 module_code:feature_code:action
 ```
 
@@ -74,12 +74,12 @@ If the user has the system role "Super Admin", the backend returns `['*']` as th
 
 ### Role hierarchy levels
 
-| Level | Name                    | Default scope          |
-|-------|-------------------------|------------------------|
-| 1     | Institution Admin       | All permissions        |
-| 2     | Category Admin          | Org + student + assess |
-| 3     | Department Admin (HOD)  | View-only              |
-| 4     | Faculty                 | Dashboard + view       |
+| Level | Name                   | Default scope          |
+| ----- | ---------------------- | ---------------------- |
+| 1     | Institution Admin      | All permissions        |
+| 2     | Category Admin         | Org + student + assess |
+| 3     | Department Admin (HOD) | View-only              |
+| 4     | Faculty                | Dashboard + view       |
 
 ---
 
@@ -154,9 +154,7 @@ import ModuleRoute from '@/app/components/auth/ModuleRoute';
 import { PERMISSIONS } from '@/app/constants/permissions';
 
 const Page = () => (
-  <ModuleRoute module={PERMISSIONS.MY_NEW_MODULE.MODULE}>
-    {/* Your page content */}
-  </ModuleRoute>
+  <ModuleRoute module={PERMISSIONS.MY_NEW_MODULE.MODULE}>{/* Your page content */}</ModuleRoute>
 );
 
 export default Page;
@@ -225,14 +223,14 @@ ORGANIZATION: {
 
 ## Key Files Reference
 
-| File | Purpose |
-|------|---------|
-| `backend/src/auth/permission.resolver.ts` | Core RBAC resolution logic |
-| `backend/src/auth/me.context.handler.ts` | `/auth/me/context` endpoint |
-| `backend/prisma/seed/seed-permissions.ts` | Permission seed data |
-| `frontend/src/app/providers/AuthProvider.tsx` | Fetches and caches auth context |
-| `frontend/src/app/hooks/usePermissions.ts` | Permission check hooks |
-| `frontend/src/app/components/auth/PermissionGate.tsx` | UI guard (button/section) |
-| `frontend/src/app/components/auth/ModuleRoute.tsx` | UI guard (page-level) |
-| `frontend/src/app/constants/permissions.ts` | Permission code registry |
-| `frontend/src/app/lib/roles.ts` | Sidebar builder for module-driven roles |
+| File                                                  | Purpose                                 |
+| ----------------------------------------------------- | --------------------------------------- |
+| `backend/src/auth/permission.resolver.ts`             | Core RBAC resolution logic              |
+| `backend/src/auth/me.context.handler.ts`              | `/auth/me/context` endpoint             |
+| `backend/prisma/seed/seed-permissions.ts`             | Permission seed data                    |
+| `frontend/src/app/providers/AuthProvider.tsx`         | Fetches and caches auth context         |
+| `frontend/src/app/hooks/usePermissions.ts`            | Permission check hooks                  |
+| `frontend/src/app/components/auth/PermissionGate.tsx` | UI guard (button/section)               |
+| `frontend/src/app/components/auth/ModuleRoute.tsx`    | UI guard (page-level)                   |
+| `frontend/src/app/constants/permissions.ts`           | Permission code registry                |
+| `frontend/src/app/lib/roles.ts`                       | Sidebar builder for module-driven roles |
