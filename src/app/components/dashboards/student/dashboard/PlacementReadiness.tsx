@@ -36,14 +36,15 @@ export default function PlacementReadiness() {
         alt="celebration"
         className="
           absolute
-          right-4
-          lg:right-12
-          top-1/2
+          right-6
+          
+          lg:right-16
+          top-2/4
           -translate-y-1/2
           w-[180px]
           sm:w-[220px]
-          lg:w-[260px]
-          opacity-80
+          lg:w-[240px]
+          opacity-50
           pointer-events-none
           z-0
         "
@@ -124,7 +125,7 @@ export default function PlacementReadiness() {
         </div>
 
         {/* RIGHT INFO CARD */}
-        <div className="relative w-full lg:w-[532px] min-h-[136px] lg:h-[136px]">
+        <div className="relative w-full border rounded-3xl border-[#008E2D] shadow-[0px_0px_16px_0px_#0F172A26] lg:w-[532px] min-h-[136px] lg:h-[136px]">
           <div
             className="
               relative
@@ -135,7 +136,7 @@ export default function PlacementReadiness() {
               border
               border-white/40
               bg-gradient-to-br from-white/40 to-white/10
-              backdrop-blur-[30px]
+              backdrop-blur-[50px]
               shadow-[0px_0px_8px_0px_#0F172A1F]
               flex
               flex-col

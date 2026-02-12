@@ -88,16 +88,63 @@ function DataTable<T extends RowData>({
             )}
           </thead>
 
-          <tbody>
+          {/* <tbody>
             {table.getRowModel().rows.map((row) => (
               <tr key={row.id} className="border-b border-gray-200">
                 {row.getVisibleCells().map((cell) => (
-                  <td key={cell.id} className="px-4 py-3">
+                  <td key={cell.id} className="px-4 py-3 text-[#0F172A]">
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </td>
                 ))}
               </tr>
             ))}
+
+            {table.getRowModel().rows.length === 0 && (
+              <tr>
+                <td colSpan={columns.length} className="text-center py-4 text-gray-500">
+                  No results found.
+                </td>
+              </tr>
+            )}
+          </tbody> */}
+
+          <tbody>
+            {table.getRowModel().rows.map((row) => {
+              const onRowClick = table.options.meta?.onRowClick;
+              const hasRowClick = typeof onRowClick === 'function';
+
+              return (
+                <tr
+                  key={row.id}
+                  onClick={hasRowClick ? () => onRowClick(row.original) : undefined}
+                  title={hasRowClick ? 'Click to view performance' : undefined}
+                  className={`border-b border-gray-200 last:border-none transition-colors duration-200
+    ${hasRowClick ? 'cursor-pointer hover:bg-purple-50' : ''}
+  `}
+                  // className="border-b border-gray-200 last:border-none"
+                >
+                  {row.getVisibleCells().map((cell) => (
+                    <td key={cell.id} className="px-4 py-3 ">
+                      {/* {flexRender(cell.column.columnDef.cell, cell.getContext())} */}
+                      {(() => {
+                        const rendered = flexRender(cell.column.columnDef.cell, cell.getContext());
+
+                        if (
+                          typeof rendered === 'object' &&
+                          rendered !== null &&
+                          !Array.isArray(rendered) &&
+                          !('$$typeof' in rendered)
+                        ) {
+                          return (rendered as any)?.name ?? '';
+                        }
+
+                        return rendered;
+                      })()}
+                    </td>
+                  ))}
+                </tr>
+              );
+            })}
 
             {table.getRowModel().rows.length === 0 && (
               <tr>

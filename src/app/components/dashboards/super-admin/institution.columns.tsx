@@ -20,7 +20,7 @@ export const institutionColumns = (
     header: 'Institution',
     cell: ({ row }) => (
       <div className="max-w-[260px]">
-        <p className="font-medium text-gray-900 truncate">{row.original.name}</p>
+        <p className="font-medium  truncate">{row.original.name}</p>
         <p className="text-[11px] sm:text-xs text-gray-500 truncate">{row.original.code}</p>
       </div>
     ),
@@ -31,8 +31,33 @@ export const institutionColumns = (
     cell: ({ getValue }) => {
       const plan = getValue() as string;
 
-      const bg = plan === 'Premium' ? 'bg-[#C89A2A]' : 'bg-[#E8F0FF]';
-      const text = plan === 'Premium' ? 'text-white' : 'text-black';
+      const planStyles: Record<string, { bg: string; text: string }> = {
+        'Free Trial': {
+          bg: 'bg-black',
+          text: 'text-white',
+        },
+        'Basic Plan': {
+          bg: 'bg-[#E8F0FF]',
+          text: 'text-[#0F172A]',
+        },
+        'Premium Plan': {
+          bg: 'bg-[#C89A2A]',
+          text: 'text-white',
+        },
+        'Professional Plan': {
+          bg: 'bg-[#2563EB]',
+          text: 'text-white',
+        },
+        'Enterprise Plan': {
+          bg: 'bg-[#1A2E66]',
+          text: 'text-white',
+        },
+      };
+
+      const { bg, text } = planStyles[plan] ?? {
+        bg: 'bg-gray-100',
+        text: 'text-gray-700',
+      };
 
       return <span className={`${bg} ${text} px-3 py-1 rounded text-xs font-medium`}>{plan}</span>;
     },

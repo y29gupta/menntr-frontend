@@ -47,7 +47,7 @@ function PerformanceSection({ assessmentId }: Props) {
   }, [assessmentId]);
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col border gap-4">
       <QuestionPerformance
         data={questionData}
         title="Average time per question"

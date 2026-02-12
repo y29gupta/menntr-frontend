@@ -1,6 +1,5 @@
 'use client';
 
-import { formatStartTime } from '@/app/components/ui/FormatDate';
 import AssessmentCard from '../assessment/AssessmentCard';
 import { DashboardAssessment } from '../student.services';
 
@@ -8,10 +7,10 @@ type Props = {
   assessments: DashboardAssessment[];
 };
 
-export default function UpcomingAssessment({ assessments }: Props) {
+export default function PendingAssessment({ assessments }: Props) {
   return (
     <div className="bg-white">
-      <h3 className="font-semibold mb-4">Upcoming Assessment</h3>
+      <h3 className="font-semibold mb-4">Pending Assessments</h3>
 
       <div className="flex flex-col gap-4">
         {assessments.map((a) => (
@@ -21,10 +20,7 @@ export default function UpcomingAssessment({ assessments }: Props) {
             title={a.title}
             type={a.type}
             duration={`${a.durationMinutes} mins`}
-            status={{
-              kind: 'upcoming',
-              startLabel: formatStartTime(a.startTime),
-            }}
+            status={{ kind: 'pending' }}
           />
         ))}
       </div>
