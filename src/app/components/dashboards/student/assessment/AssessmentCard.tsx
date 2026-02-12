@@ -1,9 +1,14 @@
 'use client';
 
+import { Calendar, Clock } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 
-export type AssessmentStatus = { kind: 'pending' } | { kind: 'ends'; timeLeft: string };
+// export type AssessmentStatus = { kind: 'pending' } | { kind: 'ends'; timeLeft: string };
+export type AssessmentStatus =
+  | { kind: 'pending' }
+  | { kind: 'ends'; timeLeft: string }
+  | { kind: 'upcoming'; startLabel: string };
 
 type AssessmentCardProps = {
   assId: string;
@@ -21,6 +26,8 @@ export default function AssessmentCard({
   status,
 }: AssessmentCardProps) {
   const isPending = status.kind === 'pending';
+  const isEnds = status.kind === 'ends';
+  const isUpcoming = status.kind === 'upcoming';
 
   const router = useRouter();
 
@@ -42,10 +49,19 @@ export default function AssessmentCard({
 
         <p className="text-gray-500 text-[13px]">Type: {type}</p>
 
-        <div className="flex items-center gap-1 text-gray-500 text-[13px]">
-          <Image src="/assets/stopwatch.svg" alt="Duration" width={18} height={18} />
-          <span>{duration}</span>
-        </div>
+        {isUpcoming ? (
+          <div className="flex items-center gap-1 text-gray-500 text-[13px]">
+            <Calendar size={16} className="text-[#667085]" />
+            <span>
+              {status.startLabel} • {duration}
+            </span>
+          </div>
+        ) : (
+          <div className="flex items-center gap-1 text-gray-500 text-[13px]">
+            <Clock size={16} className="text-[#667085]" />
+            <span>{duration}</span>
+          </div>
+        )}
       </div>
 
       {/* RIGHT */}
@@ -53,7 +69,8 @@ export default function AssessmentCard({
         <span
           className={`text-[13px] font-medium ${isPending ? 'text-[#C46800]' : 'text-gray-500'}`}
         >
-          {isPending ? 'Pending' : `Ends in: ${status.timeLeft}`}
+          {isPending && 'Pending'}
+          {isEnds && `Ends in: ${status.timeLeft}`}
         </span>
 
         <button
@@ -68,7 +85,7 @@ export default function AssessmentCard({
           "
           onClick={() => router.push(`/student/assessment/ongoing/${assId}`)}
         >
-          Take Assessment
+          {isUpcoming ? 'View Details' : 'Take Assessment'}
         </button>
       </div>
     </div>

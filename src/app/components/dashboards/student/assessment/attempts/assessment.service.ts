@@ -42,7 +42,7 @@ export const attemptsApi = {
     message: string;
   };
   },
-  
+
   submitMicResult: async (
   assessmentId: string,
   payload: { success: boolean }
@@ -52,7 +52,48 @@ export const attemptsApi = {
     payload
   );
   return res.data;
+  },
+  
+  getCameraCheck: async (assessmentId: string) => {
+  const res = await api.get(
+    `/student/assessments/${assessmentId}/camera-check`
+  );
+  return res.data as {
+    step: {
+      current: number;
+      total: number;
+      label: string;
+    };
+    instructions: string;
+    can_start_camera: boolean;
+  };
 },
+startCameraCheck: async (assessmentId: string) => {
+  const res = await api.post(
+    `/student/assessments/${assessmentId}/camera-check/start`
+  );
+  return res.data as {
+    status: string;
+    message: string;
+  };
+},
+
+submitCameraResult: async (
+  assessmentId: string,
+  payload: { success: boolean }
+) => {
+  const res = await api.post(
+    `/student/assessments/${assessmentId}/camera-check/result`,
+    payload
+  );
+  return res.data as {
+    success: boolean;
+    message: string;
+    next_step?: { current: number; label: string };
+    retry_allowed?: boolean;
+  };
+},
+
 
 
 

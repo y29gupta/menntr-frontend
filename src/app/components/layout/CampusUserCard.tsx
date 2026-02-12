@@ -130,7 +130,7 @@ export default function CampusUserCard({
         </div>
 
         {/* TITLE */}
-        <h2 className="text-[20px] font-semibold leading-[28px] !text-[#0F172A] mt-1">{title}</h2>
+        <h2 className="text-[20px] font-semibold leading-[28px] text-[#0F172A] mt-1">{title}</h2>
 
         {/* DESCRIPTION */}
         <p className="text-[14px] leading-[22px] text-[#636771] max-w-[260px]">{description}</p>

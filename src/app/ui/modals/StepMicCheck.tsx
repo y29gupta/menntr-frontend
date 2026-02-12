@@ -199,13 +199,15 @@ export default function StepMicCheck({ micStatus, setMicStatus, micMeta, assessm
       </div>
 
       <div className="flex flex-col items-center mt-3 min-h-17.5">
-        <button
-          disabled={startMicMutation.isPending}
-          onClick={() => startMicMutation.mutate()}
-          className="border border-[#904BFF] text-[#904BFF] px-6 py-2 rounded-full text-sm hover:bg-purple-50 transition disabled:opacity-50"
-        >
-          {startMicMutation.isPending ? 'Starting...' : 'Speak'}
-        </button>
+        {micStatus === 'idle' && micMeta?.can_start_test && (
+          <button
+            disabled={startMicMutation.isPending}
+            onClick={() => startMicMutation.mutate()}
+            className="border border-[#904BFF] text-[#904BFF] px-6 py-2 rounded-full text-sm hover:bg-purple-50 transition disabled:opacity-50"
+          >
+            {startMicMutation.isPending ? 'Starting...' : 'Speak'}
+          </button>
+        )}
 
         {micStatus === 'analyzing' && (
           <p className="text-[#1A2C50] text-sm">
