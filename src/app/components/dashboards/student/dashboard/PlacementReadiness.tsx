@@ -3,9 +3,13 @@
 import { Rocket } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
-export default function PlacementReadiness() {
-  const percentage = 85;
-  const target = 75;
+type Props = {
+  score: number;
+  target: number;
+};
+
+export default function PlacementReadiness({ score, target }: Props) {
+  const percentage = Math.round(score ?? 0);
 
   const radius = 80;
   const strokeWidth = 28;
@@ -37,7 +41,6 @@ export default function PlacementReadiness() {
         className="
           absolute
           right-6
-          
           lg:right-16
           top-2/4
           -translate-y-1/2
@@ -75,7 +78,6 @@ export default function PlacementReadiness() {
                 </linearGradient>
               </defs>
 
-              {/* Background circle */}
               <circle
                 cx="100"
                 cy="100"
@@ -85,7 +87,6 @@ export default function PlacementReadiness() {
                 strokeWidth={strokeWidth}
               />
 
-              {/* Gradient Progress */}
               <circle
                 cx="100"
                 cy="100"
@@ -102,7 +103,6 @@ export default function PlacementReadiness() {
               />
             </svg>
 
-            {/* Center circles */}
             <div className="absolute inset-0 flex items-center justify-center">
               <div
                 className="absolute w-24 h-24 sm:w-28 sm:h-28 rounded-full"

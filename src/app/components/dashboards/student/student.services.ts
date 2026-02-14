@@ -19,6 +19,22 @@ export type DashboardAssessment = {
   status: 'pending' | 'ongoing' | 'upcoming';
 };
 
+ export type PlacementReadinessResponse = {
+  readinessScore: number;
+  targetReadiness: number;
+  strengths: string[];
+  needsImprovement: string[];
+  criticalGaps: string[];
+  assessments: {
+    assessmentId: string;
+    assessmentName: string;
+    score: number;
+    timeTakenMinutes: number;
+    attempts: number;
+    result: string;
+  }[];
+};
+
 export type DashboardAssessmentsResponse = {
   pending: DashboardAssessment[];
   ongoing: DashboardAssessment[];
@@ -35,4 +51,11 @@ export const studentApi = {
     const res = await api.get('/student/dashboard/assessments');
     return res.data;
   },
+    
+
+getPlacementReadiness: async (): Promise<PlacementReadinessResponse> => {
+  const res = await api.get('/student/dashboard/placement-readiness');
+  return res.data;
+},
+
 };

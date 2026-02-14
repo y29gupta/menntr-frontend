@@ -18,6 +18,25 @@ export default function StudentDashboardPage() {
   });
 
   if (isLoading) return null; // Replace with skeleton later
+  const { data: readinessData } = useQuery({
+    queryKey: ['placement-readiness'],
+    queryFn: studentApi.getPlacementReadiness,
+  });
+
+  const readinessScore = Math.round(readinessData?.readinessScore ?? 0);
+  const targetReadiness = readinessData?.targetReadiness ?? 0;
+
+  const strengths = readinessData?.strengths ?? [];
+  const needsImprovement = readinessData?.needsImprovement ?? [];
+  const criticalGaps = readinessData?.criticalGaps ?? [];
+
+  const assessments =
+    readinessData?.assessments?.map((assessment) => ({
+      label: assessment.assessmentName,
+      score: Math.round(assessment.score),
+      attempt: assessment.attempts,
+      rawScore: `${assessment.score}%`,
+    })) ?? [];
 
   return (
     <div className="px-1 space-y-4 w-full bg-[#F8F9FB] min-h-screen">
@@ -27,9 +46,13 @@ export default function StudentDashboardPage() {
       {data?.ongoing?.length ? <OngoingAssessment assessments={data.ongoing} /> : null}
 
       {data?.upcoming?.length ? <UpcomingAssessment assessments={data.upcoming} /> : null}
-      <PlacementReadiness />
-      <SkillGapOverview />
-      <PerformanceChart />
+      <PlacementReadiness score={readinessScore} target={targetReadiness} />
+      <SkillGapOverview
+        strengths={strengths}
+        needsImprovement={needsImprovement}
+        criticalGaps={criticalGaps}
+      />
+      <PerformanceChart assessments={assessments} />
     </div>
   );
 }
