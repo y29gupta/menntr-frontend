@@ -17,11 +17,11 @@ export default function StudentDashboardPage() {
     queryFn: studentApi.getDashboardAssessments,
   });
 
-  if (isLoading) return null; // Replace with skeleton later
   const { data: readinessData } = useQuery({
     queryKey: ['placement-readiness'],
     queryFn: studentApi.getPlacementReadiness,
   });
+  if (isLoading) return null; //replace with skeleton
 
   const readinessScore = Math.round(readinessData?.readinessScore ?? 0);
   const targetReadiness = readinessData?.targetReadiness ?? 0;
