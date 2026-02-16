@@ -94,7 +94,11 @@ const OrganizationContent = () => {
   return (
     <div className="flex rounded-2xl   flex-1  flex-col  gap-4  shadow-[0_0_16px_0_#0F172A26] w-full">
       {!hideOrganizationHeader && (
-        <OrganizationHeader activeTab={activeTab} onTabChange={setActiveTab} visibleTabs={visibleTabs} />
+        <OrganizationHeader
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+          visibleTabs={visibleTabs}
+        />
       )}
 
       {/* <OrganizationHeader
@@ -122,7 +126,7 @@ const OrganizationContent = () => {
                         setSelectedDepartment(null);
                         setDepartmentView('form');
                       }}
-                      className="w-full sm:w-auto whitespace-nowrap text-xs sm:text-sm !text-white bg-[linear-gradient(90deg,#904BFF_0%,#C053C2_100%)] px-6 py-2.5 rounded-full flex items-center justify-center gap-2 font-medium"
+                      className="w-full sm:w-auto whitespace-nowrap text-xs sm:text-sm text-red-700 bg-[linear-gradient(90deg,#904BFF_0%,#C053C2_100%)] px-6 py-2.5 rounded-full flex items-center justify-center gap-2 font-medium"
                     >
                       <span>+</span> Add Department
                     </button>
