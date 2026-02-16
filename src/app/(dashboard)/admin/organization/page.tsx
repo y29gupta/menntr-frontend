@@ -83,7 +83,6 @@ const OrganizationContent = () => {
     if (formMode === 'create') {
       createDepartmentMutation.mutate(payload);
     } else {
-      console.log(payload, 'update');
       updateDepartmentMutation.mutate({
         id: selectedDepartment.id,
         payload,
@@ -119,7 +118,7 @@ const OrganizationContent = () => {
                         setSelectedDepartment(null);
                         setDepartmentView('form');
                       }}
-                      className="w-full sm:w-auto whitespace-nowrap text-xs sm:text-sm text-white bg-[linear-gradient(90deg,#904BFF_0%,#C053C2_100%)] px-6 py-2.5 rounded-full flex items-center justify-center gap-2 font-medium"
+                      className="w-full sm:w-auto whitespace-nowrap text-xs sm:text-sm !text-white bg-[linear-gradient(90deg,#904BFF_0%,#C053C2_100%)] px-6 py-2.5 rounded-full flex items-center justify-center gap-2 font-medium"
                     >
                       <span>+</span> Add Department
                     </button>
@@ -156,7 +155,6 @@ const OrganizationContent = () => {
                   onGlobalFilterChange={setSearch}
                   showColumnFilters={showColumnFilters}
                   onEdit={(department) => {
-                    console.log(department, 'del');
                     setFormMode('edit');
                     setSelectedDepartment(department);
                     setDepartmentView('form');

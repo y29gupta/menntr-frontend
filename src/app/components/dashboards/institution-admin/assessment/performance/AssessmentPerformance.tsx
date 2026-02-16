@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import DashboardCard from '../../dashboard/DashboardCard';
-import HighestAvgDepartmentCard from '../../dashboard/HighestAvgDepartmentCard';
+// import HighestAvgDepartmentCard from '../../dashboard/HighestAvgDepartmentCard';
 import AssessmentHeader from './AssessmentHeader';
 import AssessmentInfoCard from './AssessmentInfoCard';
 import { buildAssessmentMetricsUI } from './assessmentMetricsUI';
@@ -12,6 +12,7 @@ import PerformanceSection from './PerformanceSection';
 import QuestionsSection from './QuestionsSection';
 import SettingConfigForm from './settings/SettingConfigForm';
 import { fetchAssessmentOverview } from './assessmentPerformance.api';
+import ProgressBarCard from '@/app/components/ui/progressCard/ProgressBarCard';
 
 type AssessmentPerformanceProps = {
   assessmentId: string;
@@ -95,7 +96,7 @@ const AssessmentPerformance = ({ assessmentId }: AssessmentPerformanceProps) => 
         ))}
       </div>
 
-      <HighestAvgDepartmentCard
+      <ProgressBarCard
         label="Completion rate"
         valueText={`${overview?.metrics.completionRate ?? 0}%`}
         percentage={overview?.metrics.completionRate ?? 0}

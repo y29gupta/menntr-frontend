@@ -6,7 +6,6 @@ import { InstitutionNode } from "./hierarchy.types"
 export async function fetchOrganizationTree(): Promise<InstitutionNode> {
   try {
      const res = await api.get("/organization/tree")
-  console.log(res, "tree")
  
   return res.data
   } catch (error:any) {
