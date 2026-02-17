@@ -83,7 +83,6 @@ const OrganizationContent = () => {
     if (formMode === 'create') {
       createDepartmentMutation.mutate(payload);
     } else {
-      console.log(payload, 'update');
       updateDepartmentMutation.mutate({
         id: selectedDepartment.id,
         payload,
@@ -94,16 +93,13 @@ const OrganizationContent = () => {
   return (
     <div className="flex rounded-2xl   flex-1  flex-col  gap-4  shadow-[0_0_16px_0_#0F172A26] w-full">
       {!hideOrganizationHeader && (
-        <OrganizationHeader activeTab={activeTab} onTabChange={setActiveTab} visibleTabs={visibleTabs} />
+        <OrganizationHeader
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+          visibleTabs={visibleTabs}
+        />
       )}
 
-      {/* <OrganizationHeader
-        activeTab={activeTab}
-        onTabChange={(tab) => {
-          setActiveTab(tab);
-          setDepartmentView('list'); // reset view on tab change
-        }}
-      /> */}
       {activeTab === 'Departments' && (
         <>
           {departmentView === 'list' ? (
@@ -159,7 +155,6 @@ const OrganizationContent = () => {
                   onGlobalFilterChange={setSearch}
                   showColumnFilters={showColumnFilters}
                   onEdit={(department) => {
-                    console.log(department, 'del');
                     setFormMode('edit');
                     setSelectedDepartment(department);
                     setDepartmentView('form');

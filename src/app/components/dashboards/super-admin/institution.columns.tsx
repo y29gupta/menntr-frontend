@@ -20,7 +20,7 @@ export const institutionColumns = (
     header: 'Institution',
     cell: ({ row }) => (
       <div className="max-w-[260px]">
-        <p className="font-medium text-gray-900 truncate">{row.original.name}</p>
+        <p className="font-medium  truncate">{row.original.name}</p>
         <p className="text-[11px] sm:text-xs text-gray-500 truncate">{row.original.code}</p>
       </div>
     ),

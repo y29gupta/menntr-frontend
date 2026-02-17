@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useState, useEffect, useRef, useMemo } from 'react';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import SuperAdminIcon from '@/app/components/icons/SuperAdminIcon';
 import { MetricCard } from '@/app/components/dashboards/super-admin/MetricCard';
 import { institutionColumns } from './institution.columns';
@@ -22,7 +22,7 @@ type Props = {
   onEditInstitution: (row: any) => void;
 };
 
-const ITEMS_PER_PAGE = 3;
+const ITEMS_PER_PAGE = 5;
 const DEBOUNCE_DELAY = 500;
 
 type PaginationMeta = {
@@ -33,8 +33,8 @@ type PaginationMeta = {
 };
 
 const Dashboard = ({ onCreateInstitution, onEditInstitution }: Props) => {
+  /* -------------------- STATE -------------------- */
   const [page, setPage] = useState(1);
-  const [limit] = useState(ITEMS_PER_PAGE);
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [showColumnFilters, setShowColumnFilters] = useState(false);
@@ -58,17 +58,20 @@ const Dashboard = ({ onCreateInstitution, onEditInstitution }: Props) => {
     };
   }, [search, columnFilters]);
 
-  /* -------------------- FILTERS -------------------- */
-  const filters: FilterParams = {
-    page,
-    limit,
-    search: debouncedSearch || undefined,
-    name: debouncedColumnFilters.name || undefined,
-    code: debouncedColumnFilters.code || undefined,
-    status: debouncedColumnFilters.status || undefined,
-    contactEmail: debouncedColumnFilters.contact_email || undefined,
-    planCode: debouncedColumnFilters.plan || undefined,
-  };
+  /* -------------------- FILTERS (MEMOIZED) -------------------- */
+  const filters: FilterParams = useMemo(
+    () => ({
+      page,
+      limit: ITEMS_PER_PAGE,
+      search: debouncedSearch || undefined,
+      name: debouncedColumnFilters.name || undefined,
+      code: debouncedColumnFilters.code || undefined,
+      status: debouncedColumnFilters.status || undefined,
+      contactEmail: debouncedColumnFilters.contact_email || undefined,
+      planCode: debouncedColumnFilters.plan || undefined,
+    }),
+    [page, debouncedSearch, debouncedColumnFilters]
+  );
 
   /* -------------------- INSTITUTIONS QUERY -------------------- */
   const {
@@ -78,26 +81,29 @@ const Dashboard = ({ onCreateInstitution, onEditInstitution }: Props) => {
   } = useQuery({
     queryKey: ['institutions', filters],
     queryFn: () => fetchInstitutions(filters),
+    placeholderData: keepPreviousData,
   });
 
-  const institutions: Institution[] = mapInstitutions(data.data ?? []);
+  const institutions: Institution[] = useMemo(() => mapInstitutions(data.data ?? []), [data.data]);
 
-  /* -------------------- META (FIXED) -------------------- */
-  const rawMeta = (data.meta ?? {}) as PaginationMeta;
+  /* -------------------- PAGINATION NORMALIZATION -------------------- */
+  const normalizedMeta = useMemo(() => {
+    const rawMeta = (data.meta ?? {}) as PaginationMeta;
 
-  const totalCount = rawMeta.totalCount ?? rawMeta.total ?? 0;
-  const pageCount = Math.max(1, Math.ceil(totalCount / limit));
+    const totalCount = rawMeta.totalCount ?? rawMeta.total ?? 0;
+    const pageCount = Math.max(1, Math.ceil(totalCount / ITEMS_PER_PAGE));
 
-  const normalizedMeta = {
-    currentPage: rawMeta.currentPage ?? rawMeta.page ?? page,
-    pageCount,
-    totalCount,
-  };
+    return {
+      currentPage: rawMeta.currentPage ?? rawMeta.page ?? page,
+      pageCount,
+      totalCount,
+    };
+  }, [data.meta, page]);
 
   const canPreviousPage = normalizedMeta.currentPage > 1;
   const canNextPage = normalizedMeta.currentPage < normalizedMeta.pageCount;
 
-  /* -------------------- STUDENT COUNT -------------------- */
+  /* -------------------- STUDENT COUNT QUERY -------------------- */
   const { data: studentCountData, isLoading: isStudentCountLoading } = useQuery({
     queryKey: ['student-count'],
     queryFn: async () => {
@@ -190,22 +196,23 @@ const Dashboard = ({ onCreateInstitution, onEditInstitution }: Props) => {
         </div>
 
         {isError && <p className="text-red-500">Failed to load institutions</p>}
-
-        <DataTable
-          columns={institutionColumns(onEditInstitution)}
-          data={institutions}
-          isLoading={isLoading}
-          columnFilters={columnFilters}
-          onColumnFilterChange={handleColumnFilterChange}
-          showColumnFilters={showColumnFilters}
-          currentPage={normalizedMeta.currentPage}
-          pageCount={normalizedMeta.pageCount}
-          onPreviousPage={handlePreviousPage}
-          onNextPage={handleNextPage}
-          canPreviousPage={canPreviousPage}
-          canNextPage={canNextPage}
-          meta={{ setPage }}
-        />
+        <div className=" overflow-y-auto">
+          <DataTable
+            columns={institutionColumns(onEditInstitution)}
+            data={institutions}
+            isLoading={isLoading}
+            columnFilters={columnFilters}
+            onColumnFilterChange={handleColumnFilterChange}
+            showColumnFilters={showColumnFilters}
+            currentPage={normalizedMeta.currentPage}
+            pageCount={normalizedMeta.pageCount}
+            onPreviousPage={handlePreviousPage}
+            onNextPage={handleNextPage}
+            canPreviousPage={canPreviousPage}
+            canNextPage={canNextPage}
+            meta={{ setPage }}
+          />
+        </div>
       </div>
     </main>
   );

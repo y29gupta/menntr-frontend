@@ -17,6 +17,7 @@ import {
 } from '@/app/lib/loginSchema';
 
 import { getRedirectForRole } from '../lib/roles';
+import Image from 'next/image';
 
 type LoginFormValues = StudentAdminLogin | SuperAdminLogin;
 // type LoginFormValues = StudentAdminLogin | SuperAdminLogin | SetPasswordForm;
@@ -122,11 +123,17 @@ const Loginform = ({ role, setupToken }: LoginFormProps) => {
 
           {role !== 'superadmin' && (
             <div
-              className="flex gap-2 mb-6 cursor-pointer hover:opacity-80 transition-opacity w-fit"
+              className="flex gap-2 items-center cursor-pointer hover:opacity-80 transition-opacity justify-between w-fit"
               onClick={() => navigate.push('/')}
             >
-              <img src={'/Go-back.svg'} alt="Loading" />
-              <p className="text-slate-900 text-[14px] sm:text-[16px] pt-4">Go back</p>
+              <Image
+                src={'/Go-back.svg'}
+                alt="Loading"
+                className="border  "
+                width={20}
+                height={20}
+              />
+              <p className="text-[#1A2C50] text-[14px] sm:text-[16px] pt-3">Go back</p>
             </div>
           )}
         </div>
