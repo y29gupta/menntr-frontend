@@ -9,6 +9,22 @@ import { Management, ManagementColumn } from './usermanagement.column';
 import ConfirmModal from '@/app/ui/modals/ConfirmModal';
 
 /* =========================================================
+   DATE FORMATTER (UI ONLY)
+========================================================= */
+
+function formatLastLogin(date: string | null) {
+  if (!date) return '—';
+
+  const d = new Date(date);
+
+  return d.toLocaleDateString('en-GB', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  });
+}
+
+/* =========================================================
    DEBOUNCE HOOK
 ========================================================= */
 
@@ -33,7 +49,6 @@ type UsersApiResponse = {
     name: string;
     email: string;
     role: string | null;
-    department: string | null;
     status: string;
     lastLoginAt: string | null;
   }[];
@@ -71,9 +86,8 @@ export default function ManagementTable({
   const queryClient = useQueryClient();
 
   const [page, setPage] = useState(1);
-  const [limit] = useState(10);
+  const [limit] = useState(2);
   const [columnFilters, setColumnFilters] = useState<Record<string, string>>({});
-
   const [selectedUser, setSelectedUser] = useState<Management | null>(null);
 
   const debouncedSearch = useDebounce(globalFilter, 500);
@@ -86,7 +100,7 @@ export default function ManagementTable({
   }, [debouncedSearch, debouncedColumnFilters]);
 
   /* ---------------- FETCH USERS ---------------- */
-
+  const FILTERABLE_COLUMNS = ['name', 'role', 'status'];
   const fetchUsers = async (): Promise<UsersApiResponse> => {
     const params = new URLSearchParams();
 
@@ -98,7 +112,11 @@ export default function ManagementTable({
     }
 
     Object.entries(debouncedColumnFilters).forEach(([key, value]) => {
-      if (value) params.set(key, value);
+      if (!value) return;
+
+      if (!FILTERABLE_COLUMNS.includes(key)) return;
+
+      params.set(key, value);
     });
 
     const res = await fetch(`/api/institutionsadmin/user-management/users?${params.toString()}`, {
@@ -120,16 +138,15 @@ export default function ManagementTable({
     refetchOnWindowFocus: false,
   });
 
-  /* ---------------- MAP DATA ---------------- */
+  /* ---------------- MAP DATA (DATE FIX HERE) ---------------- */
 
   const users: Management[] =
     data?.data.map((u) => ({
       id: Number(u.id),
       name: u.name || '-',
       role: u.role || '-',
-      Department: u.department || '-',
       status: u.status === 'active' ? 'Active' : 'Suspended',
-      lastLogin: u.lastLoginAt || '—',
+      lastLogin: formatLastLogin(u.lastLoginAt),
     })) ?? [];
 
   const meta = data?.meta;
@@ -137,6 +154,8 @@ export default function ManagementTable({
   /* ---------------- COLUMN FILTER ---------------- */
 
   const onColumnFilterChange = (column: string, value: string) => {
+    if (!FILTERABLE_COLUMNS.includes(column)) return;
+
     setColumnFilters((prev) => ({
       ...prev,
       [column]: value,
@@ -144,7 +163,7 @@ export default function ManagementTable({
   };
 
   /* =========================================================
-     🔥 CHANGE USER STATUS (ONLY { status })
+     CHANGE USER STATUS
   ========================================================= */
 
   const changeStatusMutation = useMutation({
@@ -155,9 +174,7 @@ export default function ManagementTable({
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          status,
-        }),
+        body: JSON.stringify({ status }),
       });
 
       if (!res.ok) {
@@ -166,11 +183,8 @@ export default function ManagementTable({
 
       return res.json();
     },
-
     onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ['users'],
-      });
+      queryClient.invalidateQueries({ queryKey: ['users'] });
     },
   });
 
@@ -191,12 +205,6 @@ export default function ManagementTable({
     setSelectedUser(null);
   };
 
-  /* ---------------- LOADING ---------------- */
-
-  if (isLoading) {
-    return <div className="text-sm text-gray-500">Loading users…</div>;
-  }
-
   /* ---------------- RENDER ---------------- */
 
   return (
@@ -208,6 +216,7 @@ export default function ManagementTable({
           (row) => onSuspendUser(row)
         )}
         columnFilters={columnFilters}
+        isLoading={isLoading}
         onColumnFilterChange={onColumnFilterChange}
         showColumnFilters={showColumnFilters}
         currentPage={meta?.currentPage ?? 1}

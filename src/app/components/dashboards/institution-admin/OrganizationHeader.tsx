@@ -6,7 +6,12 @@ type Props = {
   visibleTabs?: Props['activeTab'][];
 };
 
-const defaultTabs: Props['activeTab'][] = ['Categories', 'Departments', 'Batches', 'Role Hierarchy'];
+const defaultTabs: Props['activeTab'][] = [
+  'Categories',
+  'Departments',
+  'Batches',
+  'Role Hierarchy',
+];
 
 export default function OrganizationHeader({ activeTab, onTabChange, visibleTabs }: Props) {
   const tabs = visibleTabs ?? defaultTabs;
@@ -31,8 +36,8 @@ export default function OrganizationHeader({ activeTab, onTabChange, visibleTabs
               key={tab}
               onClick={() => onTabChange(tab)}
               className={`relative pb-2 px-3 text-sm font-medium transition-colors shrink-0
-  ${activeTab === tab ? '!text-[#7C3AED]' : '!text-[#616570] hover:text-gray-700'}
-`}
+                  ${activeTab === tab ? '!text-[#7C3AED]' : '!text-[#616570] hover:text-gray-700'}
+                `}
             >
               {tab}
 
