@@ -7,8 +7,8 @@ export type Department = {
   code: string;
   // categoryId?: number;
   // hodUserId?: number;
-  category: {};
-  hod: {} | null;
+  category: string;
+  hod: string | null;
   students?: number;
   faculty?: number;
 };
@@ -67,8 +67,8 @@ export const mapApiDepartmentToDepartment = (apiData: DepartmentApiData): Depart
   code: apiData.code ?? '—',
   // categoryId: apiData.category?.id,
   // hodUserId: apiData.hod?.id,
-  category: apiData.category ?? '—',
-  hod: apiData.hod ?? '—',
+  category: apiData.category?.name ?? '—',
+  hod: apiData.hod?.name ?? '—',
   students: 0,
   faculty: 0,
 });
@@ -91,13 +91,13 @@ export const departmentColumns = (
     accessorKey: 'category',
     header: 'Category',
     cell: ({ row }) => {
-      return <span className="text-gray-600">{row.original.name as string}</span>;
+      return <span className="text-gray-600">{row.original.category as string}</span>;
     },
   },
   {
     accessorKey: 'hod',
     header: 'HOD',
-    cell: ({ row }) => <span className="text-gray-600">{row.original.name as string}</span>,
+    cell: ({ row }) => <span className="text-gray-600">{row.original.hod ?? '—'}</span>,
   },
   {
     accessorKey: 'students',

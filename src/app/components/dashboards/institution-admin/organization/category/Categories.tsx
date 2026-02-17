@@ -42,7 +42,7 @@ export default function Categories({ setCategoryView }: Props) {
     );
   }
   return (
-    <div className="mt-6 px-4 ">
+    <div className="mt-6 px-4 mb-4 ">
       {/* Top Row */}
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-lg font-semibold text-gray-900">
