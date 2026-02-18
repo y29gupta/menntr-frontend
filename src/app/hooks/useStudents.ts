@@ -7,7 +7,7 @@ export function useStudents(page: number, search: string, columnFilters: Record<
     queryFn: () =>
       studentsApi.getStudents({
         page,
-        limit: 1,
+        limit: 2,
         search,
         filters: columnFilters,
       }),
