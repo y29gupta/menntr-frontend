@@ -1,12 +1,14 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 
 import CompletedAssessmentCard from './CompletedAssessmentCard';
 import EmptyAssessmentState from './EmptyAssessmentState';
 import SearchWithFilter from './SearchWithFilter';
 import CompletedAssessmentFilterModal from '@/app/ui/modals/CompletedAssessmentFilterModal';
+
+/* ================= TYPES ================= */
 
 type ApiAssessment = {
   id: string;
@@ -24,6 +26,32 @@ type CompletedAssessmentItem = {
   attemptStatus: 'submitted' | 'evaluated' | 'not_started';
 };
 
+type FilterState = {
+  type?: 'mcq' | 'coding' | 'mcq+coding';
+  evaluation?: 'published' | 'under_evaluation';
+  search?: string;
+};
+
+type UiFilterState = {
+  type: string[];
+  evaluationStatus: string[];
+};
+
+/* ================= DEBOUNCE HOOK ================= */
+
+function useDebounce<T>(value: T, delay: number): T {
+  const [debounced, setDebounced] = useState(value);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setDebounced(value), delay);
+    return () => clearTimeout(timer);
+  }, [value, delay]);
+
+  return debounced;
+}
+
+/* ================= HELPERS ================= */
+
 function formatDate(date: string | null): string {
   if (!date) return '-';
 
@@ -34,8 +62,17 @@ function formatDate(date: string | null): string {
   });
 }
 
-async function fetchCompletedAssessments(): Promise<ApiAssessment[]> {
-  const res = await fetch('/api/student/assessments?status=completed', {
+/* ================= API ================= */
+
+async function fetchCompletedAssessments(filters: FilterState): Promise<ApiAssessment[]> {
+  const params = new URLSearchParams();
+  params.set('status', 'completed');
+
+  if (filters.type) params.set('type', filters.type);
+  if (filters.evaluation) params.set('evaluation', filters.evaluation);
+  if (filters.search) params.set('search', filters.search);
+
+  const res = await fetch(`/api/student/assessments?${params.toString()}`, {
     credentials: 'include',
   });
 
@@ -43,14 +80,52 @@ async function fetchCompletedAssessments(): Promise<ApiAssessment[]> {
   return data.assessments;
 }
 
+/* ================= COMPONENT ================= */
+
 export default function CompletedAssessment() {
   const [search, setSearch] = useState('');
+  const debouncedSearch = useDebounce(search, 300);
+
   const [showFilters, setShowFilters] = useState(false);
 
-  const { data, isLoading } = useQuery({
-    queryKey: ['completed-assessments'],
-    queryFn: fetchCompletedAssessments,
+  const [filters, setFilters] = useState<FilterState>({});
+
+  const [uiFilters, setUiFilters] = useState<UiFilterState>({
+    type: ['All'],
+    evaluationStatus: ['All'],
   });
+
+  useEffect(() => {
+    setFilters((prev) => ({
+      ...prev,
+      search: debouncedSearch.trim() ? debouncedSearch.trim() : undefined,
+    }));
+  }, [debouncedSearch]);
+
+  const { data, isLoading } = useQuery({
+    queryKey: ['completed-assessments', filters],
+    queryFn: () => fetchCompletedAssessments(filters),
+  });
+
+  const handleApplyFilters = (modalFilters: UiFilterState) => {
+    setUiFilters(modalFilters);
+
+    const newFilters: FilterState = {
+      search: debouncedSearch.trim() || undefined,
+    };
+
+    if (modalFilters.type.includes('MCQ+Coding')) newFilters.type = 'mcq+coding';
+    else if (modalFilters.type.includes('MCQ')) newFilters.type = 'mcq';
+    else if (modalFilters.type.includes('Coding')) newFilters.type = 'coding';
+
+    if (modalFilters.evaluationStatus.includes('Results published'))
+      newFilters.evaluation = 'published';
+    else if (modalFilters.evaluationStatus.includes('Under evaluation'))
+      newFilters.evaluation = 'under_evaluation';
+
+    setFilters(newFilters);
+    setShowFilters(false);
+  };
 
   const mappedAssessments: CompletedAssessmentItem[] = useMemo(() => {
     if (!data) return [];
@@ -64,19 +139,7 @@ export default function CompletedAssessment() {
     }));
   }, [data]);
 
-  const filteredData = useMemo(() => {
-    return mappedAssessments.filter((a) => a.title.toLowerCase().includes(search.toLowerCase()));
-  }, [search, mappedAssessments]);
-
-  if (!isLoading && filteredData.length === 0) {
-    return (
-      <EmptyAssessmentState
-        imageSrc="/assets/empty-ongoing-assessment.svg"
-        title="No completed assessments"
-        description="You haven’t completed any assessments yet."
-      />
-    );
-  }
+  const hasActiveFilters = filters.type || filters.evaluation || filters.search;
 
   return (
     <>
@@ -88,7 +151,8 @@ export default function CompletedAssessment() {
           filterOpen={showFilters}
           filterModal={
             <CompletedAssessmentFilterModal
-              onApply={() => setShowFilters(false)}
+              initialValues={uiFilters}
+              onApply={handleApplyFilters}
               onClose={() => setShowFilters(false)}
             />
           }
@@ -96,7 +160,23 @@ export default function CompletedAssessment() {
       </div>
 
       <div className="space-y-4">
-        {filteredData.map((assessment) => (
+        {!isLoading && mappedAssessments.length === 0 && (
+          <EmptyAssessmentState
+            imageSrc="/assets/empty-ongoing-assessment.svg"
+            title={
+              hasActiveFilters
+                ? 'No assessments match your search or filters'
+                : 'No completed assessments'
+            }
+            description={
+              hasActiveFilters
+                ? 'Try changing or clearing your search and filters.'
+                : 'You haven’t completed any assessments yet.'
+            }
+          />
+        )}
+
+        {mappedAssessments.map((assessment) => (
           <CompletedAssessmentCard key={assessment.id} {...assessment} />
         ))}
       </div>
