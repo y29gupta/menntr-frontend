@@ -13,8 +13,8 @@ import { meta } from 'zod/v4/core';
 export const departmentSchema = z.object({
   name: z.string().min(1, 'Department name is required'),
   code: z.string().min(1, 'Department code is required'),
-  category_id: z.string().min(1, 'Parent category is required'), // Mandatory field
-  // hodId removed - users can be assigned separately
+  category_id: z.string().min(1, 'Parent category is required'),
+  hod_id: z.string().optional(),
 });
 
 export type DepartmentFormValues = z.infer<typeof departmentSchema>;
@@ -34,7 +34,13 @@ const DepartmentForm = ({ mode, defaultValues, onBack, onSubmit }: Props) => {
     formState: { errors },
   } = useForm<DepartmentFormValues>({
     resolver: zodResolver(departmentSchema),
-    defaultValues,
+    defaultValues: {
+      name: '',
+      code: '',
+      category_id: '',
+      hod_id: undefined,
+      ...defaultValues,
+    },
   });
 
   const { data: metaData, isLoading } = useQuery({
@@ -46,6 +52,12 @@ const DepartmentForm = ({ mode, defaultValues, onBack, onSubmit }: Props) => {
     metaData?.categories.map((item) => ({
       label: item.name,
       value: String(item.id),
+    })) || [];
+
+  const HodOptions =
+    metaData?.hodUsers?.map((user) => ({
+      label: user.name && user.name.trim() !== '' ? user.name : user.email,
+      value: String(user.id),
     })) || [];
   return (
     <div className="w-full p-4">
@@ -69,7 +81,7 @@ const DepartmentForm = ({ mode, defaultValues, onBack, onSubmit }: Props) => {
         <button
           onClick={handleSubmit(onSubmit)}
           className="px-5 py-2.5 rounded-full text-lg font-medium !text-white
-          bg-[linear-gradient(90deg,#904BFF_0%,#C053C2_100%)]"
+          bg-[linear-gradient(90deg,#904BFF_0%,#C053C2_100%)] cursor-pointer"
         >
           + {mode === 'edit' ? 'Update Department' : 'Add Department'}
         </button>
@@ -106,7 +118,6 @@ const DepartmentForm = ({ mode, defaultValues, onBack, onSubmit }: Props) => {
 
           {/* RIGHT COLUMN */}
           <div className="space-y-6 pl-6">
-            {/* Parent Category (CUSTOM DROPDOWN UI) */}
             {/* Parent Category */}
             <div>
               <label className="text-sm text-gray-700 font-medium">Parent Category</label>
@@ -114,20 +125,37 @@ const DepartmentForm = ({ mode, defaultValues, onBack, onSubmit }: Props) => {
               <Controller
                 name="category_id"
                 control={control}
-                render={({ field }) => {
-                  return (
-                    <FormDropdown
-                      placeholder="Select Parent Category"
-                      value={field.value}
-                      onChange={field.onChange}
-                      options={Categoryoption || []}
-                    />
-                  );
-                }}
+                defaultValue=""
+                render={({ field }) => (
+                  <FormDropdown
+                    placeholder="Select Parent Category"
+                    value={field.value ?? ''}
+                    onChange={(val) => field.onChange(val ?? '')}
+                    options={Categoryoption || []}
+                  />
+                )}
               />
+
               {errors.category_id && (
                 <p className="text-xs text-red-500 mt-1">{errors.category_id.message}</p>
               )}
+            </div>
+            {/* Assign HOD */}
+            <div>
+              <label className="text-sm text-gray-700 font-medium">Assign HOD (Optional)</label>
+
+              <Controller
+                name="hod_id"
+                control={control}
+                render={({ field }) => (
+                  <FormDropdown
+                    placeholder="Select HOD"
+                    value={field.value}
+                    onChange={field.onChange}
+                    options={HodOptions}
+                  />
+                )}
+              />
             </div>
           </div>
         </div>

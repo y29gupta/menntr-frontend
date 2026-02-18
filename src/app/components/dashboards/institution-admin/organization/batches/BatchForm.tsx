@@ -44,6 +44,11 @@ export default function BatchForm({ mode, batchId, onBack, editRow }: Props) {
   } = useForm<BatchFormValues>({
     resolver: zodResolver(batchSchema),
     defaultValues: {
+      name: '',
+      category: '',
+      departmentId: '',
+      startYear: '',
+      endYear: '',
       status: 'Active',
       sections: [''],
       facultyId: undefined,
@@ -149,7 +154,7 @@ export default function BatchForm({ mode, batchId, onBack, editRow }: Props) {
   });
 
   return (
-    <div className="w-full  px-4 pt-4">
+    <div className="w-full p-4">
       {/* HEADER */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex flex-col gap-3">
@@ -181,33 +186,6 @@ export default function BatchForm({ mode, batchId, onBack, editRow }: Props) {
                 focus:outline-none focus:border-purple-500"
               />
               {errors.name && <p className="text-xs text-red-500 mt-1">{errors.name.message}</p>}
-            </div>
-
-            {/* Category */}
-            <div>
-              <label className="text-[16px] font-medium text-gray-700">
-                Category <span className="text-red-500">*</span>
-              </label>
-              <Controller
-                name="category"
-                control={control}
-                render={({ field }) => (
-                  <FormDropdown
-                    placeholder="Select category"
-                    value={field.value}
-                    onChange={(val) => {
-                      field.onChange(val);
-                      // Reset department and faculty when category changes
-                      setValue('departmentId', '');
-                      setValue('facultyId', undefined);
-                    }}
-                    options={categoryOptions}
-                  />
-                )}
-              />
-              {errors.category && (
-                <p className="text-xs text-red-500 mt-1">{errors.category.message}</p>
-              )}
             </div>
 
             {/* Department */}
@@ -270,6 +248,7 @@ export default function BatchForm({ mode, batchId, onBack, editRow }: Props) {
                       value={field.value}
                       onChange={field.onChange}
                       options={yearOptions}
+                      dropdownPosition="top"
                     />
                   )}
                 />
@@ -282,6 +261,7 @@ export default function BatchForm({ mode, batchId, onBack, editRow }: Props) {
                       value={field.value}
                       onChange={field.onChange}
                       options={yearOptions}
+                      dropdownPosition="top"
                     />
                   )}
                 />
@@ -296,6 +276,47 @@ export default function BatchForm({ mode, batchId, onBack, editRow }: Props) {
 
           {/* RIGHT COLUMN */}
           <div className="space-y-8 sm:pl-6">
+            {/* Institution Category */}
+            <div>
+              <label className="text-sm font-medium text-gray-700">
+                Institution Category <span className="text-red-500">*</span>
+              </label>
+
+              <Controller
+                name="category"
+                control={control}
+                render={({ field }) => (
+                  <div className="flex gap-3 mt-3">
+                    {categoryOptions.map((item: any) => (
+                      <button
+                        type="button"
+                        key={item.value}
+                        onClick={() => {
+                          field.onChange(item.value);
+                          setValue('departmentId', '');
+                          setValue('facultyId', undefined);
+                        }}
+                        className={`px-4 py-1.5 rounded-full border text-sm font-light ${
+                          field.value === item.value
+                            ? 'border-purple-500 text-purple-600 bg-purple-50'
+                            : 'border-[#C3CAD9] text-[#3D465C]'
+                        }`}
+                      >
+                        <span className="flex items-center gap-2">
+                          {field.value === item.value && <span>✓</span>}
+                          {item.label}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              />
+
+              {errors.category && (
+                <p className="text-xs text-red-500 mt-1">{errors.category.message}</p>
+              )}
+            </div>
+
             {/* Batch Status */}
             <div>
               <label className="text-sm font-medium text-gray-700">Batch Status</label>
@@ -326,79 +347,114 @@ export default function BatchForm({ mode, batchId, onBack, editRow }: Props) {
                 )}
               />
             </div>
-          </div>
-        </div>
 
-        {/* SECTIONS */}
-        <div className="mt-8 pt-8 border-t border-[#C3CAD9]">
-          <div className="flex items-center justify-between mb-4">
-            <label className="text-[16px] font-medium text-gray-700">
-              Sections <span className="text-red-500">*</span>
-            </label>
-            <Controller
-              name="sections"
-              control={control}
-              render={({ field }) => (
-                <button
-                  type="button"
-                  onClick={() => {
-                    const currentSections = Array.isArray(field.value) ? field.value : [''];
-                    field.onChange([...currentSections, '']);
-                  }}
-                  className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-purple-600 border border-purple-500 rounded-lg hover:bg-purple-50"
-                >
-                  <Plus className="w-4 h-4" />
-                  Add Section
-                </button>
-              )}
-            />
-          </div>
+            <div className="pt-6 border-t border-[#C3CAD9]">
+              <Controller
+                name="sections"
+                control={control}
+                render={({ field }) => {
+                  const sections = Array.isArray(field.value) ? field.value : [''];
+                  const lastIndex = sections.length - 1;
+                  const lastValue = sections[lastIndex] || '';
+                  const hasTyped = lastValue.trim().length > 0;
 
-          <Controller
-            name="sections"
-            control={control}
-            render={({ field }) => (
-              <div className="space-y-3">
-                {Array.isArray(field.value) && field.value.length > 0 ? (
-                  field.value.map((section, index) => (
-                    <div key={index} className="flex items-center gap-3">
-                      <input
-                        type="text"
-                        value={section}
-                        onChange={(e) => {
-                          const newSections = [...field.value];
-                          newSections[index] = e.target.value;
-                          field.onChange(newSections);
-                        }}
-                        placeholder={`Section ${index + 1} (e.g., A, B, C)`}
-                        className="flex-1 border-b border-gray-300 py-2 text-sm
-                        focus:outline-none focus:border-purple-500"
-                      />
-                      {field.value.length > 1 && (
+                  const addSection = () => {
+                    if (!hasTyped) return;
+                    field.onChange([...sections, '']);
+                  };
+
+                  const removeChip = (index: number) => {
+                    const updated = sections.filter((_, i) => i !== index);
+                    field.onChange(updated.length ? updated : ['']);
+                  };
+
+                  const clearCurrentInput = () => {
+                    const updated = [...sections];
+                    updated[lastIndex] = '';
+                    field.onChange(updated);
+                  };
+
+                  return (
+                    <>
+                      {/* Header */}
+                      <div className="mb-4">
+                        <label className="text-lg font-medium text-[#1A2C50]">
+                          Total Sections <span className="text-red-500">*</span>
+                        </label>
+                      </div>
+
+                      {/* Input Row */}
+                      <div className="flex items-center gap-4 border-b border-gray-300 pb-2">
+                        <input
+                          type="text"
+                          value={lastValue}
+                          onChange={(e) => {
+                            const updated = [...sections];
+                            updated[lastIndex] = e.target.value;
+                            field.onChange(updated);
+                          }}
+                          placeholder="CSE-2017-A"
+                          className="flex-1 text-sm focus:outline-none"
+                        />
+
+                        {/* Add Button */}
                         <button
                           type="button"
-                          onClick={() => {
-                            const newSections = field.value.filter((_, i) => i !== index);
-                            field.onChange(newSections);
-                          }}
-                          className="p-2 text-red-500 hover:bg-red-50 rounded-lg"
+                          onClick={addSection}
+                          disabled={!hasTyped}
+                          className={`font-medium ${
+                            hasTyped
+                              ? '!text-purple-600 cursor-pointer'
+                              : '!text-gray-400 cursor-not-allowed'
+                          }`}
                         >
-                          <X className="w-4 h-4" />
+                          Add
                         </button>
+
+                        {/* Close Button (only when typing) */}
+                        {hasTyped && (
+                          <button
+                            type="button"
+                            onClick={clearCurrentInput}
+                            className="text-gray-400 hover:text-red-500"
+                          >
+                            ✕
+                          </button>
+                        )}
+                      </div>
+
+                      {/* Chips */}
+                      {sections.length > 1 && (
+                        <div className="flex flex-wrap gap-3 mt-6">
+                          {sections.slice(0, -1).map((section, index) => (
+                            <div
+                              key={index}
+                              className="flex items-center gap-2 px-4 py-2 rounded-full
+                  border border-[#C3CAD9] text-[#3D465C] text-sm"
+                            >
+                              {section}
+
+                              <button
+                                type="button"
+                                onClick={() => removeChip(index)}
+                                className="text-gray-500 hover:text-red-500"
+                              >
+                                ✕
+                              </button>
+                            </div>
+                          ))}
+                        </div>
                       )}
-                    </div>
-                  ))
-                ) : (
-                  <p className="text-sm text-gray-500">
-                    No sections added. Click "Add Section" to add one.
-                  </p>
-                )}
-              </div>
-            )}
-          />
-          {errors.sections && (
-            <p className="text-xs text-red-500 mt-1">{errors.sections.message}</p>
-          )}
+                    </>
+                  );
+                }}
+              />
+
+              {errors.sections && (
+                <p className="text-xs text-red-500 mt-2">{errors.sections.message}</p>
+              )}
+            </div>
+          </div>
         </div>
       </div>
 

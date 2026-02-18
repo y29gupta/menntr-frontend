@@ -165,7 +165,7 @@ const FormDropdown = ({
           )}
 
           {/* Options */}
-          <div className="max-h-60 overflow-y-hidden">
+          <div className="max-h-60 overflow-y-auto overflow-x-hidden">
             {filteredOptions.length === 0 && (
               <p className="px-4 py-2 text-[16px] text-gray-500">No results found</p>
             )}

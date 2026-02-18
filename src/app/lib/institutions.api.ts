@@ -12,6 +12,7 @@ import {
   CreateCategoryPayload,
   DepartmentMetaResponse,
 } from '../components/dashboards/institution-admin/organization/category/category.types';
+import axios from 'axios';
 
 export const PLAN_CODE_TO_ID = {
   BASIC: 1,
@@ -173,7 +174,7 @@ export async function updateInstitution(id: number | string, payload: Institutio
 
 /* ----------------------- categories api ---------------------------------------- */
 
-export const getCategories = async (institutionId: string): Promise<CategoryApiItem[]> => {
+export const getCategories = async (): Promise<CategoryApiItem[]> => {
   const res = await api.get(`/organization/categories`);
   return res.data;
 };
@@ -272,37 +273,36 @@ export const getHierarchy = async (): Promise<HierarchyApiResponse> => {
 
 /* ----------------------------- programs api -------------------------------- */
 
-export type Program = {
-  id: number;
-  program_code: string;
-  program_name: string;
-  category_role_id?: number;
-};
+// export type Program = {
+//   id: number;
+//   program_code: string;
+//   program_name: string;
+//   category_role_id?: number;
+// };
 
-export const getPrograms = async (category_role_id?: number): Promise<Program[]> => {
-  const params = category_role_id ? { category_role_id } : {};
-  const res = await api.get('/organization/programs', { params });
-  return res.data;
-};
+// export const getPrograms = async (category_role_id?: number): Promise<Program[]> => {
+//   const params = category_role_id ? { category_role_id } : {};
+//   const res = await api.get('/organization/programs', { params });
+//   return res.data;
+// };
 
-export const createProgram = async (payload: {
-  category_role_id: number;
-  program_code: string;
-  program_name: string;
-}) => {
-  try {
-    const res = await toastApiPromise(api.post('/organization/programs', payload), {
-      pending: 'Creating program...',
-      success: 'Program created successfully',
-    });
-    return res.data;
-  } catch (error) {
-    showApiError(error);
-    throw error;
-  }
-};
+// export const createProgram = async (payload: {
+//   category_role_id: number;
+//   program_code: string;
+//   program_name: string;
+// }) => {
+//   try {
+//     const res = await toastApiPromise(api.post('/organization/programs', payload), {
+//       pending: 'Creating program...',
+//       success: 'Program created successfully',
+//     });
+//     return res.data;
+//   } catch (error) {
+//     showApiError(error);
+//     throw error;
+//   }
+// };
 
-import axios from 'axios';
 export const institutionsApi = {
   getById: (id: number) =>
     axios

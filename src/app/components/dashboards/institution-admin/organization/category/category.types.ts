@@ -1,39 +1,41 @@
 // Used ONLY for category cards (listing)
 export type CategoryListItem = {
+  id: number;
   name: string;
   departments: number;
   students: number;
-  head: string;
+  head: string; // Display name in UI
   code: string;
 };
 
-
-
+// API response item
 export interface CategoryApiItem {
   id: number;
   name: string;
   code: string;
   departmentCount: number;
-  assignedUsers: {
-    id: string;
-    name: string;
-    email: string;
-  }[];
-  head: {
-    id: string;
-    name: string;
-    email: string;
-  } | null; // For backward compatibility
-}
 
+  // Single assigned user
+  assigned_user: {
+    id: string;
+    name: string;
+    email: string;
+  } | null;
+
+  // Kept only if backend still returns it
+  head?: {
+    id: string;
+    name: string;
+    email: string;
+  } | null;
+}
 
 // Used ONLY for add/edit form
 export type CategoryFormData = {
   id?: string;
   name: string;
   code: string;
-  programs?: Array<{ program_code: string; program_name: string }>;
-  // assignedUserId and departments removed - users can be assigned separately
+  assignedUserId: string; // Used in form (string for dropdown)
 };
 
 export type UserOption = {
@@ -41,8 +43,6 @@ export type UserOption = {
   name: string;
   department: string;
 };
-
-
 
 export type CategoryMetaResponse = {
   users: {
@@ -58,31 +58,20 @@ export type CategoryMetaResponse = {
   }[];
 };
 
-export type DepartmentMetaResponse = {
+export interface DepartmentMetaResponse {
+  categories: {
+    id: string;
+    name: string;
+  }[];
   hodUsers: {
     id: string;
     name: string;
     email: string;
   }[];
-  categories: {
-    id: string;
-    name: string;
-    // categoryId: string | null;
-    // isAssigned: boolean;
-  }[];
-};
-
+}
 
 export type CreateCategoryPayload = {
   name: string;
   code: string;
-  programs?: Array<{ program_code: string; program_name: string }>;
-  // headUserId and departmentIds removed
-};
-
-export type Program = {
-  id: number;
-  program_code: string;
-  program_name: string;
-  category_role_id?: number;
+  assigned_user_id: number; // ✅ Backend expects number
 };

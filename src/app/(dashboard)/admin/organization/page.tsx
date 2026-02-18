@@ -118,9 +118,9 @@ const OrganizationContent = () => {
                         setSelectedDepartment(null);
                         setDepartmentView('form');
                       }}
-                      className="w-full sm:w-auto whitespace-nowrap text-xs sm:text-sm !text-white bg-[linear-gradient(90deg,#904BFF_0%,#C053C2_100%)] px-6 py-2.5 rounded-full flex items-center justify-center gap-2 font-medium"
+                      className="w-full sm:w-auto whitespace-nowrap text-xs sm:text-sm !text-white bg-[linear-gradient(90deg,#904BFF_0%,#C053C2_100%)] px-6 py-2.5 rounded-full flex items-center justify-center gap-2 font-medium cursor-pointer"
                     >
-                      <span>+</span> Add Department
+                      <span className="text-lg pr-1 leading-none">+</span> Add Department
                     </button>
                   </PermissionGate>
                 </div>

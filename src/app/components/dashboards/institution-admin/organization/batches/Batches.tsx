@@ -41,9 +41,9 @@ const Batches = ({ setBatchView }: Props) => {
                 setView('form');
               }}
               className="px-6 py-2.5 rounded-full text-sm font-medium !text-white
-              bg-[linear-gradient(90deg,#904BFF_0%,#C053C2_100%)]"
+              bg-[linear-gradient(90deg,#904BFF_0%,#C053C2_100%)] cursor-pointer"
             >
-              + Add Batch
+              <span className="text-lg pr-2 leading-none">+</span> Add Batch
             </button>
           </div>
 
