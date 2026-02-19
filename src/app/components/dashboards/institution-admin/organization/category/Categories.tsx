@@ -76,7 +76,7 @@ export default function Categories({ setCategoryView }: Props) {
                   id: String(categoryDetails.id),
                   name: categoryDetails.name,
                   code: categoryDetails.code,
-                  assignedUserId: categoryDetails.assigned_user?.id ?? '',
+                  assignedUserId: categoryDetails.head?.id ?? '',
                 });
               } catch (error) {
                 // fallback
@@ -84,7 +84,7 @@ export default function Categories({ setCategoryView }: Props) {
                   id: String(category.id),
                   name: category.name,
                   code: category.code,
-                  assignedUserId: category.assigned_user?.id ?? '',
+                  assignedUserId: category.head?.id ?? '',
                 });
               }
 

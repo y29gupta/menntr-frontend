@@ -7,6 +7,7 @@ import { createCategory, updateCategory, getCategoryMeta } from '@/app/lib/insti
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { CreateCategoryPayload } from './category.types';
 import FormDropdown from '@/app/ui/FormDropdown';
+import { useEffect } from 'react';
 
 type Props = {
   mode: 'add' | 'edit';
@@ -19,13 +20,23 @@ export default function CategoryForm({ mode, defaultValues, onCancel, onSubmitSu
   const form = useForm<CategoryFormValues>({
     resolver: zodResolver(categorySchema),
     defaultValues: {
-      name: defaultValues?.name || '',
-      code: defaultValues?.code || '',
-      assignedUserId:
-        defaultValues?.assignedUserId || (defaultValues as any)?.assigned_user?.id || '',
+      name: defaultValues?.name ?? '',
+      code: defaultValues?.code ?? '',
+      assignedUserId: defaultValues?.assignedUserId ?? '',
       id: defaultValues?.id,
     },
   });
+
+  useEffect(() => {
+    if (defaultValues) {
+      form.reset({
+        name: defaultValues.name ?? '',
+        code: defaultValues.code ?? '',
+        assignedUserId: defaultValues.assignedUserId ?? '',
+        id: defaultValues.id,
+      });
+    }
+  }, [defaultValues]);
 
   const { register, handleSubmit, formState, watch, setValue } = form;
   const queryClient = useQueryClient();
@@ -136,11 +147,11 @@ export default function CategoryForm({ mode, defaultValues, onCancel, onSubmitSu
               options={
                 meta?.users.map((user) => ({
                   label: user.name || user.email,
-                  value: user.id,
+                  value: String(user.id),
                   subLabel: user.email,
                 })) ?? []
               }
-              value={watch('assignedUserId')}
+              value={watch('assignedUserId') ?? ''}
               onChange={(val) => setValue('assignedUserId', val as string)}
             />
 
