@@ -9,14 +9,11 @@ import 'react-toastify/dist/ReactToastify.css';
 import { Bounce, ToastContainer } from 'react-toastify';
 import Providers from './providers/Providers';
 
-const geistSans = Geist({
-  variable: '--font-geist-sans',
-  subsets: ['latin'],
-});
+import { Plus_Jakarta_Sans } from 'next/font/google';
 
-const geistMono = Geist_Mono({
-  variable: '--font-geist-mono',
+const plusJakarta = Plus_Jakarta_Sans({
   subsets: ['latin'],
+  variable: '--font-geist-sans',
 });
 
 export const metadata: Metadata = {
@@ -31,7 +28,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <ConfigProvider>
-        <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        <body className={` ${plusJakarta.variable} antialiased`}>
           <Providers>{children}</Providers>
         </body>
       </ConfigProvider>

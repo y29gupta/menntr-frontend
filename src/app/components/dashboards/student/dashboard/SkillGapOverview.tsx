@@ -1,4 +1,10 @@
-export default function SkillGapOverview() {
+type Props = {
+  strengths: string[];
+  needsImprovement: string[];
+  criticalGaps: string[];
+};
+
+export default function SkillGapOverview({ strengths, needsImprovement, criticalGaps }: Props) {
   return (
     <div className="bg-white rounded-2xl p-6 shadow-[0px_0px_8px_0px_#0F172A1F]">
       {/* Header */}
@@ -19,15 +25,18 @@ export default function SkillGapOverview() {
           </p>
 
           <div className="flex gap-2 flex-wrap mb-4">
-            <span className="bg-[#E0F8E8] text-[#1A2C50] border border-[#B0C6B4] px-3 py-1 rounded-[64px] text-xs">
-              Data Structures
-            </span>
-            <span className="bg-[#E0F8E8] text-[#1A2C50] border border-[#B0C6B4] px-3 py-1 rounded-[64px] text-xs">
-              Python Basics
-            </span>
-            <span className="bg-[#E0F8E8] text-[#1A2C50] border border-[#B0C6B4] px-3 py-1 rounded-[64px] text-xs">
-              Problem Solving
-            </span>
+            {strengths?.length ? (
+              strengths.map((skill) => (
+                <span
+                  key={skill}
+                  className="bg-[#E0F8E8] text-[#1A2C50] border border-[#B0C6B4] px-3 py-1 rounded-[64px] text-xs"
+                >
+                  {skill}
+                </span>
+              ))
+            ) : (
+              <span className="text-xs text-slate-400">No strengths identified</span>
+            )}
           </div>
 
           <div className="border-t mt-auto border-slate-200 pt-3 text-xs text-slate-600">
@@ -49,12 +58,18 @@ border border-white/40"
           </p>
 
           <div className="flex gap-2 flex-wrap mb-4">
-            <span className="bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full text-xs">
-              Algorithms
-            </span>
-            <span className="bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full text-xs">
-              SQL Query
-            </span>
+            {needsImprovement?.length ? (
+              needsImprovement.map((skill) => (
+                <span
+                  key={skill}
+                  className="bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full text-xs"
+                >
+                  {skill}
+                </span>
+              ))
+            ) : (
+              <span className="text-xs text-slate-400">None 🎉</span>
+            )}
           </div>
 
           <div className="border-t mt-auto border-slate-200 pt-3 text-xs text-slate-600">
@@ -71,15 +86,21 @@ shadow-[0px_0px_8px_0px_#0F172A1F]
 border border-white/40"
         >
           <h4 className="font-medium text-[#192B4F] mb-3">Critical Gaps</h4>
-          <p className="text-[#727C90] font-medium text-xs">These require immediate attention </p>
+          <p className="text-[#727C90] font-medium text-xs">These require immediate attention</p>
 
           <div className="flex gap-2 flex-wrap mb-4">
-            <span className="bg-red-100 text-red-700 px-3 py-1 rounded-full text-xs">
-              System Design
-            </span>
-            <span className="bg-red-100 text-red-700 px-3 py-1 rounded-full text-xs">
-              Advanced Coding Patterns
-            </span>
+            {criticalGaps?.length ? (
+              criticalGaps.map((skill) => (
+                <span
+                  key={skill}
+                  className="bg-red-100 text-red-700 px-3 py-1 rounded-full text-xs"
+                >
+                  {skill}
+                </span>
+              ))
+            ) : (
+              <span className="text-xs text-slate-400">No critical gaps</span>
+            )}
           </div>
 
           <div className="border-t mt-auto border-slate-200 pt-3 text-xs text-slate-600">

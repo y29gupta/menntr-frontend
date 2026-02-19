@@ -143,7 +143,7 @@ export default function CategoryForm({ mode, defaultValues, onCancel, onSubmitSu
         return updateCategory(defaultValues.id, payload);
       }
       const res = await createCategory(payload);
-      console.log(res, 'response');
+
       return res;
     },
     onSuccess: () => {

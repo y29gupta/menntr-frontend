@@ -41,11 +41,12 @@ const DepartmentForm = ({ mode, defaultValues, onBack, onSubmit }: Props) => {
     queryKey: ['department-meta'],
     queryFn: getDepartmentMeta,
   });
-  
-  const Categoryoption = metaData?.categories.map((item) => ({
-    label: item.name,
-    value: String(item.id),
-  })) || [];
+
+  const Categoryoption =
+    metaData?.categories.map((item) => ({
+      label: item.name,
+      value: String(item.id),
+    })) || [];
   return (
     <div className="w-full p-4">
       <div className="flex items-center  justify-between mb-4">
@@ -114,7 +115,6 @@ const DepartmentForm = ({ mode, defaultValues, onBack, onSubmit }: Props) => {
                 name="category_id"
                 control={control}
                 render={({ field }) => {
-                  console.log(field, 'field');
                   return (
                     <FormDropdown
                       placeholder="Select Parent Category"
@@ -129,7 +129,6 @@ const DepartmentForm = ({ mode, defaultValues, onBack, onSubmit }: Props) => {
                 <p className="text-xs text-red-500 mt-1">{errors.category_id.message}</p>
               )}
             </div>
-
           </div>
         </div>
       </div>

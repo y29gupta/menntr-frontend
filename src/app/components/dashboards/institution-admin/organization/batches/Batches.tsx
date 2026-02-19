@@ -78,7 +78,6 @@ const Batches = ({ setBatchView }: Props) => {
               showColumnFilters={showColumnFilters}
               onTotalChange={setTotalBatches}
               onEdit={(batch) => {
-                console.log('ON EDIT ROW:', batch);
                 setSelectedBatch(batch);
                 setView('form');
               }}
@@ -115,7 +114,6 @@ const Batches = ({ setBatchView }: Props) => {
         confirmText="Yes, Delete"
         cancelText="No, Cancel"
         onConfirm={() => {
-          console.log('DELETE BATCH ID:', deleteBatch?.id);
           setDeleteBatch(null);
         }}
         onCancel={() => setDeleteBatch(null)}
