@@ -17,10 +17,17 @@ type Props = {
   onBack: () => void;
   onNext: () => void;
   onCancel: () => void;
-  assessmentId: string;
+  entityId: string;
+  allowedQuestionTypes: string[];
 };
 
-export default function StepThree({ onBack, onNext, onCancel, assessmentId }: Props) {
+export default function StepThree({
+  onBack,
+  onNext,
+  onCancel,
+  entityId,
+  allowedQuestionTypes,
+}: Props) {
   const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
 
@@ -75,9 +82,9 @@ export default function StepThree({ onBack, onNext, onCancel, assessmentId }: Pr
     try {
       setUploading(true);
 
-      await assessmentApi.bulkUploadQuestions(assessmentId, selectedType, pendingFile);
+      await assessmentApi.bulkUploadQuestions(entityId, selectedType, pendingFile);
       queryClient.invalidateQueries({
-        queryKey: ['assessment-questions', assessmentId],
+        queryKey: ['assessment-questions', entityId],
       });
 
       setPendingFile(null);
@@ -151,7 +158,7 @@ export default function StepThree({ onBack, onNext, onCancel, assessmentId }: Pr
                 <div className="absolute z-50 top-[120px] bg-white border rounded-xl p-4 shadow-md w-[200px]">
                   <p className="text-sm font-medium mb-2">Select Question Type</p>
 
-                  {(['mcq', 'coding'] as UploadType[]).map((type) => (
+                  {allowedQuestionTypes.map((type: any) => (
                     <button
                       key={type}
                       onClick={() => {

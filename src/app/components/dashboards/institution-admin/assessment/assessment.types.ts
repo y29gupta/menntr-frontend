@@ -166,12 +166,6 @@ export interface CodingQuestionMetaResponse {
   export type QuestionMetaType = 'MCQ' | 'CODING';
 
 
-//   export type BaseUpdateQuestionPayload = {
-//   type: 'mcq' | 'coding';
-//   topic: string;
-//   difficulty_level: string;
-//   points: number;
-// };
 
 export type CreateCodingQuestionPayload = {
   topic: string; // array (backend expects this)
@@ -224,3 +218,20 @@ export type UpdateCodingQuestionPayload = {
 export type UpdateQuestionPayload =
   | UpdateMCQQuestionPayload
   | UpdateCodingQuestionPayload;
+
+
+
+  export interface AssessmentSummary {
+  assessmentName: string;
+  category: string;
+  assessmentType: string;
+  questionType: string;
+  totalQuestions: number;
+  totalMarks: number;
+  difficultyMix: {
+    easy: number;
+    medium: number;
+    hard: number;
+  };
+  mandatory: boolean;
+}

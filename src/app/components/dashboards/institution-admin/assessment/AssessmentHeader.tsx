@@ -4,35 +4,60 @@ import AssessmentIcon from '@/app/components/icons/AssessmentIcon';
 import PermissionGate from '@/app/components/auth/PermissionGate';
 import { PERMISSIONS } from '@/app/constants/permissions';
 
+// type Props = {
+//   activeTab: 'Active' | 'Drafts' | 'Completed';
+//   onTabChange: (tab: 'Active' | 'Drafts' | 'Completed') => void;
+//   onCreate: () => void;
+//   tabCounts: Record<'Active' | 'Drafts' | 'Completed', number>;
+// };
+
 type Props = {
   activeTab: 'Active' | 'Drafts' | 'Completed';
   onTabChange: (tab: 'Active' | 'Drafts' | 'Completed') => void;
   onCreate: () => void;
   tabCounts: Record<'Active' | 'Drafts' | 'Completed', number>;
+
+  // NEW
+  title: string;
+  description: string;
+  createLabel: string;
+  Icon: React.ComponentType<any>;
+  createPermission: string;
 };
 
 const tabs: Props['activeTab'][] = ['Active', 'Drafts', 'Completed'];
 
-export default function AssessmentHeader({ activeTab, onTabChange, onCreate, tabCounts }: Props) {
+export default function AssessmentHeader({
+  activeTab,
+  onTabChange,
+  onCreate,
+  tabCounts,
+  title,
+  description,
+  createLabel,
+  Icon,
+  createPermission,
+}: Props) {
   return (
     <div className="w-full flex flex-col gap-4">
       <div className="flex items-center justify-between">
         <div>
           <div className="flex gap-2 items-center">
             <AssessmentIcon />
-            <h2 className="text-lg sm:text-[20px] font-semibold text-gray-900">Assessments</h2>
+            <h2 className="text-lg sm:text-[20px] font-semibold text-gray-900">{title}</h2>
           </div>
           <p className="text-xs sm:text-sm text-gray-500 mt-1">
-            Create, manage and track institution assessments
+            {/* Create, manage and track institution assessments */}
+            {description}
           </p>
         </div>
 
-        <PermissionGate permission={PERMISSIONS.ASSESSMENT.ASSESSMENTS.CREATE}>
+        <PermissionGate permission={createPermission}>
           <button
             onClick={onCreate}
             className="w-full sm:w-auto whitespace-nowrap text-xs sm:text-sm !text-white bg-[linear-gradient(90deg,#904BFF_0%,#C053C2_100%)] px-6 py-2.5 rounded-full flex items-center justify-center gap-2 font-medium"
           >
-            <span>+</span> Create Assessment
+            <span>+</span> {createLabel}
           </button>
         </PermissionGate>
       </div>

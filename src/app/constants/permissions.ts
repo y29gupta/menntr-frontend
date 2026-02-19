@@ -73,4 +73,20 @@ export const PERMISSIONS = {
       MANAGE: 'assessment:questions:manage',
     },
   },
+   ASSIGNMENTS: {
+    MODULE: 'assignment',
+    ASSIGNMENT: {
+      VIEW: 'assignment:assignments:view',
+      CREATE: 'assignment:assignments:create',
+      EDIT: 'assignment:assignments:edit',
+      DELETE: 'assignment:assignments:delete',
+      PUBLISH: 'assignment:assignments:publish',
+    },
+    PERFORMANCE: {
+      VIEW: 'assignment:performance:view',
+    },
+    QUESTIONS: {
+      MANAGE: 'assignment:questions:manage',
+    },
+  },
 } as const;

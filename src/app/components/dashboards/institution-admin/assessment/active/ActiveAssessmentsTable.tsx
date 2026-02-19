@@ -1,70 +1,27 @@
-// 'use client';
-
-import { assessmentColumns } from './active.columns';
-
-// import DataTable from '@/app/components/table/DataTable';
-// import { assessmentColumns } from './active.columns';
-import { AssessmentRow } from '../assessment.types';
 import DataTable from '@/app/components/table/DataTable';
 
-// export default function ActiveAssessmentsTable({
-//   data,
-//   isLoading,
-//   globalFilter,
-//   onGlobalFilterChange,
-//   showColumnFilters,
-// }: {
-//   data: AssessmentRow[];
-//   isLoading: boolean;
-//   globalFilter: string;
-//   onGlobalFilterChange: (val: string) => void;
-//   showColumnFilters: boolean;
-// }) {
-//   return (
-//     <DataTable<AssessmentRow>
-//       columns={assessmentColumns}
-//       data={data}
-//       columnFilters={{}}
-//       onColumnFilterChange={() => {}}
-//       showColumnFilters={showColumnFilters}
-//       currentPage={1}
-//       pageCount={1}
-//       onPreviousPage={() => {}}
-//       onNextPage={() => {}}
-//       canPreviousPage={false}
-//       canNextPage={false}
-//     />
-//   );
-// }
-
-export default function ActiveAssessmentsTable({
+export default function ActiveAssessmentsTable<T>({
   data,
-  isLoading,
-  globalFilter,
-  onGlobalFilterChange,
-  showColumnFilters,
+  columns,
   columnFilters,
   onColumnFilterChange,
+  showColumnFilters,
   currentPage,
   pageCount,
   onPageChange,
-}: any) {
+}: {
+  data: T[];
+  columns: any;
+  columnFilters: Record<string, any>;
+  onColumnFilterChange: (key: string, value: any) => void;
+  showColumnFilters: boolean;
+  currentPage: number;
+  pageCount: number;
+  onPageChange: (page: number) => void;
+}) {
   return (
-    // <DataTable<AssessmentRow>
-    //   columns={assessmentColumns}
-    //   data={data}
-    //   columnFilters={{}}
-    //   onColumnFilterChange={() => {}}
-    //   showColumnFilters={showColumnFilters}
-    //   currentPage={currentPage}
-    //   pageCount={pageCount}
-    //   onPreviousPage={() => onPageChange(currentPage - 1)}
-    //   onNextPage={() => onPageChange(currentPage + 1)}
-    //   canPreviousPage={currentPage > 1}
-    //   canNextPage={currentPage < pageCount}
-    // />
-    <DataTable<AssessmentRow>
-      columns={assessmentColumns}
+    <DataTable<T>
+      columns={columns}
       data={data}
       columnFilters={columnFilters}
       onColumnFilterChange={onColumnFilterChange}

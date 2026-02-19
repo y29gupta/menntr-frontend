@@ -74,8 +74,8 @@ export default function StepTwo({ form, onBack, onNext, onCancel }: Props) {
 
   return (
     <div className="bg-white rounded-2xl p-6 shadow">
-      <h3 className="font-medium text-[#101828]">Assign Assignment To</h3>
-      <p className="text-sm text-[#667085] mb-6">Choose who this assignment will be assigned to</p>
+      <h3 className="font-medium text-[#101828]">Select Audience</h3>
+      <p className="text-sm text-[#667085] mb-6">Choose who this assessment will be assigned to</p>
 
       <label className="text-sm font-medium">Institution Category</label>
       <div className="flex gap-3 mt-2">

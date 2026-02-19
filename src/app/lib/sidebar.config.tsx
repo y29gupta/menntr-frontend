@@ -56,6 +56,11 @@ export const MODULE_SIDEBAR_MAP: Record<string, SidebarItemConfig> = {
     path: '/admin/assessment?tab=active',
     icon: <BarChart3 size={20} />,
   },
+  assignment: {
+    label: 'Assignment',
+    path: '/admin/assignment?tab=active',
+    icon: <BarChart3 size={20} />,
+  },
 };
 
 type Module = {
@@ -64,8 +69,29 @@ type Module = {
   sort_order: number;
 };
 
+// export function buildSidebarFromModules(modules: Module[]): SidebarItem[] {
+//   return modules
+//     .sort((a, b) => a.sort_order - b.sort_order)
+//     .map((mod) => MODULE_SIDEBAR_MAP[mod.code])
+//     .filter((item): item is SidebarItemConfig => Boolean(item));
+// }
+
 export function buildSidebarFromModules(modules: Module[]): SidebarItem[] {
-  return modules
+  // 🔥 TEMPORARY: Add assignment module manually until backend sends it
+  const hasAssignment = modules.some((m) => m.code === 'assignment');
+
+  const updatedModules = hasAssignment
+    ? modules
+    : [
+        ...modules,
+        {
+          code: 'assignment',
+          name: 'Assignment',
+          sort_order: 999, // keep at bottom
+        },
+      ];
+
+  return updatedModules
     .sort((a, b) => a.sort_order - b.sort_order)
     .map((mod) => MODULE_SIDEBAR_MAP[mod.code])
     .filter((item): item is SidebarItemConfig => Boolean(item));
@@ -154,6 +180,11 @@ export const SIDEBAR_CONFIG = {
     {
       label: 'Assessment',
       path: '/admin/assessment?tab=active',
+      icon: <BarChart3 size={20} />,
+    },
+    {
+      label: 'Assignment',
+      path: '/admin/assignment?tab=active',
       icon: <BarChart3 size={20} />,
     },
   ],

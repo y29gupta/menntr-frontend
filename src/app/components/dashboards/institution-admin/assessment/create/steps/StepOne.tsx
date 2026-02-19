@@ -32,13 +32,6 @@ export default function StepOne({ form, onNext, onCancel }: Props) {
   const questionTypes = metaData?.questionTypes ?? [];
 
   useEffect(() => {
-    // if (assessmentCategories.length && !category) {
-    //   setValue('category', assessmentCategories[0] as any, {
-    //     shouldValidate: true,
-    //     shouldDirty: true,
-    //   });
-    // }
-
     if (assessmentCategories.length && !form.formState.dirtyFields.category) {
       if (!category) {
         setValue('category', assessmentCategories[0] as any, {

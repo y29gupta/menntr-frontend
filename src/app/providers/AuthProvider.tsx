@@ -85,15 +85,35 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   });
 
   const permissions: string[] = data?.permissions ?? [];
-  const modules: AuthModule[] = data?.modules ?? [];
+  // const modules: AuthModule[] = data?.modules ?? []; later use it when getting assignment coming from backedn\
+
+  const backendModules: AuthModule[] = data?.modules ?? [];
+
+  // ⚠️ TEMPORARY FIX:
+  // Backend is not sending "assignment" module yet.
+  // Injecting it manually for UI development.
+  // REMOVE this block once backend includes assignment in module response.
+  const hasAssignment = backendModules.some((m) => m.code === 'assignment');
+
+  const modules: AuthModule[] = hasAssignment
+    ? backendModules
+    : [
+        ...backendModules,
+        {
+          code: 'assignment',
+          name: 'Assignment',
+          icon: 'BarChart3',
+          category: 'academic',
+          sort_order: 999,
+        },
+      ];
+
   const roles: AuthRole[] = data?.roles ?? [];
 
   const permissionSet = useMemo(() => new Set(permissions), [permissions]);
   const moduleSet = useMemo(() => new Set(modules.map((m) => m.code)), [modules]);
 
-  const isSuperAdmin = roles.some(
-    (r) => r.name === 'Super Admin' && r.is_system_role
-  );
+  const isSuperAdmin = roles.some((r) => r.name === 'Super Admin' && r.is_system_role);
 
   const value: AuthContextType = useMemo(
     () => ({
@@ -105,12 +125,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       modules,
       isLoading,
       isSuperAdmin,
-      hasPermission: (permission: string) =>
-        isSuperAdmin || permissionSet.has(permission),
+      hasPermission: (permission: string) => isSuperAdmin || permissionSet.has(permission),
       hasAnyPermission: (perms: string[]) =>
         isSuperAdmin || perms.some((p) => permissionSet.has(p)),
-      hasModule: (moduleCode: string) =>
-        isSuperAdmin || moduleSet.has(moduleCode),
+      hasModule: (moduleCode: string) => isSuperAdmin || moduleSet.has(moduleCode),
     }),
     [data, isLoading, isSuperAdmin, permissions, modules, roles, permissionSet, moduleSet]
   );

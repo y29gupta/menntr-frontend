@@ -1,22 +1,12 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import ActiveAssessmentsTable from './ActiveAssessmentsTable';
-import { useQuery } from '@tanstack/react-query';
-import { assessmentApi } from '../assessment.service';
 import { AssessmentRow } from '../assessment.types';
+import { createEvaluationColumns } from './active.columns';
+// import { createEvaluationColumns } from '../../evaluation/createEvaluationColumns';
 
-// type TabsCount = {
-//   Active: number;
-//   Drafts: number;
-//   Completed: number;
-// };
-
-// type props = {
-//   // setTabsCount: React.Dispatch<React.SetStateAction<TabsCount>>;
-//   data: AssessmentRow[];
-// };
-type props = {
+type Props = {
   data: AssessmentRow[];
   currentPage: number;
   pageCount: number;
@@ -32,25 +22,31 @@ export default function ActiveAssessments({
   onPageChange,
   pendingFilters,
   setPendingFilters,
-}: props) {
-  const [globalFilter, setGlobalFilter] = useState('');
-  const [showColumnFilters, setShowColumnFilters] = useState(false);
+}: Props) {
+  const [showColumnFilters, setShowColumnFilters] = useState(true);
+
+  const columns = createEvaluationColumns({
+    entityBasePath: '/admin/assessment',
+    entityLabel: 'Assessment',
+    mode: 'active',
+    showExpiryOn: true,
+  });
 
   return (
-    <ActiveAssessmentsTable
+    <ActiveAssessmentsTable<AssessmentRow>
       data={data}
-      isLoading={false}
-      showColumnFilters={showColumnFilters}
+      columns={columns}
       currentPage={currentPage}
       pageCount={pageCount}
       onPageChange={onPageChange}
       columnFilters={pendingFilters}
-      onColumnFilterChange={(key: any, value: any) =>
+      onColumnFilterChange={(key, value) =>
         setPendingFilters((prev) => ({
           ...prev,
           [key]: value,
         }))
       }
+      showColumnFilters={showColumnFilters}
     />
   );
 }

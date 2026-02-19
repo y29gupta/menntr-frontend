@@ -4,14 +4,6 @@ export interface AssessmentQuestion {
   type: string;
 }
 
-// export interface AssessmentData {
-//   id: string;
-//   title: string;
-//   description?: string;
-//   questions: AssessmentQuestion[];
-//   duration?: number;
-//   totalMarks?: number;
-// }
 export interface AssessmentSummary {
   assessmentName: string;
   category: string;
@@ -43,8 +35,8 @@ export interface AssessmentData {
 
 
 
-export type StepFourHandle = {
-  submit: () => {
+export type Props = {
+  data?: {
     shuffleQuestions: boolean;
     shuffleOptions: boolean;
     allowReattempts: boolean;
@@ -53,8 +45,27 @@ export type StepFourHandle = {
   };
 };
 
-type Props = {
-  data?: {
+
+
+export interface PublishEntityModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+
+  entityId: string;
+  entityLabel: string; // "Assessment" | "Assignment"
+  entityName: string;
+  redirectPath: string;
+
+  fetchSummary: (id: string) => Promise<any>;
+  fetchAssignedTo: (id: string) => Promise<any>;
+  fetchAccess: (id: string) => Promise<any>;
+  updateAccess: (id: string, payload: any) => Promise<any>;
+  updateSchedule: (id: string, payload: any) => Promise<any>;
+  publishEntity: (id: string) => Promise<any>;
+}
+
+export type StepFourHandle = {
+  submit: () => {
     shuffleQuestions: boolean;
     shuffleOptions: boolean;
     allowReattempts: boolean;

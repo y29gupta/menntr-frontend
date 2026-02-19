@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import DashboardCard from '../../dashboard/DashboardCard';
+// import DashboardCard from '../../dashboard/DashboardCard';
 // import HighestAvgDepartmentCard from '../../dashboard/HighestAvgDepartmentCard';
 import AssessmentHeader from './AssessmentHeader';
 import AssessmentInfoCard from './AssessmentInfoCard';
@@ -13,6 +13,7 @@ import QuestionsSection from './QuestionsSection';
 import SettingConfigForm from './settings/SettingConfigForm';
 import { fetchAssessmentOverview } from './assessmentPerformance.api';
 import ProgressBarCard from '@/app/components/ui/progressCard/ProgressBarCard';
+import DashboardCard from '@/app/components/ui/progressCard/DashboardCard';
 
 type AssessmentPerformanceProps = {
   assessmentId: string;

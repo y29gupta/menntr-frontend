@@ -7,11 +7,12 @@ import { assessmentApi } from '../../assessment.service';
 import { PublishAssessmentModal } from '@/app/ui/modals/PublishAssessmentModal/PublishAssessmentModal';
 import { message } from 'antd';
 import QuestionModalShell from '../components/QuestionModal';
+import { PublishEntityModal } from '@/app/ui/modals/PublishEntityModal/PublishEntityModal';
 
 type Props = {
   onBack: () => void;
   onCancel: () => void;
-  assessmentId: string;
+  entityId: string;
   onDeleteQuestion: (id: string) => void;
 };
 
@@ -31,7 +32,7 @@ const DIFFICULTY_STYLES: Record<Question['difficulty'], string> = {
   Hard: 'bg-[#FFE6E6] text-[#8E0000]',
 };
 
-export default function StepFour({ onBack, onCancel, assessmentId, onDeleteQuestion }: Props) {
+export default function StepFour({ onBack, onCancel, entityId, onDeleteQuestion }: Props) {
   const queryClient = useQueryClient();
 
   /* ---------------- MODAL STATE ---------------- */
@@ -43,8 +44,8 @@ export default function StepFour({ onBack, onCancel, assessmentId, onDeleteQuest
 
   /* ---------------- QUESTIONS LIST ---------------- */
   const { data: questions = [] } = useQuery<Question[]>({
-    queryKey: ['assessment-questions', assessmentId],
-    queryFn: () => assessmentApi.getAssessmentQuestions(assessmentId),
+    queryKey: ['assessment-questions', entityId],
+    queryFn: () => assessmentApi.getAssessmentQuestions(entityId),
   });
 
   /* ---------------- FETCH QUESTION FOR EDIT ---------------- */
@@ -85,7 +86,7 @@ export default function StepFour({ onBack, onCancel, assessmentId, onDeleteQuest
   /* ---------------- SAVE HANDLERS ---------------- */
   const refreshQuestions = () => {
     queryClient.invalidateQueries({
-      queryKey: ['assessment-questions', assessmentId],
+      queryKey: ['assessment-questions', entityId],
     });
   };
 
@@ -189,7 +190,7 @@ export default function StepFour({ onBack, onCancel, assessmentId, onDeleteQuest
       {/* SINGLE MODAL */}
       {isModalOpen && (
         <QuestionModalShell
-          assessmentId={assessmentId}
+          assessmentId={entityId}
           mcqMeta={mcqMeta}
           codingMeta={codingMeta}
           initialData={editData}
@@ -203,10 +204,25 @@ export default function StepFour({ onBack, onCancel, assessmentId, onDeleteQuest
         />
       )}
 
-      <PublishAssessmentModal
+      {/* <PublishAssessmentModal
         isOpen={publishOpen}
         onClose={() => setPublishOpen(false)}
-        assessmentId={assessmentId}
+        assessmentId={entityId}
+      /> */}
+
+      <PublishEntityModal
+        isOpen={publishOpen}
+        onClose={() => setPublishOpen(false)}
+        entityId={entityId}
+        entityLabel="Assessment"
+        entityName="Aptitude Mock - Jan 2026"
+        redirectPath="/admin/assessment?tab=active"
+        fetchSummary={assessmentApi.getAssessmentSummary}
+        fetchAssignedTo={assessmentApi.getAssessmentAssignedToDetail}
+        fetchAccess={assessmentApi.getAssessmentAccess}
+        updateAccess={assessmentApi.updateAssessmentAccess}
+        updateSchedule={assessmentApi.updateAssessmentSchedule}
+        publishEntity={assessmentApi.publishAssessment}
       />
     </>
   );

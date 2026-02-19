@@ -44,6 +44,7 @@ getAssessmentList: async (
   },
    
   createAssessment: async (payload: CreateAssessmentPayload) => {
+    console.log(payload,"pyaldo")
     const res = await api.post("/assessments", payload);
     return res.data;
   },
@@ -161,7 +162,7 @@ bulkUploadQuestions: async (
 ) => {
   const formData = new FormData();
   formData.append('file', file);
-  console.log(assessmentId,"id")
+  console.log(assessmentId,"ent")
   const endpoint =
     type === 'mcq'
       ? `/assessments/${assessmentId}/mcq/bulk-create`
