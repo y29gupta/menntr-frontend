@@ -2,7 +2,6 @@
 
 import ProctoringClient from '@/proctoring/ProctoringClient';
 import AssessmentStepper from './AssessmentStepper';
-
 import AssessmentHeader from './AssessmentHeader';
 import AssessmentFooter from './AssessmentFooter';
 import { QuestionRenderer } from './questions/QuestionRenderer';
@@ -58,7 +57,6 @@ export default function AssessmentAttempt() {
     };
   }, []);
 
-  // ✅ CLEANUP CAMERA ON UNMOUNT
   useEffect(() => {
     return () => {
       console.log('🧹 Cleaning up camera stream');

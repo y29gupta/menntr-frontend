@@ -73,5 +73,6 @@ export interface DepartmentMetaResponse {
 export type CreateCategoryPayload = {
   name: string;
   code: string;
-  assigned_user_id: number; // ✅ Backend expects number
+  assigned_user_id: number;
+  programs: string[];
 };

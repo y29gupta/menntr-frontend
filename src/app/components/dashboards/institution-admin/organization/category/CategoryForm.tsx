@@ -1,6 +1,6 @@
 'use client';
 
-import { useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { categorySchema, CategoryFormValues } from './category.schema';
 import { createCategory, updateCategory, getCategoryMeta } from '@/app/lib/institutions.api';
@@ -23,6 +23,7 @@ export default function CategoryForm({ mode, defaultValues, onCancel, onSubmitSu
       name: defaultValues?.name ?? '',
       code: defaultValues?.code ?? '',
       assignedUserId: defaultValues?.assignedUserId ?? '',
+      programs: defaultValues?.programs ?? [''],
       id: defaultValues?.id,
     },
   });
@@ -33,6 +34,7 @@ export default function CategoryForm({ mode, defaultValues, onCancel, onSubmitSu
         name: defaultValues.name ?? '',
         code: defaultValues.code ?? '',
         assignedUserId: defaultValues.assignedUserId ?? '',
+        programs: defaultValues.programs ?? [''],
         id: defaultValues.id,
       });
     }
@@ -65,6 +67,7 @@ export default function CategoryForm({ mode, defaultValues, onCancel, onSubmitSu
       name: data.name,
       code: data.code,
       assigned_user_id: Number(data.assignedUserId),
+      programs: data.programs.filter((p) => p.trim().length > 0),
     });
   };
 
@@ -158,6 +161,114 @@ export default function CategoryForm({ mode, defaultValues, onCancel, onSubmitSu
             {formState.errors.assignedUserId && (
               <p className="text-xs text-red-500">{formState.errors.assignedUserId.message}</p>
             )}
+          </div>
+
+          {/* Total Programs */}
+          <div className="pt-4 ">
+            <Controller
+              name="programs"
+              control={form.control}
+              render={({ field }) => {
+                const programs = Array.isArray(field.value) ? field.value : [''];
+                const lastIndex = programs.length - 1;
+                const lastValue = programs[lastIndex] || '';
+                const hasTyped = lastValue.trim().length > 0;
+
+                const addProgram = () => {
+                  if (!hasTyped) return;
+                  field.onChange([...programs, '']);
+                };
+
+                const removeChip = (index: number) => {
+                  const updated = programs.filter((_, i) => i !== index);
+                  field.onChange(updated.length ? updated : ['']);
+                };
+
+                const clearCurrentInput = () => {
+                  const updated = [...programs];
+                  updated[lastIndex] = '';
+                  field.onChange(updated);
+                };
+
+                return (
+                  <>
+                    {/* Header */}
+                    <div className="mb-4">
+                      <label className="text-[16px] font-medium text-[#0F172A]">
+                        Total Programs
+                      </label>
+                    </div>
+
+                    {/* Input Row */}
+                    <div className="flex items-center gap-4 border-b border-[#C3CAD9] pb-2">
+                      <input
+                        type="text"
+                        value={lastValue}
+                        onChange={(e) => {
+                          const updated = [...programs];
+                          updated[lastIndex] = e.target.value;
+                          field.onChange(updated);
+                        }}
+                        placeholder="Bachelor of Technology"
+                        className="flex-1 text-sm bg-transparent focus:outline-none"
+                      />
+
+                      <button
+                        type="button"
+                        onClick={addProgram}
+                        disabled={!hasTyped}
+                        className={`font-medium ${
+                          hasTyped
+                            ? '!text-purple-600 cursor-pointer'
+                            : '!text-gray-400 cursor-not-allowed'
+                        }`}
+                      >
+                        Add
+                      </button>
+
+                      {hasTyped && (
+                        <button
+                          type="button"
+                          onClick={clearCurrentInput}
+                          className="text-gray-400 hover:text-red-500"
+                        >
+                          ✕
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Chips */}
+                    {programs.length > 1 && (
+                      <div className="flex flex-wrap gap-3 mt-6">
+                        {programs.slice(0, -1).map((program, index) => (
+                          <div
+                            key={index}
+                            className="flex items-center gap-2 px-4 py-2 rounded-full
+                  border border-[#C3CAD9] text-[#3D465C] text-sm"
+                          >
+                            {program}
+
+                            <button
+                              type="button"
+                              onClick={() => removeChip(index)}
+                              className="text-gray-500 hover:text-red-500"
+                            >
+                              ✕
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {form.formState.errors.programs && (
+                      <p className="text-xs text-red-500 mt-2">
+                        {form.formState.errors.programs.message}
+                      </p>
+                    )}
+                  </>
+                );
+              }}
+            />
           </div>
         </div>
       </div>

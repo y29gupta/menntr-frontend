@@ -8,15 +8,19 @@ import FormDropdown from '@/app/ui/FormDropdown';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { createBatch, updateBatch, getBatchMeta } from './batches.service';
 import { CreateBatchPayload } from './batches.types';
+import { Dayjs } from 'dayjs';
+import dayjs from 'dayjs';
+
 import { Plus, X } from 'lucide-react';
+import YearInput from '@/app/ui/YearInput';
 
 const batchSchema = z.object({
   name: z.string().min(1, 'Batch name is required'),
   category: z.string().min(1, 'Category is required'),
   departmentId: z.string().min(1, 'Department is required'),
   facultyId: z.string().optional(), // Optional faculty assignment
-  startYear: z.string().min(1, 'Start year is required'),
-  endYear: z.string().min(1, 'End year is required'),
+  startYear: z.custom<Dayjs>().nullable(),
+  endYear: z.custom<Dayjs>().nullable(),
   status: z.enum(['Active', 'Inactive']),
   sections: z
     .array(z.string().min(1, 'Section name is required'))
@@ -47,8 +51,8 @@ export default function BatchForm({ mode, batchId, onBack, editRow }: Props) {
       name: '',
       category: '',
       departmentId: '',
-      startYear: '',
-      endYear: '',
+      startYear: null,
+      endYear: null,
       status: 'Active',
       sections: [''],
       facultyId: undefined,
@@ -90,8 +94,8 @@ export default function BatchForm({ mode, batchId, onBack, editRow }: Props) {
 
         facultyId: editRow.coordinator ? String(editRow.coordinator.id) : undefined,
 
-        startYear: String(editRow.academic_year).split('-')[0],
-        endYear: String(editRow.academic_year).split('-')[1],
+        startYear: dayjs(String(editRow.academic_year).split('-')[0], 'YYYY'),
+        endYear: dayjs(String(editRow.academic_year).split('-')[1], 'YYYY'),
 
         status: editRow.status,
         sections: editRow.sections?.map((s: any) => s.name || s) || [''],
@@ -238,34 +242,36 @@ export default function BatchForm({ mode, batchId, onBack, editRow }: Props) {
             {/* Academic Year */}
             <div>
               <label className="text-[16px] font-medium text-gray-700">Academic Year</label>
+
               <div className="flex gap-4 mt-2">
                 <Controller
                   name="startYear"
                   control={control}
                   render={({ field }) => (
-                    <FormDropdown
-                      placeholder="Start year"
+                    <YearInput
+                      label="Start Year"
+                      placeholder="Select start year"
                       value={field.value}
                       onChange={field.onChange}
-                      options={yearOptions}
-                      dropdownPosition="top"
                     />
                   )}
                 />
+
                 <Controller
                   name="endYear"
                   control={control}
                   render={({ field }) => (
-                    <FormDropdown
-                      placeholder="End year"
+                    <YearInput
+                      label="End Year"
+                      placeholder="Select end year"
                       value={field.value}
                       onChange={field.onChange}
-                      options={yearOptions}
-                      dropdownPosition="top"
+                      disabledBefore={watch('startYear')}
                     />
                   )}
                 />
               </div>
+
               {(errors.startYear || errors.endYear) && (
                 <p className="text-xs text-red-500 mt-1">
                   {errors.startYear?.message || errors.endYear?.message}
@@ -286,7 +292,7 @@ export default function BatchForm({ mode, batchId, onBack, editRow }: Props) {
                 name="category"
                 control={control}
                 render={({ field }) => (
-                  <div className="flex gap-3 mt-3">
+                  <div className="flex flex-wrap gap-3 mt-3 max-h-[6.5rem] min-h-[6.5rem] overflow-y-auto">
                     {categoryOptions.map((item: any) => (
                       <button
                         type="button"
@@ -296,13 +302,13 @@ export default function BatchForm({ mode, batchId, onBack, editRow }: Props) {
                           setValue('departmentId', '');
                           setValue('facultyId', undefined);
                         }}
-                        className={`px-4 py-1.5 rounded-full border text-sm font-light ${
+                        className={`px-4 py-1.5 rounded-full border text-sm font-light whitespace-nowrap ${
                           field.value === item.value
-                            ? 'border-purple-500 text-purple-600 bg-purple-50'
+                            ? 'border-purple-500 !text-purple-600 bg-purple-50'
                             : 'border-[#C3CAD9] text-[#3D465C]'
                         }`}
                       >
-                        <span className="flex items-center gap-2">
+                        <span className="flex items-center gap-2 whitespace-nowrap">
                           {field.value === item.value && <span>✓</span>}
                           {item.label}
                         </span>
@@ -472,8 +478,8 @@ export default function BatchForm({ mode, batchId, onBack, editRow }: Props) {
               categoryRoleId: Number(data.category),
               departmentRoleId: Number(data.departmentId),
               coordinatorId: data.facultyId ? Number(data.facultyId) : undefined,
-              startDate: `${data.startYear}-01-01`,
-              endDate: `${data.endYear}-12-31`,
+              startDate: `${data.startYear?.year()}-01-01`,
+              endDate: `${data.endYear?.year()}-12-31`,
               isActive: data.status === 'Active',
               sections: validSections,
             };
