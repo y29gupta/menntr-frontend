@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { ZodObject, z } from 'zod';
 
@@ -15,6 +15,7 @@ interface Props<TSchema extends ZodObject<any>> {
     entityLabel: string;
     basePath: string;
     schema: TSchema;
+    queryKeyBase: string;
     api: CreateEvaluationApi;
     buildCreatePayload: (values: z.infer<TSchema>) => any;
     buildUpdatePayload?: (values: z.infer<TSchema>) => any;
@@ -46,11 +47,22 @@ export default function CreateEvaluationContainer<TSchema extends ZodObject<any>
     buildCreatePayload,
     buildUpdatePayload,
     stepOneFields,
+    queryKeyBase,
   } = config;
 
   const router = useRouter();
   const [step, setStep] = useState(1);
   const [entityId, setEntityId] = useState<string>('');
+
+  const queryClient = useQueryClient();
+
+  const invalidateListQueries = () => {
+    queryClient.invalidateQueries({
+      predicate: (query) => {
+        return query.queryKey[0] === config.entityLabel.toLowerCase() + 's';
+      },
+    });
+  };
 
   const isEdit = mode === 'edit' && !!editId;
 
@@ -118,7 +130,7 @@ export default function CreateEvaluationContainer<TSchema extends ZodObject<any>
 
       const payload = buildUpdatePayload(values);
       await updateMutation.mutateAsync(payload);
-
+      invalidateListQueries();
       setStep(2);
       return;
     }
@@ -128,6 +140,7 @@ export default function CreateEvaluationContainer<TSchema extends ZodObject<any>
 
     setEntityId(res.id);
     // setEntityId('10');
+    invalidateListQueries();
     setStep(2);
   };
 

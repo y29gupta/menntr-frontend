@@ -17,6 +17,36 @@ type Props = {
   entityId: string;
 };
 
+const DUMMY_QUESTIONS: Question[] = [
+  {
+    assessment_question_id: 'dummy-1',
+    questionText: 'What is the capital of France?',
+    isMandatory: true,
+    marks: 2,
+    topic: 'Geography',
+    questionTypeLabel: 'MCQ',
+    difficulty: 'Easy',
+  },
+  {
+    assessment_question_id: 'dummy-2',
+    questionText: 'Explain event bubbling in JavaScript.',
+    isMandatory: true,
+    marks: 5,
+    topic: 'JavaScript',
+    questionTypeLabel: 'Theory',
+    difficulty: 'Medium',
+  },
+  {
+    assessment_question_id: 'dummy-3',
+    questionText: 'Write a function to reverse a string.',
+    isMandatory: false,
+    marks: 10,
+    topic: 'Programming',
+    questionTypeLabel: 'Coding',
+    difficulty: 'Hard',
+  },
+];
+
 type Question = {
   assessment_question_id: string;
   questionText: string;
@@ -48,6 +78,7 @@ export default function StepFour({ onBack, onCancel, entityId }: Props) {
     queryKey: ['assignment-questions', entityId],
     queryFn: () => assignmentApi.getAssignmentQuestions(entityId),
   });
+  // const displayQuestions = questions.length ? questions : DUMMY_QUESTIONS;
 
   /* ---------------- FETCH QUESTION FOR EDIT ---------------- */
   // const { data: fetchedEditQuestion, isError } = useQuery({

@@ -324,6 +324,7 @@ export default function CreateAssessment({ mode = 'create', editAssessmentId }: 
         entityLabel: 'Assessment',
         basePath: '/admin/assessment',
         schema: createAssessmentSchema,
+        queryKeyBase: 'assessments',
         allowedQuestionTypes: ['mcq', 'coding'],
         stepOneFields: ['title', 'category', 'AssessmentType'],
         stepTwoFields: ['institutionCategory', 'department', 'batches'],

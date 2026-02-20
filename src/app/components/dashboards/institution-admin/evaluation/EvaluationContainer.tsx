@@ -31,9 +31,11 @@ interface EvaluationContainerProps<TStatus extends string> {
       status: TStatus,
       page: number,
       search: string,
-      filters: Record<string, string>
+      filters: Record<string, string>,
+      limit?: number
     ) => Promise<any>;
   };
+
   statuses: {
     active: TStatus;
     draft: TStatus;
@@ -61,6 +63,8 @@ export default function EvaluationContainer<TStatus extends string>({
   const searchParams = useSearchParams();
 
   // -------------------- PAGE STATE --------------------
+  const PAGE_SIZE = 10; // 🔥 single source of truth
+
   const [activePage, setActivePage] = useState(1);
   const [draftPage, setDraftPage] = useState(1);
   const [completedPage, setCompletedPage] = useState(1);
@@ -69,6 +73,14 @@ export default function EvaluationContainer<TStatus extends string>({
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [pendingFilters, setPendingFilters] = useState<Record<string, string>>({});
   const [filters, setFilters] = useState<Record<string, string>>({});
+
+  const [hasInitialized, setHasInitialized] = useState(false);
+
+  const [tabCountsState, setTabCountsState] = useState({
+    Active: 0,
+    Drafts: 0,
+    Completed: 0,
+  });
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -111,26 +123,40 @@ export default function EvaluationContainer<TStatus extends string>({
     queries: [
       {
         queryKey: [queryKeyBase, 'active', activePage, debouncedSearch, filters],
-        queryFn: () => api.getList(statuses.active, activePage, debouncedSearch, filters),
+        // queryFn: () => api.getList(statuses.active, activePage, debouncedSearch, filters),
+        queryFn: () =>
+          api.getList(statuses.active, activePage, debouncedSearch, filters, PAGE_SIZE),
+
         placeholderData: keepPreviousData,
-        // enabled: activeTab === 'Active',
+        enabled: !hasInitialized || activeTab === 'Active',
       },
       {
         queryKey: [queryKeyBase, 'drafts', draftPage, debouncedSearch, filters],
-        queryFn: () => api.getList(statuses.draft, draftPage, debouncedSearch, filters),
+        queryFn: () => api.getList(statuses.draft, draftPage, debouncedSearch, filters, PAGE_SIZE),
+
         placeholderData: keepPreviousData,
-        // enabled: activeTab === 'Drafts',
+        enabled: !hasInitialized || activeTab === 'Drafts',
       },
       {
         queryKey: [queryKeyBase, 'completed', completedPage, debouncedSearch, filters],
-        queryFn: () => api.getList(statuses.completed, completedPage, debouncedSearch, filters),
+        queryFn: () =>
+          api.getList(statuses.completed, completedPage, debouncedSearch, filters, PAGE_SIZE),
+
         placeholderData: keepPreviousData,
-        // enabled: activeTab === 'Completed',
+        enabled: !hasInitialized || activeTab === 'Completed',
       },
     ],
   });
 
   const [activeQuery, draftQuery, completedQuery] = results;
+
+  useEffect(() => {
+    if (!hasInitialized) {
+      if (activeQuery.data || draftQuery.data || completedQuery.data) {
+        setHasInitialized(true);
+      }
+    }
+  }, [activeQuery.data, draftQuery.data, completedQuery.data, hasInitialized]);
 
   // -------------------- DATA --------------------
 
@@ -142,16 +168,24 @@ export default function EvaluationContainer<TStatus extends string>({
   const draftMeta = draftQuery.data?.meta;
   const completedMeta = completedQuery.data?.meta;
 
+  useEffect(() => {
+    setTabCountsState((prev) => ({
+      Active: activeMeta?.totalCount ?? prev.Active,
+      Drafts: draftMeta?.totalCount ?? prev.Drafts,
+      Completed: completedMeta?.totalCount ?? prev.Completed,
+    }));
+  }, [activeMeta, draftMeta, completedMeta]);
+
   // -------------------- TAB COUNTS (FIXED) --------------------
 
-  const tabsCount = useMemo(
-    () => ({
-      Active: activeMeta?.totalCount ?? 0,
-      Drafts: draftMeta?.totalCount ?? 0,
-      Completed: completedMeta?.totalCount ?? 0,
-    }),
-    [activeMeta, draftMeta, completedMeta]
-  );
+  // const tabsCount = useMemo(
+  //   () => ({
+  //     Active: activeMeta?.totalCount ?? 0,
+  //     Drafts: draftMeta?.totalCount ?? 0,
+  //     Completed: completedMeta?.totalCount ?? 0,
+  //   }),
+  //   [activeMeta, draftMeta, completedMeta]
+  // );
   const handleTabChange = (tab: UiTab) => {
     router.replace(`${basePath}?tab=${uiToUrlTab[tab]}`);
   };
@@ -166,7 +200,7 @@ export default function EvaluationContainer<TStatus extends string>({
         activeTab={activeTab}
         onTabChange={handleTabChange}
         onCreate={handleCreate}
-        tabCounts={tabsCount}
+        tabCounts={tabCountsState}
       />
 
       {/* <AssessmentFilters value="" onChange={() => {}} /> */}

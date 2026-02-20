@@ -7,26 +7,59 @@ export type AssessmentTab = "active" | "draft" | "completed";
 
 export const assessmentApi = {
  
-getAssessmentList: async (
+// getAssessmentList: async (
+//   tab: 'active' | 'draft' | 'completed',
+//   page = 1,
+//   search?: string,
+//   filters: Record<string, string> = {}
+// ): Promise<AssessmentListResult> => {
+
+//   const params: Record<string, any> = {
+//     tab,
+//     page,
+//   };
+
+//   // ✅ Only attach search if exists
+//   if (search && search.trim() !== '') {
+//     params.search = search;
+//   }
+
+//   // ✅ Attach column filters only if exist
+//   Object.entries(filters).forEach(([key, value]) => {
+//     if (value) params[key] = value;
+//   });
+
+//   const res = await api.get('/assessments', { params });
+
+//   return {
+//     rows: res.data.data,
+//     meta: res.data.meta,
+//   };
+// },
+
+  getAssessmentList: async (
   tab: 'active' | 'draft' | 'completed',
   page = 1,
   search?: string,
-  filters: Record<string, string> = {}
+  filters: Record<string, string> = {},
+  limit = 10 // ✅ NEW (default safe)
 ): Promise<AssessmentListResult> => {
-
   const params: Record<string, any> = {
     tab,
     page,
+    limit, // ✅ REQUIRED by new API
   };
 
-  // ✅ Only attach search if exists
+  // ✅ attach search only when present
   if (search && search.trim() !== '') {
-    params.search = search;
+    params.search = search.trim();
   }
 
-  // ✅ Attach column filters only if exist
+  // ✅ attach column filters dynamically
   Object.entries(filters).forEach(([key, value]) => {
-    if (value) params[key] = value;
+    if (value !== undefined && value !== null && value !== '') {
+      params[key] = value;
+    }
   });
 
   const res = await api.get('/assessments', { params });
