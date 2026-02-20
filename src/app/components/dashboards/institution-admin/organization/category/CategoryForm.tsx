@@ -205,7 +205,7 @@ export default function CategoryForm({ mode, defaultValues, onCancel, onSubmitSu
             <input
               {...register('name')}
               placeholder="Enter Category Name"
-              className="w-full border-b py-2 sm:py-2.5 outline-none bg-transparent border-[#C3CAD9]"
+              className="w-full border-b  leading-relaxed h-[30px] outline-none bg-transparent border-[#C3CAD9]"
             />
             {formState.errors.name && (
               <p className="text-xs text-red-500">{formState.errors.name.message}</p>
@@ -220,7 +220,7 @@ export default function CategoryForm({ mode, defaultValues, onCancel, onSubmitSu
             <input
               {...register('code')}
               placeholder="Enter Category Code"
-              className="w-full border-b py-2 sm:py-2.5 outline-none bg-transparent border-[#C3CAD9]"
+              className="w-full border-b py-2 sm:py-2.5  leading-relaxed h-[30px] outline-none bg-transparent border-[#C3CAD9]"
             />
             {formState.errors.code && (
               <p className="text-xs text-red-500">{formState.errors.code.message}</p>

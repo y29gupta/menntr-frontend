@@ -8,7 +8,12 @@ import {
   DragOverlay,
   closestCenter,
 } from '@dnd-kit/core';
-import { arrayMove, SortableContext, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
+import {
+  arrayMove,
+  SortableContext,
+  verticalListSortingStrategy,
+  useSortable,
+} from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -88,7 +93,11 @@ function SortableRoleRow({
   const typeLabel =
     type === 'CATEGORY' ? 'Category' : type === 'DEPARTMENT' ? 'Department' : 'Faculty';
   const borderColor =
-    type === 'CATEGORY' ? 'border-purple-300' : type === 'DEPARTMENT' ? 'border-blue-300' : 'border-green-300';
+    type === 'CATEGORY'
+      ? 'border-purple-300'
+      : type === 'DEPARTMENT'
+        ? 'border-blue-300'
+        : 'border-green-300';
 
   return (
     <div ref={setNodeRef} style={style} className="relative">
@@ -158,7 +167,15 @@ export default function Hierarchy() {
   });
 
   const moveRoleMutation = useMutation({
-    mutationFn: async ({ roleId, newParentId, newOrder }: { roleId: string; newParentId?: number; newOrder?: number }) => {
+    mutationFn: async ({
+      roleId,
+      newParentId,
+      newOrder,
+    }: {
+      roleId: string;
+      newParentId?: number;
+      newOrder?: number;
+    }) => {
       const res = await api.put(`/organization/hierarchy/${roleId}/move`, {
         newParentId,
         newOrder,
@@ -240,7 +257,12 @@ export default function Hierarchy() {
     }
 
     // Reordering roles at same level
-    if (dragType === 'ROLE' && draggedRoleId && dragRoleHierarchyId === overRoleHierarchyId && overId) {
+    if (
+      dragType === 'ROLE' &&
+      draggedRoleId &&
+      dragRoleHierarchyId === overRoleHierarchyId &&
+      overId
+    ) {
       // Find the category, department, or faculty list
       if (dragRoleHierarchyId === 2) {
         // Reordering categories
@@ -270,7 +292,8 @@ export default function Hierarchy() {
         // Reordering faculty - find which department they belong to
         for (const category of categories) {
           for (const dept of category.children || []) {
-            const oldIndex = dept.children?.findIndex((faculty) => faculty.id === draggedRoleId) ?? -1;
+            const oldIndex =
+              dept.children?.findIndex((faculty) => faculty.id === draggedRoleId) ?? -1;
             const newIndex = dept.children?.findIndex((faculty) => faculty.id === overId) ?? -1;
             if (oldIndex !== -1 && newIndex !== -1 && oldIndex !== newIndex) {
               // Both are in the same department
@@ -315,26 +338,23 @@ export default function Hierarchy() {
             </a>
           </div>
           <OrganizationTreeModal open={open} onClose={() => setOpen(false)} />
-
-          <div>
+          {/* 
+          <div className="border">
             <p className="text-sm text-gray-500 mb-2">Drag and drop to add or reorder</p>
             <div className="flex gap-3">
               <DragAddButton id="add-category" label="Add Category" dragType="ADD_CATEGORY" />
               <DragAddButton id="add-department" label="Add Department" dragType="ADD_DEPARTMENT" />
             </div>
-          </div>
+          </div> */}
         </div>
 
         {/* PRINCIPAL - Droppable for adding categories */}
-        <DroppableZone
-          id="principal"
-          type="PRINCIPAL"
-          className="mb-4"
-          isDropAllowed={dropValid}
-        >
+        <DroppableZone id="principal" type="PRINCIPAL" className="mb-4" isDropAllowed={dropValid}>
           <div className="flex items-center justify-between px-4 py-3 rounded-xl bg-white border-2 border-orange-300 shadow-sm">
             <div className="flex items-center gap-3">
-              <span className="font-semibold text-gray-900">{institution?.name || 'Institution Admin'}</span>
+              <span className="font-semibold text-gray-900">
+                {institution?.name || 'Institution Admin'}
+              </span>
               <span className="text-xs text-gray-500">(Principal)</span>
             </div>
           </div>
@@ -342,7 +362,10 @@ export default function Hierarchy() {
 
         {/* CATEGORIES - Sortable */}
         <div className="mt-4 ml-6 space-y-4">
-          <SortableContext items={categories.map((cat) => cat.id)} strategy={verticalListSortingStrategy}>
+          <SortableContext
+            items={categories.map((cat) => cat.id)}
+            strategy={verticalListSortingStrategy}
+          >
             {categories.map((cat) => (
               <SortableRoleRow
                 key={cat.id}
@@ -442,7 +465,7 @@ export default function Hierarchy() {
       )}
 
       {/* DEPARTMENT FORM OVERLAY */}
-      {showDepartmentForm && (
+      {/* {showDepartmentForm && (
         <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center">
           <div className="bg-white rounded-lg p-6 w-full max-w-xl">
             <DepartmentForm
@@ -466,7 +489,7 @@ export default function Hierarchy() {
             />
           </div>
         </div>
-      )}
+      )} */}
     </>
   );
 }
