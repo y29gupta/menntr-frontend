@@ -5,7 +5,7 @@ export type Management = {
   id: number;
   name: string;
   role: string;
-  Department: string;
+  // Department: string;
   status: 'Active' | 'Suspended';
   lastLogin: string;
   avatar?: string;
@@ -45,11 +45,11 @@ export const ManagementColumn = (
       </span>
     ),
   },
-  {
-    accessorKey: 'Department',
-    header: 'Department',
-    cell: ({ getValue }) => <span className="text-gray-700">{getValue() as string}</span>,
-  },
+  // {
+  //   accessorKey: 'Department',
+  //   header: 'Department',
+  //   cell: ({ getValue }) => <span className="text-gray-700">{getValue() as string}</span>,
+  // },
   {
     accessorKey: 'status',
     header: 'Status',

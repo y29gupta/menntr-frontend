@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 type FilterValues = {
   type: string[];
@@ -8,31 +8,35 @@ type FilterValues = {
 };
 
 type Props = {
+  initialValues: FilterValues;
   onApply: (filters: FilterValues) => void;
   onClose: () => void;
 };
 
-export default function OngoingAssessmentFilterModal({ onApply, onClose }: Props) {
-  const [type, setType] = useState<string[]>(['MCQ+Coding']);
-  const [ending, setEnding] = useState<string[]>(['This Week']);
+export default function OngoingAssessmentFilterModal({ initialValues, onApply, onClose }: Props) {
+  const [type, setType] = useState<string[]>(initialValues.type);
+  const [ending, setEnding] = useState<string[]>(initialValues.ending);
 
-  const toggleValue = (value: string, state: string[], setState: (v: string[]) => void) => {
-    setState(state.includes(value) ? state.filter((v) => v !== value) : [...state, value]);
+  useEffect(() => {
+    setType(initialValues.type);
+    setEnding(initialValues.ending);
+  }, [initialValues]);
+
+  const toggleSingle = (value: string, setState: (v: string[]) => void) => {
+    setState([value]);
   };
 
   return (
     <>
-      {/* Overlay */}
       <div className="fixed inset-0 z-40 bg-black/20" onClick={onClose} />
 
-      {/* Modal */}
       <div className="absolute left-0 top-full z-50 mt-2 w-90 rounded-2xl bg-white p-5 shadow-[0_12px_40px_rgba(0,0,0,0.15)]">
         <div className="flex text-sm">
           {/* Type */}
           <div className="flex-1 pr-4">
             <p className="mb-3 font-medium">Type</p>
 
-            {['MCQ+Coding', 'MCQ', 'Coding'].map((item) => (
+            {['All', 'MCQ+Coding', 'MCQ', 'Coding'].map((item) => (
               <label
                 key={item}
                 className="mb-3 flex cursor-pointer items-center gap-3 text-gray-700"
@@ -40,7 +44,7 @@ export default function OngoingAssessmentFilterModal({ onApply, onClose }: Props
                 <input
                   type="checkbox"
                   checked={type.includes(item)}
-                  onChange={() => toggleValue(item, type, setType)}
+                  onChange={() => toggleSingle(item, setType)}
                   className="peer relative h-4 w-4 appearance-none rounded border border-gray-300
                   checked:border-transparent
                   checked:bg-[linear-gradient(90deg,#904BFF_0%,#C053C2_100%)]
@@ -72,7 +76,7 @@ export default function OngoingAssessmentFilterModal({ onApply, onClose }: Props
                 <input
                   type="checkbox"
                   checked={ending.includes(item)}
-                  onChange={() => toggleValue(item, ending, setEnding)}
+                  onChange={() => toggleSingle(item, setEnding)}
                   className="peer relative h-4 w-4 appearance-none rounded border border-gray-300
                   checked:border-transparent
                   checked:bg-[linear-gradient(90deg,#904BFF_0%,#C053C2_100%)]

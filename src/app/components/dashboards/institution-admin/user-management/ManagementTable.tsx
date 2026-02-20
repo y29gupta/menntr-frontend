@@ -9,7 +9,23 @@ import { Management, ManagementColumn } from './usermanagement.column';
 import ConfirmModal from '@/app/ui/modals/ConfirmModal';
 
 /* =========================================================
-   DEBOUNCE HOOK
+   DATE FORMATTER
+========================================================= */
+
+function formatLastLogin(date: string | null) {
+  if (!date) return '—';
+
+  const d = new Date(date);
+
+  return d.toLocaleDateString('en-GB', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  });
+}
+
+/* =========================================================
+   DEBOUNCE
 ========================================================= */
 
 function useDebounce<T>(value: T, delay = 500) {
@@ -33,7 +49,6 @@ type UsersApiResponse = {
     name: string;
     email: string;
     role: string | null;
-    department: string | null;
     status: string;
     lastLoginAt: string | null;
   }[];
@@ -66,20 +81,15 @@ export default function ManagementTable({
   showColumnFilters,
   onEdit,
 }: Props) {
-  /* ---------------- STATE ---------------- */
-
   const queryClient = useQueryClient();
 
   const [page, setPage] = useState(1);
-  const [limit] = useState(10);
+  const [limit] = useState(2);
   const [columnFilters, setColumnFilters] = useState<Record<string, string>>({});
-
   const [selectedUser, setSelectedUser] = useState<Management | null>(null);
 
   const debouncedSearch = useDebounce(globalFilter, 500);
   const debouncedColumnFilters = useDebounce(columnFilters, 500);
-
-  /* ---------------- RESET PAGE ---------------- */
 
   useEffect(() => {
     setPage(1);
@@ -87,28 +97,31 @@ export default function ManagementTable({
 
   /* ---------------- FETCH USERS ---------------- */
 
+  const FILTERABLE_COLUMNS = ['name', 'role', 'status'];
+
   const fetchUsers = async (): Promise<UsersApiResponse> => {
     const params = new URLSearchParams();
 
     params.set('page', String(page));
     params.set('limit', String(limit));
 
-    if (debouncedSearch) {
-      params.set('search', debouncedSearch);
-    }
+    if (debouncedSearch) params.set('search', debouncedSearch);
 
     Object.entries(debouncedColumnFilters).forEach(([key, value]) => {
-      if (value) params.set(key, value);
+      if (!value) return;
+      if (!FILTERABLE_COLUMNS.includes(key)) return;
+      params.set(key, value);
     });
 
-    const res = await fetch(`/api/institutionsadmin/user-management/users?${params.toString()}`, {
-      credentials: 'include',
-      cache: 'no-store',
-    });
+    const res = await fetch(
+      `/api/institutionsadmin/user-management/users?${params.toString()}`,
+      {
+        credentials: 'include',
+        cache: 'no-store',
+      }
+    );
 
-    if (!res.ok) {
-      throw new Error('Failed to fetch users');
-    }
+    if (!res.ok) throw new Error('Failed to fetch users');
 
     return res.json();
   };
@@ -127,9 +140,8 @@ export default function ManagementTable({
       id: Number(u.id),
       name: u.name || '-',
       role: u.role || '-',
-      Department: u.department || '-',
       status: u.status === 'active' ? 'Active' : 'Suspended',
-      lastLogin: u.lastLoginAt || '—',
+      lastLogin: formatLastLogin(u.lastLoginAt),
     })) ?? [];
 
   const meta = data?.meta;
@@ -137,40 +149,37 @@ export default function ManagementTable({
   /* ---------------- COLUMN FILTER ---------------- */
 
   const onColumnFilterChange = (column: string, value: string) => {
+    if (!FILTERABLE_COLUMNS.includes(column)) return;
+
     setColumnFilters((prev) => ({
       ...prev,
       [column]: value,
     }));
   };
 
-  /* =========================================================
-     🔥 CHANGE USER STATUS (ONLY { status })
-  ========================================================= */
+  /* ---------------- STATUS MUTATION ---------------- */
 
   const changeStatusMutation = useMutation({
-    mutationFn: async ({ userId, status }: { userId: number; status: 'active' | 'suspended' }) => {
+    mutationFn: async ({
+      userId,
+      status,
+    }: {
+      userId: number;
+      status: 'active' | 'suspended';
+    }) => {
       const res = await fetch(`/api/users/status/${userId}`, {
         method: 'PATCH',
         credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          status,
-        }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status }),
       });
 
-      if (!res.ok) {
-        throw new Error('Failed to update user status');
-      }
+      if (!res.ok) throw new Error('Failed to update user status');
 
       return res.json();
     },
-
     onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ['users'],
-      });
+      queryClient.invalidateQueries({ queryKey: ['users'] });
     },
   });
 
@@ -191,13 +200,9 @@ export default function ManagementTable({
     setSelectedUser(null);
   };
 
-  /* ---------------- LOADING ---------------- */
-
-  if (isLoading) {
-    return <div className="text-sm text-gray-500">Loading users…</div>;
-  }
-
-  /* ---------------- RENDER ---------------- */
+  /* =========================================================
+     RENDER
+  ========================================================= */
 
   return (
     <>
@@ -208,6 +213,7 @@ export default function ManagementTable({
           (row) => onSuspendUser(row)
         )}
         columnFilters={columnFilters}
+        isLoading={isLoading}
         onColumnFilterChange={onColumnFilterChange}
         showColumnFilters={showColumnFilters}
         currentPage={meta?.currentPage ?? 1}
@@ -215,12 +221,10 @@ export default function ManagementTable({
         canPreviousPage={!meta?.isFirstPage}
         canNextPage={!meta?.isLastPage}
         onPreviousPage={() => setPage((p) => Math.max(p - 1, 1))}
-        onNextPage={() => {
-          if (meta?.nextPage) setPage(meta.nextPage);
-        }}
+        onNextPage={() => meta?.nextPage && setPage(meta.nextPage)}
+        meta={{ setPage }}   // ✅ required for page numbers, first, last
       />
 
-      {/* CONFIRM MODAL */}
       <ConfirmModal
         open={!!selectedUser}
         title="Suspend User"
@@ -232,7 +236,9 @@ export default function ManagementTable({
           </>
         }
         warning="Suspended users will lose access immediately."
-        confirmText={changeStatusMutation.isPending ? 'Suspending...' : 'Yes, Suspend'}
+        confirmText={
+          changeStatusMutation.isPending ? 'Suspending...' : 'Yes, Suspend'
+        }
         cancelText="No, Cancel"
         onConfirm={onConfirmSuspend}
         onCancel={() => setSelectedUser(null)}

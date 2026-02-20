@@ -1,5 +1,6 @@
 'use client';
 
+import { calculateTimeLeft } from '@/app/utils/calculateTimeLeft';
 import AssessmentCard from '../assessment/AssessmentCard';
 import { DashboardAssessment } from '../student.services';
 
