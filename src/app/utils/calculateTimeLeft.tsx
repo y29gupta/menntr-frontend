@@ -1,4 +1,4 @@
-function calculateTimeLeft(endTime: string) {
+export function calculateTimeLeft(endTime: string) {
   const end = new Date(endTime).getTime();
   const now = Date.now();
   const diff = end - now;

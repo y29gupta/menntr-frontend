@@ -228,19 +228,16 @@ const UserManagementContent = () => {
       batchIds?: number[];
       permissionCodes: string[];
     }) => {
-      const res = await fetch(
-        `/api/institutionsadmin/create-user`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          credentials: 'include',
-          body: JSON.stringify({
-            payload,
-          }),
-        }
-      );
+      const res = await fetch(`/api/institutionsadmin/create-user`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          payload,
+        }),
+      });
 
       if (!res.ok) {
         let errorMessage = 'Failed to create user';
@@ -248,21 +245,26 @@ const UserManagementContent = () => {
           const err = await res.json();
           // Backend returns { error: '...' } for 409, or { message: '...' } for other errors
           errorMessage = err.error || err.message || errorMessage;
-          
+
           // Provide more specific error messages based on status code
           if (res.status === 409) {
-            errorMessage = err.error || 'A user with this email already exists. Please use a different email address.';
+            errorMessage =
+              err.error ||
+              'A user with this email already exists. Please use a different email address.';
           } else if (res.status === 400) {
-            errorMessage = err.message || err.error || 'Invalid request. Please check your input and try again.';
+            errorMessage =
+              err.message || err.error || 'Invalid request. Please check your input and try again.';
           } else if (res.status === 403) {
-            errorMessage = err.message || err.error || 'You do not have permission to perform this action.';
+            errorMessage =
+              err.message || err.error || 'You do not have permission to perform this action.';
           } else if (res.status === 500) {
             errorMessage = 'Server error. Please try again later or contact support.';
           }
         } catch (parseError) {
           // If JSON parsing fails, use status-based message
           if (res.status === 409) {
-            errorMessage = 'A user with this email already exists. Please use a different email address.';
+            errorMessage =
+              'A user with this email already exists. Please use a different email address.';
           } else if (res.status >= 500) {
             errorMessage = 'Server error. Please try again later.';
           }
@@ -302,7 +304,7 @@ const UserManagementContent = () => {
       permissionCodes: string[];
     }) => {
       if (!formData.id) throw new Error('User ID is required for update');
-      
+
       const res = await fetch(`/api/users/${formData.id}`, {
         method: 'PUT',
         headers: {
@@ -319,11 +321,13 @@ const UserManagementContent = () => {
         try {
           const err = await res.json();
           errorMessage = err.error || err.message || errorMessage;
-          
+
           if (res.status === 400) {
-            errorMessage = err.message || err.error || 'Invalid request. Please check your input and try again.';
+            errorMessage =
+              err.message || err.error || 'Invalid request. Please check your input and try again.';
           } else if (res.status === 403) {
-            errorMessage = err.message || err.error || 'You do not have permission to perform this action.';
+            errorMessage =
+              err.message || err.error || 'You do not have permission to perform this action.';
           } else if (res.status === 404) {
             errorMessage = 'User not found.';
           } else if (res.status === 500) {
@@ -345,7 +349,7 @@ const UserManagementContent = () => {
       queryClient.invalidateQueries({
         queryKey: ['users'],
         exact: false,
-      })
+      });
       setView('list');
       setStep(1);
       setModulePermissions({});
@@ -399,22 +403,23 @@ const UserManagementContent = () => {
               </div>
             </div>
 
-            <div className="flex gap-3 mb-4">
+            <div className="flex sm:flex-row gap-3 mb-4">
               <div className="relative max-w-[400px] w-full">
                 <Search className="absolute left-3 top-2.5 text-gray-400 w-4 h-4" />
                 <input
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
+                  type="text"
                   placeholder="Search for users"
-                  className="w-full pl-9 pr-4 py-2 border rounded-lg text-sm"
+                  className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white text-gray-700 placeholder-gray-400"
                 />
               </div>
 
               <button
                 onClick={() => setShowColumnFilters((p) => !p)}
-                className="flex items-center gap-2 px-4 py-2 border rounded-lg text-sm"
+                className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-xs sm:text-sm hover:bg-gray-50 text-gray-700"
               >
-                <Filter className="w-4 h-4" />
+                <Filter className="w-4 h-4 text-gray-500" />
                 {showColumnFilters ? 'Hide Filters' : 'Filter'}
               </button>
             </div>

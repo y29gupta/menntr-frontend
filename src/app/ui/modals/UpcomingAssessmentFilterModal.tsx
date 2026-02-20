@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 type FilterValues = {
   type: string[];
@@ -8,16 +8,22 @@ type FilterValues = {
 };
 
 type Props = {
+  initialValues: FilterValues;
   onApply: (filters: FilterValues) => void;
   onClose: () => void;
 };
 
-export default function UpcomingAssessmentFilterModal({ onApply, onClose }: Props) {
-  const [type, setType] = useState<string[]>(['MCQ+Coding']);
-  const [scheduled, setScheduled] = useState<string[]>(['This Week']);
+export default function UpcomingAssessmentFilterModal({ initialValues, onApply, onClose }: Props) {
+  const [type, setType] = useState<string[]>(initialValues.type);
+  const [scheduled, setScheduled] = useState<string[]>(initialValues.scheduled);
 
-  const toggleValue = (value: string, state: string[], setState: (v: string[]) => void) => {
-    setState(state.includes(value) ? state.filter((v) => v !== value) : [...state, value]);
+  useEffect(() => {
+    setType(initialValues.type);
+    setScheduled(initialValues.scheduled);
+  }, [initialValues]);
+
+  const toggleSingle = (value: string, setState: (v: string[]) => void) => {
+    setState([value]);
   };
 
   return (
@@ -30,7 +36,7 @@ export default function UpcomingAssessmentFilterModal({ onApply, onClose }: Prop
           <div className="flex-1 pr-4">
             <p className="mb-3 font-medium">Type</p>
 
-            {['MCQ+Coding', 'MCQ', 'Coding'].map((item) => (
+            {['All', 'MCQ+Coding', 'MCQ', 'Coding'].map((item) => (
               <label
                 key={item}
                 className="mb-3 flex cursor-pointer items-center gap-3 text-gray-700"
@@ -38,7 +44,7 @@ export default function UpcomingAssessmentFilterModal({ onApply, onClose }: Prop
                 <input
                   type="checkbox"
                   checked={type.includes(item)}
-                  onChange={() => toggleValue(item, type, setType)}
+                  onChange={() => toggleSingle(item, setType)}
                   className="peer relative h-4 w-4 appearance-none rounded border border-gray-300
                   checked:border-transparent
                   checked:bg-[linear-gradient(90deg,#904BFF_0%,#C053C2_100%)]
@@ -70,7 +76,7 @@ export default function UpcomingAssessmentFilterModal({ onApply, onClose }: Prop
                 <input
                   type="checkbox"
                   checked={scheduled.includes(item)}
-                  onChange={() => toggleValue(item, scheduled, setScheduled)}
+                  onChange={() => toggleSingle(item, setScheduled)}
                   className="peer relative h-4 w-4 appearance-none rounded border border-gray-300
                   checked:border-transparent
                   checked:bg-[linear-gradient(90deg,#904BFF_0%,#C053C2_100%)]
