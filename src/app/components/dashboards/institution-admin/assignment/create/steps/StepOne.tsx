@@ -3,6 +3,7 @@ import { CreateAssignmentForm } from '../schema';
 import { useQuery } from '@tanstack/react-query';
 import { assignmentApi } from '../../assignment.service';
 import { useEffect } from 'react';
+import { AssignmentMeta } from '../../assignment.types';
 
 type Props = {
   form: UseFormReturn<CreateAssignmentForm>;
@@ -20,19 +21,20 @@ export default function AssignmentStepOne({ form, onNext, onCancel }: Props) {
 
   const category = watch('category');
   const type = watch('assignmentType'); // 👈 change if your field name differs
-
-  const { data: metaData } = useQuery({
-    queryKey: ['assignment-meta'], // ✅ changed
-    queryFn: assignmentApi.getAssignmentMeta, // ✅ changed
+  const { data: metaData } = useQuery<AssignmentMeta>({
+    queryKey: ['assignment-meta'],
+    queryFn: assignmentApi.getAssignmentMeta,
   });
 
-  const assignmentCategories = metaData?.assignmentCategories ?? [];
-  const assignmentTypes = metaData?.assignmentTypes ?? [];
+  console.log(metaData, 'meta');
+  const assignmentCategories =
+    metaData?.assignmentCategories ?? ([] as AssignmentMeta['assignmentCategories']);
+  const assignmentTypes = metaData?.assignmentTypes ?? ([] as AssignmentMeta['assignmentTypes']);
 
   useEffect(() => {
     if (assignmentCategories.length && !form.formState.dirtyFields.category) {
       if (!category) {
-        setValue('category', assignmentCategories[0] as any, {
+        setValue('category', assignmentCategories[0]?.value as any, {
           shouldValidate: true,
           shouldDirty: false,
         });
@@ -41,7 +43,7 @@ export default function AssignmentStepOne({ form, onNext, onCancel }: Props) {
 
     if (assignmentTypes.length && !form.formState.dirtyFields.assignmentType) {
       if (!type) {
-        setValue('assignmentType', assignmentTypes[0] as any, {
+        setValue('assignmentType', assignmentTypes[0]?.value as any, {
           shouldValidate: true,
           shouldDirty: false,
         });
@@ -92,24 +94,24 @@ export default function AssignmentStepOne({ form, onNext, onCancel }: Props) {
             <div className="flex flex-wrap gap-3 mt-4">
               {assignmentCategories.map((v) => (
                 <button
-                  key={v}
+                  key={v.value}
                   type="button"
                   onClick={() =>
-                    setValue('category', v as any, {
+                    setValue('category', v.value as any, {
                       shouldValidate: true,
                       shouldDirty: true,
                     })
                   }
                   className={`px-4 py-1.5 rounded-full border text-[16px] font-light
-                  ${
-                    category === v
-                      ? 'border-[#7C3AED] text-[#7C3AED] bg-[#F6F0FF]'
-                      : 'border-[#C3CAD9] text-[#3D465C]'
-                  }`}
+      ${
+        category === v.value
+          ? 'border-[#7C3AED] text-[#7C3AED] bg-[#F6F0FF]'
+          : 'border-[#C3CAD9] text-[#3D465C]'
+      }`}
                 >
                   <span className="flex items-center gap-2">
-                    {category === v && <span>✓</span>}
-                    {v}
+                    {category === v.value && <span>✓</span>}
+                    {v.label}
                   </span>
                 </button>
               ))}
@@ -120,24 +122,24 @@ export default function AssignmentStepOne({ form, onNext, onCancel }: Props) {
             <div className="flex flex-wrap gap-3 mt-4">
               {assignmentTypes.map((v) => (
                 <button
-                  key={v}
+                  key={v.value}
                   type="button"
                   onClick={() =>
-                    setValue('assignmentType', v as any, {
+                    setValue('assignmentType', v.value as any, {
                       shouldValidate: true,
                       shouldDirty: true,
                     })
                   }
                   className={`px-4 py-1.5 rounded-full border text-[16px] font-light
-                  ${
-                    type === v
-                      ? 'border-purple-500 text-purple-600 bg-purple-50'
-                      : 'border-gray-300 text-gray-500'
-                  }`}
+      ${
+        type === v.value
+          ? 'border-purple-500 text-purple-600 bg-purple-50'
+          : 'border-gray-300 text-gray-500'
+      }`}
                 >
                   <span className="flex items-center gap-2">
-                    {type === v && <span>✓</span>}
-                    {v}
+                    {type === v.value && <span>✓</span>}
+                    {v.label}
                   </span>
                 </button>
               ))}

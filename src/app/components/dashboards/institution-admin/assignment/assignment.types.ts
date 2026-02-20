@@ -30,6 +30,13 @@ export interface AssignmentListResult {
 }
 
 
+export type AssignmentMeta = {
+  assignmentCategories: { label: string; value: string }[];
+  assignmentTypes: { label: string; value: string }[];
+};
+
+
+
 
 export interface AssignmentSummary {
   assignmentName: string;

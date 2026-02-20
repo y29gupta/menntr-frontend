@@ -122,14 +122,17 @@ export default function CreateMCQModal({
       is_correct: o.correct,
     })),
   });
-
   const createMutation = useMutation({
-    mutationFn: (payload: any) => assignmentApi.createAssignmentQuestion(assignmentId, payload),
+    mutationFn: (payload: any) => assignmentApi.createAssignmentMCQQuestion(assignmentId, payload),
   });
 
   const updateMutation = useMutation({
     mutationFn: (payload: any) =>
-      assignmentApi.updateAssignmentQuestion(assignmentId, initialData.id, payload),
+      assignmentApi.updateAssignmentMCQQuestion(
+        assignmentId,
+        initialData?.assessment_question_id || initialData?.id,
+        payload
+      ),
   });
 
   const topicOptions = meta?.topics.map((t) => ({ label: t, value: t })) ?? [];

@@ -60,7 +60,7 @@ export default function StepFour({ onBack, onCancel, entityId }: Props) {
     try {
       const question = await queryClient.fetchQuery({
         queryKey: ['edit-question', id],
-        // queryFn: () => assignmentApi.getQuestionById(id),
+        queryFn: () => assignmentApi.getAssignmentQuestionById(entityId, id),
       });
 
       setEditData(question);
@@ -73,8 +73,8 @@ export default function StepFour({ onBack, onCancel, entityId }: Props) {
 
   /* ---------------- META (BOTH TYPES) ---------------- */
   const { data: mcqMeta } = useQuery({
-    queryKey: ['mcq-meta'],
-    queryFn: assessmentApi.getMCQMeta,
+    queryKey: ['assignment-mcq-meta'],
+    queryFn: assignmentApi.getAssignmentQuestionMeta,
     staleTime: Infinity,
   });
 

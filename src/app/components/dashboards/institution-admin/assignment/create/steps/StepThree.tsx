@@ -18,7 +18,7 @@ type Props = {
   onBack: () => void;
   onNext: () => void;
   onCancel: () => void;
-  assignmentId: string;
+  entityId: string;
 
   allowedQuestionTypes: string[];
 };
@@ -27,7 +27,7 @@ export default function StepThree({
   onBack,
   onNext,
   onCancel,
-  assignmentId,
+  entityId,
   allowedQuestionTypes,
 }: Props) {
   const [pendingFile, setPendingFile] = useState<File | null>(null);
@@ -84,9 +84,9 @@ export default function StepThree({
     try {
       setUploading(true);
 
-      await assignmentApi.bulkUploadQuestions(assignmentId, selectedType, pendingFile);
+      await assignmentApi.bulkUploadQuestions(entityId, selectedType, pendingFile);
       queryClient.invalidateQueries({
-        queryKey: ['assessment-questions', assignmentId],
+        queryKey: ['assignment-questions', entityId],
       });
 
       setPendingFile(null);

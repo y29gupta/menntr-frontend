@@ -1,13 +1,11 @@
+import { api } from "@/app/lib/api";
+import { AssignmentMeta } from "./assignment.types";
 import { dummyActiveAssignments } from "./dummyActiveAssignment";
 
 
 const USE_DUMMY = true;
 let assignmentStore: any[] = [];
 
-export type AssignmentMeta = {
-  assignmentCategories: string[];
-  assignmentTypes: string[];
-};
 
 export const assignmentApi = {
   getAssignmentList: async (
@@ -27,45 +25,57 @@ export const assignmentApi = {
     // later real API call
   },
 
-getAssignmentMeta: async (): Promise<AssignmentMeta> => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve({
-        assignmentCategories: [
-          'Aptitude',
-          'Domain',
-         
-        ],
-        assignmentTypes: [
-          'Homework',
-          'Practice',
-          'Test',
-        ],
-      });
-    }, 300);
-  });
+    getAssignmentMeta: async (): Promise<AssignmentMeta> => {
+    const res = await api.get("/assignments/meta");
+
+    return {
+      assignmentCategories: res.data?.categories ?? [],
+      assignmentTypes: res.data?.assignmentTypes ?? [],
+    };
+  },
+
+createAssignment: async (payload: any) => {
+  console.log("FORM PAYLOAD:", payload);
+
+  const requestBody = {
+    title: payload.title,
+    description: payload.description,
+    category: payload.category, // already ENUM
+    assignment_type:
+      payload.assignmentType ?? payload.assignment_type, // already ENUM
+    question_type: payload.questionType ?? "MCQ",
+  };
+
+  console.log("FINAL BODY:", requestBody);
+
+  const res = await api.post("/assignments", requestBody);
+  return res.data;
 },
 
+getAssignmentAudienceMeta: async () => {
+  const res = await api.get("/assignments/audience/meta");
 
-  createAssignment: async (payload: any) => {
-      console.log("Creating Assignment:", payload);
-    const newAssignment = {
-      id: crypto.randomUUID(),
-      ...payload,
-      metadata: {
-        category: payload.category,
-        assignmentType: payload.assignment_type,
-      },
-      batches: [],
-      questions: [],
-      published_at: null,
-      updated_at: new Date().toISOString(),
-    };
+  return {
+    institutionCategories: res.data?.categories ?? [],
+  };
+},
 
-    assignmentStore.push(newAssignment);
+getAssignmentQuestionMeta: async () => {
+  const res = await api.get("/assignments/questions/meta");
 
-    return newAssignment;
-  },
+  return {
+    topics: res.data?.topics ?? [],
+
+    //  MUST be string[]
+    questionTypes:
+      res.data?.questionTypes?.map((q: any) => q.value) ?? [],
+
+    //  MUST be string[]
+    difficulties:
+      res.data?.difficulties?.map((d: any) => d.value) ?? [],
+  };
+},
+
 
    getAssignmentById: async (id: string) => {
   const found = assignmentStore.find((a) => a.id === id);
@@ -115,53 +125,53 @@ deleteDraftAssignment: async (id: string) => {
 },
 
 
-     updateAssignmentAudience: async (id: string, batchIds: number[]) => {
-    const found = assignmentStore.find((a) => a.id === id);
-    if (found) {
-      found.batches = batchIds.map((b) => ({
-        batch_id: b,
-        batch: { name: `Batch ${b}` },
-      }));
-    }
-    return { success: true };
+updateAssignmentAudience: async (id: string, batchIds: number[]) => {
+  const res = await api.put(`/assignments/${id}/audience`, {
+    batch_ids: batchIds,
+  });
+
+  return res.data;
+},
+
+
+
+createAssignmentMCQQuestion: async (assignmentId: string, payload: any) => {
+  const res = await api.post(
+    `/assignments/${assignmentId}/questions/mcq`,
+    payload
+  );
+
+  return res.data;
   },
 
 
+updateAssignmentMCQQuestion: async (
+  assignmentId: string,
+  questionId: string,
+  payload: any
+) => {
+  const res = await api.put(
+    `/assignments/${assignmentId}/questions/${questionId}/mcq`,
+    payload
+  );
 
-     createAssignmentQuestion: async (assignmentId: string, payload: any) => {
-  const found = assignmentStore.find((a) => a.id === assignmentId);
-
-  if (!found) {
-    throw new Error("Assignment not found");
-  }
-
-  const newQuestion = {
-    id: crypto.randomUUID(),
-    ...payload,
-  };
-
-  found.questions.push(newQuestion);
-
-  return newQuestion;
+  return res.data;
 },
-updateAssignmentQuestion: async (assignmentId: string, questionId: string, payload: any) => {
-  const found = assignmentStore.find((a) => a.id === assignmentId);
 
-  if (!found) throw new Error("Assignment not found");
-
-  const question = found.questions.find((q: any) => q.id === questionId);
-
-  if (!question) throw new Error("Question not found");
-
-  Object.assign(question, payload);
-
-  return question;
-},
 
       getAssignmentQuestions: async (id: string) => {
     const found = assignmentStore.find((a) => a.id === id);
     return found?.questions ?? [];
   },
+
+getAssignmentQuestionById: async (assignmentId: string, questionId: string) => {
+  const res = await api.get(
+    `/assignments/${assignmentId}/questions/${questionId}`
+  );
+  return res.data;
+},
+
+
       
       deleteAssignmentQuestion: async (id: string, questionId: string) => {
     const found = assignmentStore.find((a) => a.id === id);
@@ -171,10 +181,44 @@ updateAssignmentQuestion: async (assignmentId: string, questionId: string, paylo
     return { success: true };
   },
 
-  bulkUploadQuestions: async (id: string, type: any, file: File) => {
-    console.log('Mock bulk upload', id, type, file.name);
-    return { success: true };
-  },
+
+    bulkUploadQuestions: async (
+  assignmentId: string,
+  type: 'mcq' | 'coding' | 'theory',
+  file: File
+) => {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  let endpoint = '';
+
+  switch (type) {
+    case 'mcq':
+      endpoint = `/assignments/${assignmentId}/questions/mcq/bulk-upload`;
+      break;
+
+    // 🔮 future ready
+    case 'coding':
+      endpoint = `/assignments/${assignmentId}/questions/coding/bulk-upload`;
+      break;
+
+    case 'theory':
+      endpoint = `/assignments/${assignmentId}/questions/theory/bulk-upload`;
+      break;
+
+    default:
+      throw new Error('Unsupported question type');
+  }
+
+  const res = await api.post(endpoint, formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+
+  return res.data;
+},
+
 
 
 

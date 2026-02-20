@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useEffect, useMemo } from 'react';
 import { CreateAssignmentForm } from '../schema';
 import { assessmentApi } from '../../../assessment/assessment.service';
+import { assignmentApi } from '../../assignment.service';
 
 type Props = {
   form: UseFormReturn<CreateAssignmentForm>;
@@ -48,8 +49,8 @@ export default function StepTwo({ form, onBack, onNext, onCancel }: Props) {
 
   /* ---------------- Meta API ---------------- */
   const { data: institutionMeta } = useQuery<AssessmentMetaResponse>({
-    queryKey: ['assignAudience-meta'],
-    queryFn: assessmentApi.getInstitutionMeta,
+    queryKey: ['assignment-audience-meta'],
+    queryFn: assignmentApi.getAssignmentAudienceMeta,
   });
 
   const institutionCategories: AssessmentCategory[] = institutionMeta?.institutionCategories ?? [];
@@ -152,20 +153,6 @@ export default function StepTwo({ form, onBack, onNext, onCancel }: Props) {
 
       <label className="text-sm font-medium mt-4 block">Select Batch</label>
 
-      {/* <Controller
-        name="batches"
-        control={form.control}
-        render={({ field }) => (
-          <FormDropdown
-            placeholder="Select Batch"
-            options={batchOptions}
-            value={field.value}
-            onChange={field.onChange}
-            multiple
-            renderChips
-          />
-        )}
-      /> */}
       <Controller
         name="batches"
         control={control}

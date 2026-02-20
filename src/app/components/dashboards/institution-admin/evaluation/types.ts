@@ -8,7 +8,13 @@ export interface CreateEvaluationApi {
   updateAudience?: (id: string, batchIds: number[]) => Promise<any>;
   getQuestions?: (id: string) => Promise<any>;
   deleteQuestion?: (entityId: string, questionId: string) => Promise<any>;
-  bulkUpload?: (id: string, type: string, file: File) => Promise<any>;
+  // bulkUpload?: (id: string, type: string, file: File) => Promise<any>;
+  bulkUpload?: (
+  id: string,
+  type: 'mcq' | 'coding' | 'theory',
+  file: File
+) => Promise<any>;
+
 }
 
 export interface CreateEvaluationConfig<
@@ -17,7 +23,7 @@ export interface CreateEvaluationConfig<
   entityLabel: string;
   basePath: string;
 
-  schema: ZodTypeAny   // 🔥 FIXED
+  schema: ZodTypeAny   //  FIXED
 
   api: CreateEvaluationApi;
 

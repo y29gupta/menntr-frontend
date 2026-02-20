@@ -40,15 +40,6 @@ export default function QuestionModalShell({
     }
   }, [mode, initialData]);
 
-  // const headerTitle =
-  //   type === 'MCQ'
-  //     ? mode === 'edit'
-  //       ? 'Edit MCQ Question'
-  //       : 'Create MCQ Question'
-  //     : mode === 'edit'
-  //       ? 'Edit Coding Question'
-  //       : 'Add a programming problem for this assessment';
-
   const headerTitle =
     type === 'MCQ'
       ? mode === 'edit'
